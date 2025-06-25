@@ -311,8 +311,8 @@ export default function Settings() {
                       min={0.5}
                       max={2}
                       step={0.1}
-                      onChange={(value) => 
-                        setGameSettings({ ...gameSettings, gameSpeed: value })
+                      onChange={(value) =>
+                        setGameSettings({ ...gameSettings, gameSpeed: value as number })
                       }
                     />
                   </div>
