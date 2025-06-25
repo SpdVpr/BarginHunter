@@ -63,7 +63,7 @@ export default function StatusPage() {
     return (
       <AppProvider i18n={{}}>
         <Page title="Loading...">
-          <Text variant="bodyMd">Loading status...</Text>
+          <Text variant="bodyMd" as="p">Loading status...</Text>
         </Page>
       </AppProvider>
     );
@@ -128,21 +128,21 @@ export default function StatusPage() {
                 
                 <Stack vertical spacing="tight">
                   <Stack>
-                    <Text variant="bodyMd">Project ID:</Text>
+                    <Text variant="bodyMd" as="p">Project ID:</Text>
                     <Badge status={status.firebase.projectId ? 'success' : 'critical'}>
                       {status.firebase.projectId || 'Not set'}
                     </Badge>
                   </Stack>
-                  
+
                   <Stack>
-                    <Text variant="bodyMd">Service Account:</Text>
+                    <Text variant="bodyMd" as="p">Service Account:</Text>
                     <Badge status={status.firebase.hasServiceAccount ? 'success' : 'critical'}>
                       {status.firebase.hasServiceAccount ? 'Configured' : 'Missing'}
                     </Badge>
                   </Stack>
-                  
+
                   <Stack>
-                    <Text variant="bodyMd">Web Config:</Text>
+                    <Text variant="bodyMd" as="p">Web Config:</Text>
                     <Badge status={status.firebase.hasWebConfig ? 'success' : 'critical'}>
                       {status.firebase.hasWebConfig ? 'Configured' : 'Missing'}
                     </Badge>
@@ -169,21 +169,21 @@ export default function StatusPage() {
                 
                 <Stack vertical spacing="tight">
                   <Stack>
-                    <Text variant="bodyMd">API Key:</Text>
+                    <Text variant="bodyMd" as="p">API Key:</Text>
                     <Badge status={status.shopify.hasApiKey ? 'success' : 'critical'}>
                       {status.shopify.hasApiKey ? status.shopify.apiKeyPreview : 'Not set'}
                     </Badge>
                   </Stack>
-                  
+
                   <Stack>
-                    <Text variant="bodyMd">API Secret:</Text>
+                    <Text variant="bodyMd" as="p">API Secret:</Text>
                     <Badge status={status.shopify.hasApiSecret ? 'success' : 'critical'}>
                       {status.shopify.hasApiSecret ? 'Configured' : 'Missing'}
                     </Badge>
                   </Stack>
-                  
+
                   <Stack>
-                    <Text variant="bodyMd">Webhook Secret:</Text>
+                    <Text variant="bodyMd" as="p">Webhook Secret:</Text>
                     <Badge status={status.shopify.hasWebhookSecret ? 'success' : 'critical'}>
                       {status.shopify.hasWebhookSecret ? 'Configured' : 'Missing'}
                     </Badge>
@@ -212,18 +212,18 @@ export default function StatusPage() {
                 
                 <Stack vertical spacing="tight">
                   <Stack>
-                    <Text variant="bodyMd">Environment:</Text>
+                    <Text variant="bodyMd" as="p">Environment:</Text>
                     <Badge>{status.application.nodeEnv}</Badge>
                   </Stack>
-                  
+
                   <Stack>
-                    <Text variant="bodyMd">App URL:</Text>
-                    <Text variant="bodyMd" color="subdued">{status.application.appUrl}</Text>
+                    <Text variant="bodyMd" as="p">App URL:</Text>
+                    <Text variant="bodyMd" as="p" color="subdued">{status.application.appUrl}</Text>
                   </Stack>
-                  
+
                   <Stack>
-                    <Text variant="bodyMd">Host:</Text>
-                    <Text variant="bodyMd" color="subdued">{status.application.host}</Text>
+                    <Text variant="bodyMd" as="p">Host:</Text>
+                    <Text variant="bodyMd" as="p" color="subdued">{status.application.host}</Text>
                   </Stack>
                 </Stack>
               </Stack>
@@ -238,7 +238,7 @@ export default function StatusPage() {
                 
                 {status.readyForShopify ? (
                   <Stack vertical spacing="tight">
-                    <Text variant="bodyMd">✅ Configuration complete! You can now:</Text>
+                    <Text variant="bodyMd" as="p">✅ Configuration complete! You can now:</Text>
                     <Stack>
                       <Button primary url="/test">Run Full Tests</Button>
                       <Button url="/app?shop=your-store.myshopify.com">Test Shopify Install</Button>
@@ -246,20 +246,20 @@ export default function StatusPage() {
                   </Stack>
                 ) : status.readyForTesting ? (
                   <Stack vertical spacing="tight">
-                    <Text variant="bodyMd">🔥 Firebase is ready! Next:</Text>
-                    <Text variant="bodyMd">1. Create Shopify Partner account</Text>
-                    <Text variant="bodyMd">2. Create development store</Text>
-                    <Text variant="bodyMd">3. Create Shopify app</Text>
-                    <Text variant="bodyMd">4. Get API keys and update .env.local</Text>
+                    <Text variant="bodyMd" as="p">🔥 Firebase is ready! Next:</Text>
+                    <Text variant="bodyMd" as="p">1. Create Shopify Partner account</Text>
+                    <Text variant="bodyMd" as="p">2. Create development store</Text>
+                    <Text variant="bodyMd" as="p">3. Create Shopify app</Text>
+                    <Text variant="bodyMd" as="p">4. Get API keys and update .env.local</Text>
                     <Button primary external url="https://partners.shopify.com">
                       Start Shopify Setup
                     </Button>
                   </Stack>
                 ) : (
                   <Stack vertical spacing="tight">
-                    <Text variant="bodyMd">⚠️ Configuration needed:</Text>
-                    <Text variant="bodyMd">1. Configure Firebase (service account + web config)</Text>
-                    <Text variant="bodyMd">2. Configure Shopify (API keys)</Text>
+                    <Text variant="bodyMd" as="p">⚠️ Configuration needed:</Text>
+                    <Text variant="bodyMd" as="p">1. Configure Firebase (service account + web config)</Text>
+                    <Text variant="bodyMd" as="p">2. Configure Shopify (API keys)</Text>
                     <Stack>
                       <Button external url="/FIREBASE_SETUP.md">Firebase Guide</Button>
                       <Button external url="/SHOPIFY_QUICK_SETUP.md">Shopify Guide</Button>
