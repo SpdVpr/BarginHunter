@@ -35,34 +35,52 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     //   return res.status(400).json({ success: false, error: 'Invalid state parameter' });
     // }
 
+    console.log('🔄 Starting token exchange...');
+
     // Exchange authorization code for access token
-    const session = await exchangeCodeForToken(shop, code, state as string);
-    
-    if (!session || !session.accessToken) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Failed to obtain access token' 
+    let session;
+    try {
+      session = await exchangeCodeForToken(shop, code, state as string);
+      console.log('✅ Token exchange successful');
+    } catch (tokenError) {
+      console.error('❌ Token exchange failed:', tokenError);
+      return res.status(400).json({
+        success: false,
+        error: 'Failed to obtain access token',
+        details: tokenError instanceof Error ? tokenError.message : 'Unknown error'
       });
     }
 
-    // Get shop data
-    const shopData = await getShopData(session);
+    if (!session || !session.accessToken) {
+      return res.status(400).json({
+        success: false,
+        error: 'No access token received'
+      });
+    }
 
-    // Create store record in database
-    const storeId = await StoreService.createStore({
-      shopDomain: shop,
-      accessToken: session.accessToken,
-      scopes: session.scope?.split(',') || [],
-      isActive: true,
-      shopData: {
-        name: shopData.name,
-        email: shopData.email,
-        domain: shopData.domain,
-        currency: shopData.currency,
-        timezone: shopData.timezone,
-        planName: shopData.plan_name,
-      },
-    });
+    console.log('✅ Access token obtained for shop:', shop);
+
+    // Skip database and shop data operations for now (Firebase bypass)
+    console.log('⏭️ Skipping database operations (Firebase bypass)');
+
+    // // Get shop data
+    // const shopData = await getShopData(session);
+    //
+    // // Create store record in database
+    // const storeId = await StoreService.createStore({
+    //   shopDomain: shop,
+    //   accessToken: session.accessToken,
+    //   scopes: session.scope?.split(',') || [],
+    //   isActive: true,
+    //   shopData: {
+    //     name: shopData.name,
+    //     email: shopData.email,
+    //     domain: shopData.domain,
+    //     currency: shopData.currency,
+    //     timezone: shopData.timezone,
+    //     planName: shopData.plan_name,
+    //   },
+    // });
 
     try {
       // Install script tag for widget
