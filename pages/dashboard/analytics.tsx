@@ -362,7 +362,7 @@ export default function Analytics() {
                       <Stack>
                         {Object.entries(analyticsData.sourceBreakdown).map(([source, count]) => (
                           <Badge key={source} status="info">
-                            {source}: {String(count)}
+                            {`${source}: ${String(count)}`}
                           </Badge>
                         ))}
                       </Stack>
