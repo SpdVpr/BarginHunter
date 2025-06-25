@@ -249,39 +249,42 @@ export default function Settings() {
                     label="Minimum score for discount"
                     type="number"
                     value={gameSettings.minScoreForDiscount.toString()}
-                    onChange={(value) => 
-                      setGameSettings({ 
-                        ...gameSettings, 
-                        minScoreForDiscount: parseInt(value) || 0 
+                    onChange={(value) =>
+                      setGameSettings({
+                        ...gameSettings,
+                        minScoreForDiscount: parseInt(value) || 0
                       })
                     }
                     helpText="Minimum score required to earn a discount"
+                    autoComplete="off"
                   />
 
                   <TextField
                     label="Max plays per customer"
                     type="number"
                     value={gameSettings.maxPlaysPerCustomer.toString()}
-                    onChange={(value) => 
-                      setGameSettings({ 
-                        ...gameSettings, 
-                        maxPlaysPerCustomer: parseInt(value) || 1 
+                    onChange={(value) =>
+                      setGameSettings({
+                        ...gameSettings,
+                        maxPlaysPerCustomer: parseInt(value) || 1
                       })
                     }
                     helpText="Maximum number of times a customer can play"
+                    autoComplete="off"
                   />
 
                   <TextField
                     label="Max plays per day"
                     type="number"
                     value={gameSettings.maxPlaysPerDay.toString()}
-                    onChange={(value) => 
-                      setGameSettings({ 
-                        ...gameSettings, 
-                        maxPlaysPerDay: parseInt(value) || 10 
+                    onChange={(value) =>
+                      setGameSettings({
+                        ...gameSettings,
+                        maxPlaysPerDay: parseInt(value) || 10
                       })
                     }
                     helpText="Maximum total plays across all customers per day"
+                    autoComplete="off"
                   />
 
                   <Select
@@ -426,26 +429,28 @@ export default function Settings() {
                     label="Discount expiry (hours)"
                     type="number"
                     value={businessRules.discountExpiryHours.toString()}
-                    onChange={(value) => 
-                      setBusinessRules({ 
-                        ...businessRules, 
-                        discountExpiryHours: parseInt(value) || 24 
+                    onChange={(value) =>
+                      setBusinessRules({
+                        ...businessRules,
+                        discountExpiryHours: parseInt(value) || 24
                       })
                     }
                     helpText="How long discounts remain valid"
+                    autoComplete="off"
                   />
 
                   <TextField
                     label="Minimum order value"
                     type="number"
                     value={businessRules.minimumOrderValue?.toString() || ''}
-                    onChange={(value) => 
-                      setBusinessRules({ 
-                        ...businessRules, 
-                        minimumOrderValue: value ? parseInt(value) : undefined 
+                    onChange={(value) =>
+                      setBusinessRules({
+                        ...businessRules,
+                        minimumOrderValue: value ? parseInt(value) : undefined
                       })
                     }
                     helpText="Minimum order value to use discount (optional)"
+                    autoComplete="off"
                   />
                 </FormLayout>
               </Card>
