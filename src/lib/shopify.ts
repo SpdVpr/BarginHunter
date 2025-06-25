@@ -1,5 +1,4 @@
 import { shopifyApi, LATEST_API_VERSION, Session } from '@shopify/shopify-api';
-import { restResources } from '@shopify/shopify-api/rest/admin/2023-10';
 import '@shopify/shopify-api/adapters/node';
 import crypto from 'crypto';
 
@@ -18,7 +17,6 @@ export const shopify = shopifyApi({
   hostScheme: process.env.NODE_ENV === 'production' ? 'https' : 'http',
   apiVersion: LATEST_API_VERSION,
   isEmbeddedApp: true,
-  restResources,
 });
 
 // Shopify session management
