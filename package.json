@@ -1,0 +1,52 @@
+{
+  "name": "bargain-hunter",
+  "version": "1.0.0",
+  "description": "Gamified discount application for Shopify stores",
+  "main": "index.js",
+  "scripts": {
+    "setup": "node scripts/setup.js",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@shopify/admin-api-client": "^1.1.0",
+    "@shopify/app-bridge-react": "^3.7.0",
+    "@shopify/polaris": "^10.49.0",
+    "@shopify/polaris-icons": "^6.11.0",
+    "@shopify/shopify-api": "^11.13.0",
+    "@shopify/storefront-api-client": "^1.0.8",
+    "firebase": "^10.7.0",
+    "firebase-admin": "^12.0.0",
+    "next": "^13.5.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/react": "^14.0.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "eslint": "^8.0.0",
+    "eslint-config-next": "^14.0.0",
+    "jest": "^29.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "shopify",
+    "app",
+    "gamification",
+    "discount",
+    "engagement"
+  ],
+  "author": "Bargain Hunter Team",
+  "license": "MIT"
+}

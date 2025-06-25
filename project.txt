@@ -1,0 +1,1938 @@
+# Bargain Hunter - Shopify Gaming Application
+## Kompletní specifikace a technická dokumentace
+
+---
+
+## 1. Přehled projektu
+
+### 1.1 Vize produktu
+Bargain Hunter je inovativní Shopify aplikace, která kombinuje gamifikaci s e-commerce prostředím. Zákazníci si prostřednictvím jednoduché, ale návykové hry mohou "zasloužit" slevy na nákupy, čímž se zvyšuje customer engagement, čas strávený na stránce a konverzní poměr.
+
+### 1.2 Cílová skupina
+- **Primární:** E-commerce merchants na platformě Shopify hledající inovativní způsoby customer engagement
+- **Sekundární:** Online zákazníci věku 18-45 let s afinitou k mobilním hrám a online nakupování
+- **Terciální:** Marketing manageři a e-commerce specialisté
+
+### 1.3 Klíčové hodnoty
+- **Pro merchants:** Zvýšení konverzí, customer retention, diferenciace od konkurence
+- **Pro zákazníky:** Zábavný způsob získání slev, gamifikovaný shopping experience
+- **Pro platformu:** Jedinečná aplikace v Shopify App Store s vysokým engagement potenciálem
+
+---
+
+## 2. Herní design a mechaniky
+
+### 2.1 Koncept hry "Bargain Hunter"
+
+#### Základní premise
+Hráč ovládá stylového nakupujícího v prostředí nákupního centra během Black Friday chaosu. Cílem je sbírat slevové štítky a vyhýbat se překážkám, přičemž dosažené skóre se převádí na skutečnou slevu v e-shopu.
+
+#### Herní styl
+- **Žánr:** Endless runner / Arcade
+- **Inspirace:** Chrome Dino, Temple Run, Subway Surfers
+- **Perspektiva:** 2D side-scrolling
+- **Délka hry:** 30 sekund - 3 minuty (průměrně 1 minuta)
+
+### 2.2 Detailní herní mechaniky
+
+#### 2.2.1 Ovládání
+- **Desktop:** 
+  - `SPACE` / `↑` = Skok
+  - `↓` = Slide/krčení
+- **Mobile/Touch:**
+  - `Tap` = Skok
+  - `Swipe down` = Slide
+  - `Swipe up` = Vysoký skok (power-up)
+
+#### 2.2.2 Herní objekty
+
+**Hlavní postava - "Bargain Hunter":**
+```
+Vzhled: Stylová postava v moderním oblečení
+Animace: Běžící cyklus s bouncing nákupními taškami
+Stavy: Běh, skok, slide, crash
+Velikost hitboxu: 32x48px pro optimální gameplay
+```
+
+**Překážky (nutno se vyhnout):**
+- **🛒 Nákupní vozíky** - nízké překážky (skok)
+- **👥 Fronty zákazníků** - střední překážky (skok/slide)
+- **📦 Spadlé zboží** - nízké překážky (slide)
+- **🚧 "Wet floor" cedule** - střední překážky (skok)
+- **💳 Platební terminály** - nízké překážky (slide)
+
+**Sbíratelné předměty:**
+- **🏷️ Slevové štítky** - hlavní source skóre
+  - Zelené: 5-10% slevy (10-15 bodů)
+  - Oranžové: 15-20% slevy (20-25 bodů)
+  - Červené: 25-50% slevy (30-50 bodů)
+- **💰 Zlaté mince** - bonus skóre (5 bodů)
+- **⭐ VIP passes** - temporary invincibility (10 sekund)
+- **🎁 Mystery boxes** - random mega bonus (50-100 bodů)
+
+#### 2.2.3 Progresivní obtížnost
+
+**Fáze obtížnosti:**
+```
+Fáze 1 (0-200 bodů): "Saturday Shopping"
+- Rychlost: 1x
+- Spawn rate: 1 překážka per 3 sekundy
+- Popis: Klidné nákupní odpoledne
+
+Fáze 2 (200-400 bodů): "Weekday Rush" 
+- Rychlost: 1.2x
+- Spawn rate: 1 překážka per 2.5 sekundy
+- Nové překážky: Delivery bots
+
+Fáze 3 (400-600 bodů): "Weekend Madness"
+- Rychlost: 1.5x  
+- Spawn rate: 1 překážka per 2 sekundy
+- Nové překážky: Cleaning crews
+
+Fáze 4 (600-800 bodů): "Pre-Holiday Chaos"
+- Rychlost: 1.8x
+- Spawn rate: 1 překážka per 1.5 sekundy
+- Multi-lane obstacles
+
+Fáze 5 (800+ bodů): "BLACK FRIDAY INSANITY!"
+- Rychlost: 2x+
+- Spawn rate: 1 překážka per 1 sekunda
+- Chaos mode: simultaneous obstacles
+```
+
+#### 2.2.4 Scoring systém
+
+**Bodování:**
+- **Base score:** +1 bod per frame při běhu
+- **Distance bonus:** +1 bod per 10 pixelů
+- **Collectibles:**
+  - Malý slevový štítek: +10 bodů
+  - Střední slevový štítek: +25 bodů  
+  - Velký slevový štítek: +50 bodů
+  - Zlatá mince: +5 bodů
+  - Mystery box: +Random(50-100) bodů
+
+**Sleva tiers:**
+```javascript
+const discountTiers = [
+  { minScore: 0,    discount: 0,  message: "Keep hunting! 🔍" },
+  { minScore: 150,  discount: 5,  message: "Nice start! 🎯" },
+  { minScore: 300,  discount: 10, message: "Getting warmer! 🔥" },
+  { minScore: 500,  discount: 15, message: "Bargain expert! 💡" },
+  { minScore: 750,  discount: 20, message: "Sale master! 👑" },
+  { minScore: 1000, discount: 25, message: "LEGENDARY HUNTER! 🏆" }
+];
+```
+
+### 2.3 Vizuální design
+
+#### 2.3.1 Art style
+- **Styl:** Modern pixel art s smooth animacemi
+- **Barevná paleta:** Bright, energetic colors
+  - Primary: #FF6B6B (coral red)
+  - Secondary: #4ECDC4 (turquoise) 
+  - Accent: #45B7D1 (sky blue)
+  - Success: #96CEB4 (mint green)
+  - Warning: #FECA57 (golden yellow)
+
+#### 2.3.2 Background design
+- **Layers:** 5-layer parallax scrolling
+  - Sky gradient s clouds
+  - Distant buildings/skyline
+  - Shop fronts s neony a signs
+  - Foreground objects (trees, lampposts)
+  - Ground texture s moving pattern
+
+#### 2.3.3 UI elementy
+- **Score counter:** Top-right, animované číslice
+- **Discount indicator:** Top-left, gradient background
+- **Progress bar:** Bottom, showing distance to next tier
+- **Power-up indicators:** Center, temporary overlays
+
+### 2.4 Audio design
+
+#### 2.4.1 Sound effects
+- **Footsteps:** Rytmický running sound (0.5s loop)
+- **Jump:** Playful "boing" sound
+- **Slide:** Quick "whoosh" effect  
+- **Collect discount:** Cash register "ka-ching!"
+- **Collect coin:** Light "ting" sound
+- **Collision:** "Oops!" + crash effect
+- **Power-up:** Triumphant fanfare
+- **Game over:** Sympathetic "aww" sound
+
+#### 2.4.2 Background music
+- **Style:** Upbeat electronic/chiptune
+- **Tempo:** 128 BPM (matches running rhythm)
+- **Length:** 2-minute loop s seamless transition
+- **Volume:** Dynamický, snižuje se během power-ups
+
+---
+
+## 3. Aplikační architektura
+
+### 3.1 Celkový přehled aplikace
+
+Bargain Hunter je komplexní Shopify aplikace sestávající z několika klíčových komponent:
+
+1. **Admin Dashboard** - konfigurace hry pro merchants
+2. **Game Widget** - embeddable herní komponent
+3. **Analytics Engine** - sledování výkonu a metrik
+4. **Discount Management** - generování a správa kupónů
+5. **API Backend** - serverless funkce pro business logiku
+
+### 3.2 User Journey
+
+#### 3.2.1 Merchant Journey
+```
+1. Instalace aplikace ze Shopify App Store
+2. OAuth autorizace a onboarding
+3. Konfigurace herních nastavení (min. skóre, slevy)
+4. Customizace vzhledu (barvy, logo)
+5. Aktivace widget na storefront
+6. Monitoring analytics a výkonu
+7. Optimalizace nastavení na základě dat
+```
+
+#### 3.2.2 Customer Journey
+```
+1. Návštěva e-shopu s aktivním Bargain Hunter
+2. Trigger game widget (popup/tab/inline)
+3. Úvodní screen s výzvou "Want discount? Score 500+!"
+4. Hraní mini-hry (30s - 3min)
+5. Zobrazení výsledku + earned discount
+6. Kopírování discount kódu
+7. Aplikace slevy v košíku
+8. Dokončení nákupu
+```
+
+### 3.3 Komponentová architektura
+
+#### 3.3.1 Frontend komponenty
+```
+src/
+├── components/
+│   ├── Game/
+│   │   ├── GameEngine.tsx          # Hlavní herní logika
+│   │   ├── PlayerCharacter.tsx     # Player entity a animace
+│   │   ├── ObstacleManager.tsx     # Spawning a collision detection
+│   │   ├── CollectibleManager.tsx  # Collectibles logika
+│   │   ├── BackgroundRenderer.tsx  # Parallax background
+│   │   ├── UIOverlay.tsx          # In-game UI elementy
+│   │   └── GameOverScreen.tsx     # End game results
+│   ├── Admin/
+│   │   ├── Dashboard.tsx          # Main admin interface
+│   │   ├── GameSettings.tsx       # Game configuration form
+│   │   ├── Analytics.tsx          # Charts a metrics
+│   │   ├── DiscountCodes.tsx      # Generated codes management
+│   │   └── AppearanceSettings.tsx # Visual customization
+│   ├── Widget/
+│   │   ├── EmbeddableWidget.tsx   # Main widget component
+│   │   ├── PopupTrigger.tsx       # Popup activation logic
+│   │   ├── FloatingTab.tsx        # Corner widget
+│   │   └── InlineEmbed.tsx        # Page-embedded version
+│   └── Shared/
+│       ├── LoadingSpinner.tsx
+│       ├── ErrorBoundary.tsx
+│       └── PolarisComponents.tsx
+```
+
+#### 3.3.2 Game Engine architektura
+```typescript
+interface GameEngine {
+  // Core systems
+  renderer: CanvasRenderer;
+  inputManager: InputManager;
+  collisionDetector: CollisionDetector;
+  audioManager: AudioManager;
+  
+  // Game state
+  gameState: GameState;
+  playerEntity: PlayerEntity;
+  entityManager: EntityManager;
+  
+  // Game loop
+  update(deltaTime: number): void;
+  render(): void;
+  handleInput(input: InputEvent): void;
+}
+
+interface GameState {
+  isRunning: boolean;
+  isPaused: boolean;
+  score: number;
+  distance: number;
+  currentPhase: number;
+  timeElapsed: number;
+  powerUpsActive: PowerUp[];
+}
+```
+
+---
+
+## 4. Technická specifikace
+
+### 4.1 Technology Stack
+
+#### 4.1.1 Frontend Technologies
+```json
+{
+  "core": {
+    "framework": "React 18+ with TypeScript",
+    "ui_library": "@shopify/polaris",
+    "app_bridge": "@shopify/app-bridge-react",
+    "state_management": "React Context + useReducer",
+    "styling": "CSS Modules + Polaris tokens"
+  },
+  "game_engine": {
+    "rendering": "HTML5 Canvas API",
+    "animation": "RequestAnimationFrame",
+    "physics": "Custom lightweight physics",
+    "audio": "Web Audio API",
+    "input": "Custom event handlers"
+  },
+  "build_tools": {
+    "bundler": "Vite",
+    "package_manager": "npm",
+    "linting": "ESLint + Prettier",
+    "testing": "Jest + React Testing Library"
+  }
+}
+```
+
+#### 4.1.2 Backend Technologies
+```json
+{
+  "runtime": "Node.js 18+",
+  "framework": "Vercel serverless functions",
+  "language": "TypeScript",
+  "database": "Firebase Firestore",
+  "authentication": "Shopify OAuth 2.0",
+  "api_layer": "RESTful APIs + GraphQL",
+  "external_apis": [
+    "Shopify Admin API",
+    "Shopify Storefront API",
+    "Shopify Billing API"
+  ]
+}
+```
+
+### 4.2 Databázové schéma
+
+#### 4.2.1 Firestore Collections
+```typescript
+// /shops/{shopDomain}
+interface ShopDocument {
+  // Basic info
+  shopDomain: string;
+  shopifyShopId: string;
+  shopOwnerEmail: string;
+  planType: 'free' | 'pro' | 'enterprise';
+  
+  // App settings
+  isActive: boolean;
+  installedAt: Timestamp;
+  lastActiveAt: Timestamp;
+  
+  // Game configuration
+  gameSettings: {
+    isEnabled: boolean;
+    minScoreForDiscount: number;
+    maxPlaysPerCustomer: number;
+    maxPlaysPerDay: number;
+    discountTiers: Array<{
+      minScore: number;
+      discountPercent: number;
+      maxUses?: number;
+    }>;
+    gameSpeed: number;
+    difficulty: 'easy' | 'medium' | 'hard';
+  };
+  
+  // Widget configuration  
+  widgetSettings: {
+    displayMode: 'popup' | 'tab' | 'inline';
+    triggerEvent: 'immediate' | 'exit_intent' | 'time_delay' | 'scroll';
+    triggerDelay?: number; // seconds
+    position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+    showOn: 'all_pages' | 'product_pages' | 'collection_pages' | 'custom';
+    customPages?: string[];
+  };
+  
+  // Appearance customization
+  appearance: {
+    primaryColor: string;
+    secondaryColor: string;
+    logoUrl?: string;
+    customCSS?: string;
+    backgroundTheme: 'default' | 'dark' | 'custom';
+    customBackgroundUrl?: string;
+  };
+  
+  // Business settings
+  businessRules: {
+    excludeDiscountedProducts: boolean;
+    minimumOrderAmount?: number;
+    allowStackingDiscounts: boolean;
+    discountExpiryHours: number;
+    productCollections?: string[]; // Restrict to specific collections
+  };
+}
+
+// /shops/{shopDomain}/gameSessions/{sessionId}
+interface GameSessionDocument {
+  // Session identification
+  sessionId: string;
+  customerId?: string; // If logged in
+  customerEmail?: string;
+  ipAddress: string;
+  userAgent: string;
+  
+  // Game data
+  startedAt: Timestamp;
+  finishedAt?: Timestamp;
+  finalScore: number;
+  maxCombo: number;
+  distanceTraveled: number;
+  objectsCollected: number;
+  obstaclesHit: number;
+  powerUpsUsed: number;
+  
+  // Reward data
+  discountEarned: number;
+  discountCode?: string;
+  discountUsed: boolean;
+  discountUsedAt?: Timestamp;
+  orderValue?: number;
+  
+  // Technical data
+  gameVersion: string;
+  deviceType: 'desktop' | 'tablet' | 'mobile';
+  browserType: string;
+  sessionDuration: number; // milliseconds
+  
+  // Analytics tags
+  source: 'popup' | 'tab' | 'inline';
+  referrer?: string;
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+}
+
+// /shops/{shopDomain}/discountCodes/{codeId}
+interface DiscountCodeDocument {
+  // Code details
+  code: string;
+  discountPercent: number;
+  discountAmount?: number; // For fixed amount discounts
+  shopifyDiscountId: string;
+  
+  // Usage tracking
+  isUsed: boolean;
+  usedAt?: Timestamp;
+  usedByCustomer?: string;
+  orderIds?: string[];
+  
+  // Validity
+  createdAt: Timestamp;
+  expiresAt: Timestamp;
+  isActive: boolean;
+  
+  // Source tracking
+  gameSessionId: string;
+  earnedScore: number;
+  
+  // Restrictions
+  usageLimit: number;
+  minimumOrderAmount?: number;
+  applicableProducts?: string[];
+  applicableCollections?: string[];
+}
+
+// /shops/{shopDomain}/analytics/daily/{YYYY-MM-DD}
+interface DailyAnalyticsDocument {
+  date: string; // YYYY-MM-DD format
+  
+  // Game metrics
+  totalGames: number;
+  uniquePlayers: number;
+  averageScore: number;
+  averageSessionDuration: number;
+  totalDistanceTraveled: number;
+  
+  // Conversion metrics
+  discountsGenerated: number;
+  discountsUsed: number;
+  conversionRate: number; // discountsUsed / discountsGenerated
+  
+  // Revenue metrics
+  totalRevenue: number;
+  revenueFromGamers: number;
+  averageOrderValue: number;
+  revenuePerPlay: number;
+  
+  // Engagement metrics
+  bounceRate: number;
+  returnPlayerRate: number;
+  shareRate: number;
+  
+  // Technical metrics
+  crashRate: number;
+  averageLoadTime: number;
+  mobileVsDesktop: {
+    mobile: number;
+    desktop: number;
+    tablet: number;
+  };
+  
+  // Top performers
+  topScores: Array<{
+    score: number;
+    customerId?: string;
+    sessionId: string;
+  }>;
+  
+  // Error tracking
+  errors: Array<{
+    type: string;
+    count: number;
+    lastOccurrence: Timestamp;
+  }>;
+}
+
+// /system/analytics/global
+interface GlobalAnalyticsDocument {
+  // Platform metrics
+  totalShops: number;
+  activeShops: number;
+  totalGamesPlayed: number;
+  totalRevenue: number;
+  
+  // Performance benchmarks
+  averageConversionRate: number;
+  averageRevenuePerShop: number;
+  topPerformingShops: Array<{
+    shopDomain: string;
+    conversionRate: number;
+    totalRevenue: number;
+  }>;
+  
+  // Feature usage
+  featureUsage: {
+    popupMode: number;
+    tabMode: number;
+    inlineMode: number;
+    customThemes: number;
+    advancedSettings: number;
+  };
+  
+  lastUpdated: Timestamp;
+}
+```
+
+### 4.3 API specifikace
+
+#### 4.3.1 Authentication & Authorization
+
+**OAuth Flow:**
+```typescript
+// POST /api/auth/shopify-install
+interface InstallRequest {
+  shop: string;
+  hmac: string;
+  timestamp: string;
+  state: string;
+}
+
+interface InstallResponse {
+  success: boolean;
+  authUrl: string;
+  error?: string;
+}
+
+// POST /api/auth/shopify-callback  
+interface CallbackRequest {
+  shop: string;
+  code: string;
+  state: string;
+  hmac: string;
+  timestamp: string;
+}
+
+interface CallbackResponse {
+  success: boolean;
+  accessToken?: string;
+  shopData?: ShopifyShop;
+  error?: string;
+}
+```
+
+**Session Management:**
+```typescript
+// GET /api/auth/verify-session
+interface SessionVerifyResponse {
+  isValid: boolean;
+  shop?: string;
+  scopes?: string[];
+  expiresAt?: number;
+}
+
+// POST /api/auth/refresh-token
+interface TokenRefreshResponse {
+  success: boolean;
+  newToken?: string;
+  expiresAt?: number;
+}
+```
+
+#### 4.3.2 Game API Endpoints
+
+**Game Session Management:**
+```typescript
+// POST /api/game/start-session
+interface StartGameRequest {
+  shopDomain: string;
+  customerData?: {
+    id?: string;
+    email?: string;
+  };
+  source: 'popup' | 'tab' | 'inline';
+  referrer?: string;
+}
+
+interface StartGameResponse {
+  success: boolean;
+  sessionId: string;
+  gameConfig: GameConfiguration;
+  canPlay: boolean;
+  playsRemaining?: number;
+  error?: string;
+}
+
+// POST /api/game/finish-session
+interface FinishGameRequest {
+  sessionId: string;
+  finalScore: number;
+  gameData: {
+    duration: number;
+    objectsCollected: number;
+    obstaclesHit: number;
+    maxCombo: number;
+    distanceTraveled: number;
+  };
+  playerEmail?: string;
+}
+
+interface FinishGameResponse {
+  success: boolean;
+  discountEarned: number;
+  discountCode?: string;
+  expiresAt?: string;
+  message: string;
+  nextTierScore?: number;
+  error?: string;
+}
+
+// GET /api/game/leaderboard/{shopDomain}
+interface LeaderboardResponse {
+  success: boolean;
+  leaderboard: Array<{
+    rank: number;
+    score: number;
+    playerName: string; // anonymized
+    achievedAt: string;
+  }>;
+  playerRank?: number;
+  totalPlayers: number;
+}
+```
+
+**Rate Limiting & Validation:**
+```typescript
+// GET /api/game/validate-play
+interface ValidatePlayRequest {
+  shopDomain: string;
+  customerIdentifier: string; // email or IP
+}
+
+interface ValidatePlayResponse {
+  canPlay: boolean;
+  reason?: 'daily_limit' | 'rate_limit' | 'shop_inactive';
+  playsRemaining: number;
+  nextPlayAvailable?: string; // ISO timestamp
+}
+```
+
+#### 4.3.3 Admin API Endpoints
+
+**Shop Configuration:**
+```typescript
+// GET /api/admin/settings/{shopDomain}
+interface GetSettingsResponse {
+  success: boolean;
+  settings: ShopDocument;
+  error?: string;
+}
+
+// PUT /api/admin/settings/{shopDomain}
+interface UpdateSettingsRequest {
+  gameSettings?: Partial<ShopDocument['gameSettings']>;
+  widgetSettings?: Partial<ShopDocument['widgetSettings']>;
+  appearance?: Partial<ShopDocument['appearance']>;
+  businessRules?: Partial<ShopDocument['businessRules']>;
+}
+
+interface UpdateSettingsResponse {
+  success: boolean;
+  updatedSettings: ShopDocument;
+  error?: string;
+}
+```
+
+**Analytics API:**
+```typescript
+// GET /api/admin/analytics/{shopDomain}
+interface AnalyticsRequest {
+  period: 'today' | 'week' | 'month' | 'quarter' | 'year';
+  startDate?: string; // YYYY-MM-DD
+  endDate?: string;   // YYYY-MM-DD
+  metrics?: string[]; // Specific metrics to return
+}
+
+interface AnalyticsResponse {
+  success: boolean;
+  data: {
+    overview: {
+      totalGames: number;
+      totalRevenue: number;
+      conversionRate: number;
+      averageOrderValue: number;
+    };
+    timeSeries: Array<{
+      date: string;
+      games: number;
+      revenue: number;
+      conversions: number;
+    }>;
+    topScores: Array<{
+      score: number;
+      date: string;
+      discount: number;
+    }>;
+    demographics: {
+      deviceTypes: Record<string, number>;
+      referrers: Record<string, number>;
+      geolocations: Record<string, number>;
+    };
+  };
+  error?: string;
+}
+
+// GET /api/admin/discount-codes/{shopDomain}
+interface DiscountCodesRequest {
+  page?: number;
+  limit?: number;
+  status?: 'all' | 'used' | 'unused' | 'expired';
+  dateRange?: {
+    start: string;
+    end: string;
+  };
+}
+
+interface DiscountCodesResponse {
+  success: boolean;
+  codes: DiscountCodeDocument[];
+  pagination: {
+    total: number;
+    page: number;
+    pages: number;
+    limit: number;
+  };
+  summary: {
+    totalGenerated: number;
+    totalUsed: number;
+    totalRevenue: number;
+    averageDiscount: number;
+  };
+}
+```
+
+#### 4.3.4 Shopify Integration APIs
+
+**Discount Code Management:**
+```typescript
+// POST /api/shopify/create-discount
+interface CreateDiscountRequest {
+  shop: string;
+  code: string;
+  discountType: 'percentage' | 'fixed_amount';
+  value: number;
+  usageLimit?: number;
+  expiresAt?: string;
+  minimumOrderAmount?: number;
+  applicableProducts?: string[];
+  applicableCollections?: string[];
+}
+
+interface CreateDiscountResponse {
+  success: boolean;
+  shopifyDiscountId?: string;
+  discountCode?: string;
+  error?: string;
+}
+
+// GET /api/shopify/discount-usage/{shopifyDiscountId}
+interface DiscountUsageResponse {
+  success: boolean;
+  usageCount: number;
+  orders: Array<{
+    orderId: string;
+    orderNumber: string;
+    totalPrice: string;
+    createdAt: string;
+    customerEmail?: string;
+  }>;
+}
+```
+
+**Script Tag Management:**
+```typescript
+// POST /api/shopify/install-widget
+interface InstallWidgetRequest {
+  shop: string;
+  widgetSettings: ShopDocument['widgetSettings'];
+}
+
+interface InstallWidgetResponse {
+  success: boolean;
+  scriptTagId?: string;
+  widgetUrl?: string;
+  error?: string;
+}
+
+// PUT /api/shopify/update-widget
+interface UpdateWidgetRequest {
+  shop: string;
+  scriptTagId: string;
+  newSettings: ShopDocument['widgetSettings'];
+}
+```
+
+**Webhook Handling:**
+```typescript
+// POST /api/webhooks/shopify/app-uninstalled
+interface AppUninstalledWebhook {
+  shop_domain: string;
+  shop_id: number;
+}
+
+// POST /api/webhooks/shopify/order-created
+interface OrderCreatedWebhook {
+  id: number;
+  order_number: string;
+  total_price: string;
+  discount_codes: Array<{
+    code: string;
+    amount: string;
+    type: string;
+  }>;
+  customer?: {
+    id: number;
+    email: string;
+  };
+  created_at: string;
+}
+```
+
+### 4.4 Widget Embedding systém
+
+#### 4.4.1 Script Tag Injection
+```javascript
+// Auto-generated script tag
+(function() {
+  const shopDomain = '{{shop.permanent_domain}}';
+  const widgetConfig = {
+    mode: 'popup', // popup | tab | inline
+    trigger: 'exit_intent', // immediate | exit_intent | time_delay | scroll
+    position: 'bottom-right',
+    primaryColor: '#FF6B6B',
+    // ... other config
+  };
+  
+  // Load widget script
+  const script = document.createElement('script');
+  script.src = 'https://bargain-hunter.vercel.app/widget/embed.js';
+  script.dataset.shopDomain = shopDomain;
+  script.dataset.config = JSON.stringify(widgetConfig);
+  document.head.appendChild(script);
+})();
+```
+
+#### 4.4.2 Widget API Interface
+```typescript
+// Widget communication interface
+interface WidgetAPI {
+  // Core methods
+  init(config: WidgetConfig): void;
+  show(): void;
+  hide(): void;
+  destroy(): void;
+  
+  // Event handlers
+  onGameStart(callback: () => void): void;
+  onGameEnd(callback: (result: GameResult) => void): void;
+  onDiscountEarned(callback: (discount: DiscountData) => void): void;
+  
+  // State queries
+  isVisible(): boolean;
+  canPlay(): boolean;
+  getPlayerStats(): PlayerStats;
+}
+
+// Usage in merchant's theme
+window.BargainHunter.onDiscountEarned((discount) => {
+  // Auto-apply discount to cart
+  fetch('/cart/add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      discount_code: discount.code
+    })
+  });
+});
+```
+
+### 4.5 Performance & Optimization
+
+#### 4.5.1 Frontend Optimalizace
+- **Bundle splitting:** Lazy loading herních assetů
+- **Image optimization:** WebP format s fallback
+- **Canvas optimization:** Requestanimationframe s delta timing
+- **Memory management:** Object pooling pro game entities
+- **Caching:** Service worker pro offline gameplay
+
+#### 4.5.2 Backend Optimalizace
+- **Database indexing:** Composite indexy pro analytics queries
+- **CDN:** Cloudflare pro static assets
+- **Edge functions:** Vercel Edge pro rate limiting
+- **Caching:** Redis cache pro často používaná data
+- **Compression:** Gzip/Brotli pro API responses
+
+#### 4.5.3 Monitoring & Analytics
+```typescript
+// Performance monitoring
+interface PerformanceMetrics {
+  // Game performance
+  averageFPS: number;
+  loadTime: number;
+  memoryUsage: number;
+  crashRate: number;
+  
+  // API performance  
+  responseTime: number;
+  errorRate: number;
+  throughput: number;
+  
+  // Business metrics
+  conversionRate: number;
+  revenuePerSession: number;
+  userEngagement: number;
+}
+```
+
+---
+
+## 5. Security & Compliance
+
+### 5.1 Data Protection
+
+#### 5.1.1 GDPR Compliance
+```typescript
+interface GDPRCompliance {
+  // Data minimization
+  dataCollection: 'minimal' | 'necessary_only';
+  retentionPeriod: number; // days
+  
+  // User rights
+  rightToAccess: boolean;
+  rightToPortability: boolean;
+  rightToErasure: boolean;
+  rightToRectification: boolean;
+  
+  // Consent management
+  cookieConsent: boolean;
+  analyticsConsent: boolean;
+  marketingConsent: boolean;
+  
+  // Data processing
+  lawfulBasis: 'consent' | 'legitimate_interest' | 'contract';
+  dataProcessors: string[];
+  dataTransfers: 'EU_only' | 'adequate_countries' | 'safeguards';
+}
+
+// Privacy policy implementation
+const privacySettings = {
+  // Personal data collected
+  personalData: [
+    'Email address (optional)',
+    'IP address (anonymized)',
+    'Browser type and version',
+    'Device type',
+    'Game performance data'
+  ],
+  
+  // Data usage purposes
+  purposes: [
+    'Game functionality',
+    'Discount code generation',
+    'Performance analytics',
+    'Fraud prevention'
+  ],
+  
+  // Data retention
+  retention: {
+    gameSessions: '12 months',
+    analytics: '24 months',
+    discountCodes: '3 years', // Tax requirements
+    errorLogs: '6 months'
+  },
+  
+  // Third-party services
+  processors: [
+    'Firebase (Google) - Data storage',
+    'Vercel - Hosting and functions',
+    'Shopify - E-commerce integration',
+    'Sentry - Error monitoring'
+  ]
+};
+```
+
+#### 5.1.2 Data Anonymization
+```typescript
+// Personal data anonymization
+interface AnonymizationStrategy {
+  // IP address handling
+  ipAnonymization: {
+    method: 'hash' | 'truncate' | 'proxy';
+    saltRotation: 'daily' | 'weekly';
+    storageFormat: 'hashed';
+  };
+  
+  // Email handling
+  emailProtection: {
+    storage: 'hashed' | 'encrypted' | 'none';
+    displayFormat: 'masked'; // j***@example.com
+    deletionSchedule: 'immediate_after_use';
+  };
+  
+  // Session tracking
+  sessionManagement: {
+    cookieType: 'session_only';
+    crossSiteTracking: false;
+    fingerprinting: 'disabled';
+  };
+}
+```
+
+### 5.2 Application Security
+
+#### 5.2.1 Input Validation & Sanitization
+```typescript
+// Security middleware
+interface SecurityControls {
+  // Input validation
+  inputValidation: {
+    scoreValidation: {
+      min: 0,
+      max: 10000,
+      type: 'integer',
+      suspicious_threshold: 5000 // Flag for review
+    };
+    
+    emailValidation: {
+      format: 'RFC_5322',
+      maxLength: 254,
+      domainValidation: true,
+      disposableEmailCheck: true
+    };
+    
+    sessionValidation: {
+      tokenFormat: 'UUID_v4',
+      expirationCheck: true,
+      originValidation: true
+    };
+  };
+  
+  // Rate limiting
+  rateLimiting: {
+    gameAttempts: '3_per_hour_per_ip',
+    apiCalls: '100_per_minute_per_shop',
+    discountGeneration: '10_per_day_per_customer'
+  };
+  
+  // Content Security Policy
+  csp: {
+    defaultSrc: "'self'",
+    scriptSrc: "'self' 'unsafe-inline' cdn.shopify.com",
+    styleSrc: "'self' 'unsafe-inline' fonts.googleapis.com",
+    imgSrc: "'self' data: https:",
+    connectSrc: "'self' firestore.googleapis.com"
+  };
+}
+```
+
+#### 5.2.2 Anti-Fraud Measures
+```typescript
+interface FraudPrevention {
+  // Score validation
+  scoreAnomaly: {
+    statisticalAnalysis: boolean;
+    velocityChecks: boolean;
+    deviceFingerprinting: boolean;
+    behaviorAnalysis: boolean;
+  };
+  
+  // Abuse prevention
+  abuseDetection: {
+    rapidFireDetection: boolean; // Multiple quick attempts
+    scoreManipulation: boolean;  // Impossible scores
+    botDetection: boolean;       // Automated gameplay
+    deviceSpoofing: boolean;     // Device/browser changes
+  };
+  
+  // Response strategies
+  suspiciousActivity: {
+    scoreThreshold: 5000;
+    reviewRequired: boolean;
+    temporaryBan: '24_hours';
+    manualVerification: boolean;
+  };
+}
+```
+
+### 5.3 Shopify Security Requirements
+
+#### 5.3.1 OAuth Implementation
+```typescript
+// Secure OAuth flow
+interface ShopifyOAuthSecurity {
+  // Token management
+  accessTokens: {
+    storage: 'encrypted_database',
+    rotation: 'periodic',
+    scoping: 'minimal_required',
+    expiration: 'never' // Shopify tokens don't expire
+  };
+  
+  // Request validation
+  requestValidation: {
+    hmacVerification: boolean;
+    timestampValidation: boolean;
+    nonceProtection: boolean;
+    stateParameterValidation: boolean;
+  };
+  
+  // Webhook security
+  webhookSecurity: {
+    signatureVerification: boolean;
+    httpsOnly: boolean;
+    idempotencyKeys: boolean;
+    replayProtection: boolean;
+  };
+}
+```
+
+#### 5.3.2 API Security
+```typescript
+// Shopify API interaction security
+interface APISecurityMeasures {
+  // Request authentication
+  authentication: {
+    method: 'Bearer_token',
+    shopValidation: boolean,
+    scopeEnforcement: boolean,
+    requestSigning: boolean
+  };
+  
+  // Error handling
+  errorHandling: {
+    sensitiveDataExposure: 'prevented',
+    errorLogging: 'sanitized',
+    userFeedback: 'generic_messages',
+    debugInformation: 'development_only'
+  };
+  
+  // API limits
+  apiLimits: {
+    respectShopifyLimits: boolean,
+    backoffStrategy: 'exponential',
+    retryLogic: 'intelligent',
+    bulkOperations: 'when_possible'
+  };
+}
+```
+
+---
+
+## 6. Deployment & DevOps
+
+### 6.1 Environment Configuration
+
+#### 6.1.1 Environment Variables
+```bash
+# Shopify Configuration
+SHOPIFY_API_KEY=your_api_key
+SHOPIFY_API_SECRET=your_api_secret
+SHOPIFY_WEBHOOK_SECRET=your_webhook_secret
+SHOPIFY_SCOPES=read_products,write_discounts,read_customers,write_script_tags
+
+# Firebase Configuration
+FIREBASE_PROJECT_ID=bargain-hunter-prod
+FIREBASE_API_KEY=your_firebase_key
+FIREBASE_AUTH_DOMAIN=bargain-hunter-prod.firebaseapp.com
+FIREBASE_DATABASE_URL=https://bargain-hunter-prod.firebaseio.com
+
+# Application URLs
+NEXT_PUBLIC_APP_URL=https://bargain-hunter.vercel.app
+NEXT_PUBLIC_WIDGET_URL=https://bargain-hunter.vercel.app/widget
+NEXT_PUBLIC_API_BASE=https://bargain-hunter.vercel.app/api
+
+# Security
+JWT_SECRET=your_jwt_secret
+ENCRYPTION_KEY=your_encryption_key
+RATE_LIMIT_SECRET=your_rate_limit_secret
+
+# Monitoring
+SENTRY_DSN=your_sentry_dsn
+VERCEL_ANALYTICS_ID=your_analytics_id
+FIREBASE_MEASUREMENT_ID=your_measurement_id
+
+# External Services
+POSTMARK_API_KEY=your_email_service_key
+STRIPE_SECRET_KEY=your_stripe_key # For premium features
+```
+
+#### 6.1.2 Environment-Specific Configurations
+```typescript
+interface EnvironmentConfig {
+  development: {
+    database: 'bargain-hunter-dev',
+    logging: 'verbose',
+    gameConfig: {
+      easyMode: true,
+      debugUI: true,
+      skipRateLimit: true
+    },
+    monitoring: 'disabled'
+  };
+  
+  staging: {
+    database: 'bargain-hunter-staging',
+    logging: 'normal',
+    gameConfig: {
+      easyMode: false,
+      debugUI: false,
+      skipRateLimit: false
+    },
+    monitoring: 'enabled'
+  };
+  
+  production: {
+    database: 'bargain-hunter-prod',
+    logging: 'errors_only',
+    gameConfig: {
+      easyMode: false,
+      debugUI: false,
+      skipRateLimit: false
+    },
+    monitoring: 'full'
+  };
+}
+```
+
+### 6.2 CI/CD Pipeline
+
+#### 6.2.1 GitHub Actions Workflow
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy Bargain Hunter
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run linting
+        run: npm run lint
+      
+      - name: Run type checking
+        run: npm run type-check
+      
+      - name: Run unit tests
+        run: npm run test:unit
+      
+      - name: Run integration tests
+        run: npm run test:integration
+        env:
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID_TEST }}
+      
+      - name: Run E2E tests
+        run: npm run test:e2e
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: 0
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+  deploy-staging:
+    needs: [test, security-scan]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy to Vercel (Staging)
+        uses: amondnet/vercel-action@v20
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          scope: staging
+
+  deploy-production:
+    needs: [test, security-scan]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy to Vercel (Production)
+        uses: amondnet/vercel-action@v20
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+      
+      - name: Update Firebase Security Rules
+        run: |
+          npm install -g firebase-tools
+          firebase deploy --only firestore:rules --token ${{ secrets.FIREBASE_TOKEN }}
+      
+      - name: Notify deployment
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+```
+
+#### 6.2.2 Quality Gates
+```typescript
+interface QualityGates {
+  // Code quality requirements
+  codeQuality: {
+    testCoverage: 85,          // Minimum test coverage
+    eslintErrors: 0,           // No ESLint errors allowed
+    typeErrors: 0,             // No TypeScript errors
+    sonarQuality: 'A',         // SonarQube quality gate
+    duplicatedCode: 3          // Max 3% duplicated code
+  };
+  
+  // Performance requirements
+  performance: {
+    bundleSize: '2MB',         // Max bundle size
+    loadTime: '3s',            // Max initial load time
+    gameLoadTime: '1s',        // Max game initialization
+    apiResponseTime: '500ms',  // Max API response time
+    memoryUsage: '100MB'       // Max memory consumption
+  };
+  
+  // Security requirements
+  security: {
+    vulnerabilities: 0,        // No high/critical vulnerabilities
+    dependencyAudit: 'pass',   // npm audit must pass
+    codeQLScan: 'pass',        // GitHub CodeQL scan
+    snykScan: 'pass'          // Snyk security scan
+  };
+}
+```
+
+### 6.3 Monitoring & Observability
+
+#### 6.3.1 Application Monitoring
+```typescript
+interface MonitoringStack {
+  // Error tracking
+  errorMonitoring: {
+    tool: 'Sentry',
+    errorThreshold: '1%',      // Max error rate
+    alerting: 'immediate',
+    contextCapture: 'full',
+    sourceMapUpload: 'automatic'
+  };
+  
+  // Performance monitoring
+  performanceMonitoring: {
+    realUserMonitoring: 'Vercel Analytics',
+    syntheticMonitoring: 'Uptime Robot',
+    coreWebVitals: 'tracked',
+    gamePerformance: 'custom_metrics'
+  };
+  
+  // Business metrics
+  businessMonitoring: {
+    conversionTracking: 'Google Analytics 4',
+    revenueTracking: 'custom_dashboard',
+    userBehavior: 'Mixpanel',
+    gameAnalytics: 'custom_implementation'
+  };
+  
+  // Infrastructure monitoring
+  infraMonitoring: {
+    serverless: 'Vercel Monitoring',
+    database: 'Firebase Console',
+    cdn: 'Cloudflare Analytics',
+    uptime: 'Uptime Robot'
+  };
+}
+```
+
+#### 6.3.2 Alerting Strategy
+```typescript
+interface AlertingConfiguration {
+  // Critical alerts (immediate notification)
+  critical: {
+    triggers: [
+      'App crash rate > 5%',
+      'API error rate > 10%',
+      'Database connection failure',
+      'Payment processing failure',
+      'Security breach detection'
+    ],
+    channels: ['PagerDuty', 'Slack', 'Email'],
+    escalation: '5_minutes'
+  };
+  
+  // Warning alerts (within business hours)
+  warning: {
+    triggers: [
+      'Response time > 2s',
+      'Conversion rate drop > 20%',
+      'High memory usage',
+      'Unusual traffic patterns',
+      'Game crash rate > 2%'
+    ],
+    channels: ['Slack', 'Email'],
+    escalation: '30_minutes'
+  };
+  
+  // Info alerts (daily digest)
+  info: {
+    triggers: [
+      'Daily metrics summary',
+      'New shop installations',
+      'Performance trends',
+      'Feature usage statistics'
+    ],
+    channels: ['Email'],
+    schedule: 'daily_at_9am'
+  };
+}
+```
+
+---
+
+## 7. Testing Strategy
+
+### 7.1 Testing Pyramid
+
+#### 7.1.1 Unit Tests (70% coverage target)
+```typescript
+// Game engine unit tests
+describe('GameEngine', () => {
+  test('should initialize with correct default state', () => {
+    const engine = new GameEngine();
+    expect(engine.gameState.isRunning).toBe(false);
+    expect(engine.gameState.score).toBe(0);
+  });
+  
+  test('should handle player jump correctly', () => {
+    const engine = new GameEngine();
+    engine.start();
+    engine.handleInput({ type: 'jump' });
+    expect(engine.playerEntity.isJumping).toBe(true);
+  });
+  
+  test('should calculate score correctly', () => {
+    const engine = new GameEngine();
+    engine.collectItem({ type: 'discount', value: 25 });
+    expect(engine.gameState.score).toBe(25);
+  });
+});
+
+// API endpoint unit tests
+describe('Game API', () => {
+  test('should validate game session correctly', async () => {
+    const result = await validateGameSession('valid-session-id');
+    expect(result.isValid).toBe(true);
+  });
+  
+  test('should enforce rate limiting', async () => {
+    // Simulate multiple rapid requests
+    const promises = Array(5).fill().map(() => 
+      startGameSession('test-shop', 'test-ip')
+    );
+    const results = await Promise.all(promises);
+    expect(results.filter(r => !r.success).length).toBeGreaterThan(0);
+  });
+});
+```
+
+#### 7.1.2 Integration Tests (20% coverage target)
+```typescript
+// Shopify API integration tests
+describe('Shopify Integration', () => {
+  test('should create discount code successfully', async () => {
+    const mockShop = await createTestShop();
+    const result = await createShopifyDiscount(mockShop.domain, {
+      code: 'TEST10',
+      percentage: 10,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+    });
+    
+    expect(result.success).toBe(true);
+    expect(result.shopifyDiscountId).toBeDefined();
+  });
+  
+  test('should handle webhook correctly', async () => {
+    const webhookPayload = createMockWebhook('app/uninstalled');
+    const response = await processWebhook(webhookPayload);
+    expect(response.status).toBe(200);
+  });
+});
+
+// Database integration tests
+describe('Firebase Integration', () => {
+  test('should save game session correctly', async () => {
+    const sessionData = createMockGameSession();
+    await saveGameSession(sessionData);
+    
+    const saved = await getGameSession(sessionData.sessionId);
+    expect(saved.finalScore).toBe(sessionData.finalScore);
+  });
+  
+  test('should aggregate analytics correctly', async () => {
+    await createMockAnalyticsData();
+    const analytics = await getShopAnalytics('test-shop', 'today');
+    expect(analytics.totalGames).toBeGreaterThan(0);
+  });
+});
+```
+
+#### 7.1.3 End-to-End Tests (10% coverage target)
+```typescript
+// E2E tests using Playwright
+describe('Complete User Journey', () => {
+  test('customer can play game and receive discount', async ({ page }) => {
+    // Navigate to test shop
+    await page.goto('https://test-shop.myshopify.com/products/test-product');
+    
+    // Trigger game widget
+    await page.click('[data-testid="bargain-hunter-trigger"]');
+    
+    // Wait for game to load
+    await page.waitForSelector('[data-testid="game-canvas"]');
+    
+    // Simulate gameplay (using test mode)
+    await page.evaluate(() => {
+      window.BargainHunter.simulateGameplay({ score: 500 });
+    });
+    
+    // Verify discount received
+    const discountCode = await page.textContent('[data-testid="discount-code"]');
+    expect(discountCode).toMatch(/HUNTER\d{3}/);
+    
+    // Apply discount to cart
+    await page.click('[data-testid="apply-discount"]');
+    await page.waitForNavigation();
+    
+    // Verify discount applied
+    const cartTotal = await page.textContent('[data-testid="cart-total"]');
+    expect(cartTotal).toContain('15% off');
+  });
+  
+  test('merchant can configure game settings', async ({ page }) => {
+    // Login to Shopify admin
+    await loginAsShopOwner(page);
+    
+    // Navigate to Bargain Hunter app
+    await page.goto('/admin/apps/bargain-hunter');
+    
+    // Update game settings
+    await page.fill('[data-testid="min-score-input"]', '600');
+    await page.selectOption('[data-testid="discount-select"]', '20');
+    await page.click('[data-testid="save-settings"]');
+    
+    // Verify settings saved
+    await page.waitForSelector('[data-testid="success-message"]');
+    
+    // Test updated settings work
+    const response = await page.request.get('/api/game/config/test-shop');
+    const config = await response.json();
+    expect(config.minScoreForDiscount).toBe(600);
+  });
+});
+```
+
+### 7.2 Performance Testing
+
+#### 7.2.1 Load Testing
+```typescript
+// Artillery.js load test configuration
+interface LoadTestConfig {
+  phases: [
+    {
+      duration: '2m',
+      arrivalRate: 10,    // 10 users per second
+      name: 'Warm up'
+    },
+    {
+      duration: '5m',
+      arrivalRate: 50,    // 50 users per second
+      name: 'Peak load'
+    },
+    {
+      duration: '2m',
+      arrivalRate: 100,   // 100 users per second
+      name: 'Spike test'
+    }
+  ];
+  
+  scenarios: [
+    {
+      name: 'Play game flow',
+      weight: 70,
+      flow: [
+        'GET /api/game/validate-play',
+        'POST /api/game/start-session',
+        'POST /api/game/finish-session'
+      ]
+    },
+    {
+      name: 'Admin dashboard',
+      weight: 20,
+      flow: [
+        'GET /api/admin/analytics',
+        'GET /api/admin/settings'
+      ]
+    },
+    {
+      name: 'Widget loading',
+      weight: 10,
+      flow: [
+        'GET /widget/embed.js',
+        'GET /api/game/config'
+      ]
+    }
+  ];
+  
+  // Performance thresholds
+  thresholds: {
+    'http_req_duration': ['p(95)<500'],  // 95% of requests under 500ms
+    'http_req_failed': ['rate<0.01'],    // Error rate under 1%
+    'http_reqs': ['rate>100']            // Minimum 100 req/s throughput
+  };
+}
+```
+
+#### 7.2.2 Game Performance Testing
+```typescript
+// Custom game performance tests
+describe('Game Performance', () => {
+  test('should maintain 60 FPS under normal conditions', async () => {
+    const game = new GameEngine();
+    const frameRates = [];
+    
+    // Run game for 30 seconds and measure FPS
+    for (let i = 0; i < 1800; i++) { // 30s * 60fps
+      const start = performance.now();
+      game.update(16.67); // 60 FPS frame time
+      game.render();
+      const frameTime = performance.now() - start;
+      frameRates.push(1000 / frameTime);
+    }
+    
+    const avgFPS = frameRates.reduce((a, b) => a + b) / frameRates.length;
+    expect(avgFPS).toBeGreaterThan(55); // Allow some variance
+  });
+  
+  test('should handle memory efficiently', async () => {
+    const game = new GameEngine();
+    const initialMemory = performance.memory?.usedJSHeapSize || 0;
+    
+    // Simulate 5 minutes of gameplay
+    for (let i = 0; i < 18000; i++) {
+      game.update(16.67);
+      if (i % 300 === 0) { // Every 5 seconds
+        game.spawnObstacle();
+        game.spawnCollectible();
+      }
+    }
+    
+    const finalMemory = performance.memory?.usedJSHeapSize || 0;
+    const memoryIncrease = finalMemory - initialMemory;
+    
+    // Memory increase should be reasonable (< 50MB)
+    expect(memoryIncrease).toBeLessThan(50 * 1024 * 1024);
+  });
+});
+```
+
+---
+
+## 8. Launch Strategy & Go-to-Market
+
+### 8.1 Pre-Launch Phase
+
+#### 8.1.1 Beta Testing Program
+```typescript
+interface BetaTestingStrategy {
+  // Target beta testers
+  betaTesters: {
+    totalShops: 50;
+    categories: [
+      'Fashion & Apparel: 15 shops',
+      'Electronics: 10 shops', 
+      'Home & Garden: 10 shops',
+      'Health & Beauty: 10 shops',
+      'Sports & Recreation: 5 shops'
+    ];
+    sizes: [
+      'Small (< $10k monthly): 20 shops',
+      'Medium ($10k-$100k): 20 shops',
+      'Large (> $100k): 10 shops'
+    ];
+  };
+  
+  // Beta testing timeline
+  timeline: {
+    week1: 'Recruit first 10 beta testers',
+    week2: 'Onboard and train beta users',
+    week3: 'Collect initial feedback',
+    week4: 'Implement critical fixes',
+    week5: 'Scale to 25 testers',
+    week6: 'Performance optimization',
+    week7: 'Scale to 50 testers',
+    week8: 'Final polish and App Store prep'
+  };
+  
+  // Success metrics
+  betaMetrics: {
+    activation: '80% of beta shops activate widget',
+    engagement: '60% see customer gameplay',
+    satisfaction: '4.5+ average rating',
+    conversion: '15%+ discount usage rate',
+    retention: '70% keep app installed for 30 days'
+  };
+}
+```
+
+#### 8.1.2 App Store Preparation
+```typescript
+interface AppStoreSubmission {
+  // Required assets
+  requiredAssets: {
+    appIcon: '1024x1024 PNG',
+    screenshots: [
+      'Dashboard overview',
+      'Game settings configuration', 
+      'Analytics dashboard',
+      'Widget in action',
+      'Mobile responsive design'
+    ];
+    videoDemo: '60 second app walkthrough';
+    detailedDescription: 'Feature highlights and benefits';
+    shortDescription: 'Gamified discounts for customer engagement';
+  };
+  
+  // Built for Shopify requirements
+  bfsRequirements: {
+    polarisComponents: 'All UI components use Polaris',
+    appBridge: 'Latest version implemented',
+    performance: 'Sub-2s load times',
+    mobileOptimized: 'Fully responsive design',
+    accessibility: 'WCAG 2.1 AA compliance',
+    graphqlUsage: 'Primary API interaction method'
+  };
+  
+  // Submission checklist
+  submissionChecklist: [
+    'App functionality fully tested',
+    'All required permissions justified',
+    'Privacy policy published',
+    'Terms of service published',
+    'Support documentation complete',
+    'Pricing model defined',
+    'App review guidelines followed',
+    'Demo store with sample data ready'
+  ];
+}
+```
+
+### 8.2 Launch Strategy
+
+#### 8.2.1 Pricing Model
+```typescript
+interface PricingStrategy {
+  // Freemium model
+  plans: {
+    free: {
+      price: '$0/month',
+      features: [
+        'Up to 100 game plays per month',
+        'Basic analytics',
+        'Standard discount tiers',
+        'Email support'
+      ],
+      limitations: [
+        'Bargain Hunter branding',
+        'Limited customization',
+        'Basic reporting only'
+      ]
+    };
+    
+    pro: {
+      price: '$29/month',
+      features: [
+        'Unlimited game plays',
+        'Advanced analytics & reporting',
+        'Custom branding & themes',
+        'A/B testing capabilities',
+        'Priority support',
+        'Webhook integrations'
+      ],
+      targetAudience: 'Shops with > $10k monthly revenue'
+    };
+    
+    enterprise: {
+      price: 'Custom pricing',
+      features: [
+        'All Pro features',
+        'Multiple game types',
+        'Advanced fraud protection',
+        'Custom development',
+        'Dedicated account manager',
+        'SLA guarantees'
+      ],
+      targetAudience: 'Large merchants with specific needs'
+    };
+  };
+  
+  // Pricing psychology
+  strategy: {
+    freemiumConversion: '15% free to pro after 3 months',
+    trialPeriod: '14 days free trial for Pro',
+    annualDiscount: '20% off annual plans',
+    grandfathering: 'Beta users get 50% off first year'
+  };
+}
+```
+
+#### 8.2.2 Marketing Channels
+```typescript
+interface MarketingStrategy {
+  // Content marketing
+  contentMarketing: {
+    blog: [
+      'Gamification in E-commerce: Ultimate Guide',
+      'How to Increase Customer Engagement with Games',
+      '15 Creative Discount Strategies for Shopify Stores',
+      'Case Study: How X Store Increased Conversions by 40%'
+    ];
+    
+    videoContent: [
+      'Product demo videos',
+      'Merchant success stories',
+      'Setup tutorials',
+      'Best practices webinars'
+    ];
+    
+    socialMedia: {
+      twitter: 'Developer community engagement',
+      linkedin: 'B2B merchant targeting',
+      youtube: 'Educational content',
+      tiktok: 'Game highlights & demos'
+    };
+  };
+  
+  // Partnership marketing
+  partnerships: {
+    shopifyExperts: 'Partner with Shopify agencies',
+    complementaryApps: 'Cross-promotion with related apps',
+    influencers: 'E-commerce thought leaders',
+    conferences: 'Shopify Unite, Commerce events'
+  };
+  
+  // Paid acquisition
+  paidMarketing: {
+    googleAds: {
+      keywords: ['shopify gamification', 'increase conversions', 'customer engagement'],
+      budget: '$5k/month initially',
+      targeting: 'Shopify store owners'
+    };
+    
+    facebookAds: {
+      audiences: 'E-commerce business owners',
+      budget: '$3k/month',
+      creative: 'Demo videos and success stories'
+    };
+    
+    shopifyAppStore: {
+      optimization: 'ASO for better visibility',
+      featured: 'Apply for featured app status',
+      reviews: 'Encourage positive reviews'
+    };
+  };
+}
+```
+
+### 8.3 Success Metrics & KPIs
+
+#### 8.3.1 Business Metrics
+```typescript
+interface BusinessKPIs {
+  // Growth metrics
+  growth: {
+    newInstalls: {
+      target: '500 in first month, 2000 in first quarter',
+      tracking: 'Weekly cohorts'
+    };
+    
+    monthlyRecurringRevenue: {
+      target: '$10k MRR by month 6',
+      breakdown: '70% Pro plans, 30% Enterprise'
+    };
+    
+    marketShare: {
+      target: 'Top 10 gamification apps by end of
