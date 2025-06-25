@@ -35,25 +35,25 @@ async function handleGetStore(req: NextApiRequest, res: NextApiResponse, shop: s
     // Original Firebase code (commented out):
     // const store = await StoreService.getStore(shop);
     // if (!store) {
-      return res.status(404).json({ 
-        success: false, 
-        error: 'Store not found' 
-      });
-    }
-
-    // Remove sensitive information
-    const { accessToken, ...publicStoreData } = store;
-
-    return res.json({
-      success: true,
-      store: publicStoreData,
-    });
+    //   return res.status(404).json({
+    //     success: false,
+    //     error: 'Store not found'
+    //   });
+    // }
+    //
+    // // Remove sensitive information
+    // const { accessToken, ...publicStoreData } = store;
+    //
+    // return res.json({
+    //   success: true,
+    //   store: publicStoreData,
+    // });
 
   } catch (error) {
     console.error('Get store error:', error);
-    return res.status(500).json({ 
-      success: false, 
-      error: 'Failed to retrieve store information' 
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to retrieve store information'
     });
   }
 }
