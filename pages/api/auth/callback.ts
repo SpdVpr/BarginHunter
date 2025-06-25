@@ -9,12 +9,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    console.log('Callback received:', req.query);
+
     const { shop, code, state } = req.query;
 
     if (!shop || !code || typeof shop !== 'string' || typeof code !== 'string') {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Missing required parameters' 
+      console.error('Missing parameters:', { shop, code, state });
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required parameters'
+      });
+    }
+
+    // Check environment variables
+    if (!process.env.SHOPIFY_API_KEY || !process.env.SHOPIFY_API_SECRET) {
+      console.error('Missing Shopify API credentials');
+      return res.status(500).json({
+        success: false,
+        error: 'Server configuration error'
       });
     }
 

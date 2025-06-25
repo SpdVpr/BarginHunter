@@ -69,11 +69,37 @@ export function generateAuthUrl(shop: string, state: string): string {
 
 export async function exchangeCodeForToken(shop: string, code: string, state: string) {
   try {
-    const { session } = await shopify.auth.callback({
-      rawRequest: {
-        url: `https://${process.env.HOST}/api/auth/callback?shop=${shop}&code=${code}&state=${state}`,
+    // Manual token exchange for better error handling
+    const tokenUrl = `https://${shop}/admin/oauth/access_token`;
+    const tokenData = {
+      client_id: process.env.SHOPIFY_API_KEY,
+      client_secret: process.env.SHOPIFY_API_SECRET,
+      code: code,
+    };
+
+    const response = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify(tokenData),
     });
+
+    if (!response.ok) {
+      throw new Error(`Token exchange failed: ${response.status}`);
+    }
+
+    const tokenResponse = await response.json();
+
+    // Create session object
+    const session = {
+      id: `${shop}_${Date.now()}`,
+      shop: shop,
+      state: state,
+      isOnline: false,
+      accessToken: tokenResponse.access_token,
+      scope: tokenResponse.scope,
+    };
 
     return session;
   } catch (error) {
