@@ -8,6 +8,7 @@ import {
   GameConfigService
 } from '../../../src/lib/database';
 import { createDiscountCode, ShopifySessionManager } from '../../../src/lib/shopify';
+import { Timestamp } from 'firebase-admin/firestore';
 import { StoreService } from '../../../src/lib/database';
 import crypto from 'crypto';
 
@@ -189,7 +190,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             customerId: session.customerId,
             customerEmail: session.customerEmail || playerEmail,
             sessionId,
-            expiresAt: new Date(expiresAt),
+            expiresAt: Timestamp.fromDate(new Date(expiresAt)),
             isUsed: false,
           });
         }
