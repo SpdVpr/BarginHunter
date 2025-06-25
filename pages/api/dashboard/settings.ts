@@ -85,7 +85,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       shopDomain: shop,
       isEnabled: gameSettings.isEnabled,
       gameSettings: {
-        isEnabled: gameSettings.isEnabled,
         minScoreForDiscount: Math.max(0, gameSettings.minScoreForDiscount),
         maxPlaysPerCustomer: Math.max(1, gameSettings.maxPlaysPerCustomer),
         maxPlaysPerDay: Math.max(1, gameSettings.maxPlaysPerDay),
