@@ -25,9 +25,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 async function handleGetStore(req: NextApiRequest, res: NextApiResponse, shop: string) {
   try {
-    const store = await StoreService.getStore(shop);
-    
-    if (!store) {
+    // Temporarily bypass Firebase and return 404 to trigger installation
+    console.log('Bypassing Firebase check for shop:', shop);
+    return res.status(404).json({
+      success: false,
+      error: 'Store not found - triggering installation'
+    });
+
+    // Original Firebase code (commented out):
+    // const store = await StoreService.getStore(shop);
+    // if (!store) {
       return res.status(404).json({ 
         success: false, 
         error: 'Store not found' 

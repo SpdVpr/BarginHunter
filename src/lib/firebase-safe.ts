@@ -4,7 +4,22 @@ let firebaseApp: any = null;
 let firebaseDb: any = null;
 let firebaseAuth: any = null;
 
-function getPrivateKey(): string {
+function getFirebaseCredentials() {
+  // Try JSON service account first
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+    try {
+      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+      return {
+        projectId: serviceAccount.project_id,
+        clientEmail: serviceAccount.client_email,
+        privateKey: serviceAccount.private_key,
+      };
+    } catch (error) {
+      console.log('Failed to parse service account JSON, falling back to individual env vars');
+    }
+  }
+
+  // Fallback to individual environment variables
   let privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
   if (!privateKey) {
@@ -24,7 +39,11 @@ function getPrivateKey(): string {
   // Replace escaped newlines with actual newlines
   privateKey = privateKey.replace(/\\n/g, '\n');
 
-  return privateKey;
+  return {
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    privateKey: privateKey,
+  };
 }
 
 export async function initFirebase() {
@@ -38,15 +57,11 @@ export async function initFirebase() {
     const { getAuth } = await import('firebase-admin/auth');
 
     if (getApps().length === 0) {
-      const privateKey = getPrivateKey();
+      const credentials = getFirebaseCredentials();
 
       firebaseApp = initializeApp({
-        credential: cert({
-          projectId: process.env.FIREBASE_PROJECT_ID,
-          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-          privateKey: privateKey,
-        }),
-        projectId: process.env.FIREBASE_PROJECT_ID,
+        credential: cert(credentials),
+        projectId: credentials.projectId,
       });
     } else {
       firebaseApp = getApps()[0];
