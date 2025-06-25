@@ -213,8 +213,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       discountEarned,
       discountCode,
       gameData: {
-        moves: gameData?.moves || 0,
-        timeSpent: gameData?.timeSpent || 0,
+        moves: gameData?.objectsCollected || 0,
+        timeSpent: gameData?.duration || 0,
         difficulty: session.gameData.difficulty,
       },
     });
