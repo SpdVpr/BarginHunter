@@ -230,7 +230,7 @@ export default function Analytics() {
                             size="small" 
                           />
                           <Text variant="bodyMd" as="p" color="subdued">
-                            {analyticsData.metrics.completedSessions} of {analyticsData.metrics.totalSessions} sessions completed
+                            {String(analyticsData.metrics.completedSessions)} of {String(analyticsData.metrics.totalSessions)} sessions completed
                           </Text>
                         </Stack>
                       </div>
@@ -255,7 +255,7 @@ export default function Analytics() {
                             size="small" 
                           />
                           <Text variant="bodyMd" as="p" color="subdued">
-                            {analyticsData.metrics.usedDiscounts} of {analyticsData.metrics.totalDiscounts} discounts used
+                            {String(analyticsData.metrics.usedDiscounts)} of {String(analyticsData.metrics.totalDiscounts)} discounts used
                           </Text>
                         </Stack>
                       </div>
@@ -292,7 +292,7 @@ export default function Analytics() {
                             Unique Players
                           </Text>
                           <Text variant="heading2xl" as="p">
-                            {analyticsData.metrics.uniqueCustomers}
+                            {String(analyticsData.metrics.uniqueCustomers)}
                           </Text>
                           <Text variant="bodyMd" as="p" color="subdued">
                             Individual customers
@@ -362,7 +362,7 @@ export default function Analytics() {
                       <Stack>
                         {Object.entries(analyticsData.sourceBreakdown).map(([source, count]) => (
                           <Badge key={source} status="info">
-                            {source}: {count}
+                            {source}: {String(count)}
                           </Badge>
                         ))}
                       </Stack>
