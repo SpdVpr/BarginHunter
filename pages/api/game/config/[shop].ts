@@ -6,7 +6,6 @@ import { Timestamp } from 'firebase-admin/firestore';
 const defaultConfig = {
   isEnabled: true,
   gameSettings: {
-    isEnabled: true,
     minScoreForDiscount: 150,
     maxPlaysPerCustomer: 3,
     maxPlaysPerDay: 10,
@@ -70,7 +69,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Check if game is enabled
-    if (!shopConfig.isEnabled || !shopConfig.gameSettings.isEnabled) {
+    if (!shopConfig.isEnabled) {
       return res.status(403).json({
         success: false,
         error: 'Game is not enabled for this shop'
