@@ -69,8 +69,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       };
     }
 
-    // Check if shop is active
-    if (!shopConfig.isActive || !shopConfig.gameSettings.isEnabled) {
+    // Check if game is enabled
+    if (!shopConfig.isEnabled || !shopConfig.gameSettings.isEnabled) {
       return res.status(403).json({
         success: false,
         error: 'Game is not enabled for this shop'
