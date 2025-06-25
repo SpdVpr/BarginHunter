@@ -38,8 +38,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Get all sessions and filter by date range (with fallback for building indexes)
-    let allSessions = [];
-    let allDiscounts = [];
+    let allSessions: any[] = [];
+    let allDiscounts: any[] = [];
 
     try {
       allSessions = await GameSessionService.getSessionsByShop(shop, 10000);

@@ -17,8 +17,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Get all sessions for the shop (with fallback for building indexes)
-    let sessions = [];
-    let discounts = [];
+    let sessions: any[] = [];
+    let discounts: any[] = [];
 
     try {
       sessions = await GameSessionService.getSessionsByShop(shop, 1000);
