@@ -24,7 +24,7 @@ import {
   AnalyticsMinor,
   CustomersMinor,
   DiscountsMajor,
-  GamesMajor,
+  GamesConsoleMajor,
 } from '@shopify/polaris-icons';
 
 interface DashboardStats {
