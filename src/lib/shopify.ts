@@ -63,11 +63,8 @@ export function verifyWebhook(data: string, hmacHeader: string): boolean {
 
 // OAuth helpers
 export function generateAuthUrl(shop: string, state: string): string {
-  return shopify.auth.buildAuthURL({
-    shop,
-    state,
-    isOnline: false,
-  });
+  const authUrl = `https://${shop}/admin/oauth/authorize?client_id=${process.env.SHOPIFY_API_KEY}&scope=${process.env.SHOPIFY_SCOPES}&redirect_uri=${process.env.HOST}/api/auth/callback&state=${state}`;
+  return authUrl;
 }
 
 export async function exchangeCodeForToken(shop: string, code: string, state: string) {

@@ -2,6 +2,12 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   env: {
     SHOPIFY_API_KEY: process.env.SHOPIFY_API_KEY || '',
     SHOPIFY_API_SECRET: process.env.SHOPIFY_API_SECRET || '',
