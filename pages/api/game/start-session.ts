@@ -150,8 +150,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Create game session in database
     await GameSessionService.createSession({
       shopDomain,
-      customerId: customerData?.id || null,
-      customerEmail: customerData?.email || null,
+      customerId: customerData?.id || undefined,
+      customerEmail: customerData?.email || undefined,
       sessionId,
       gameData: {
         moves: 0,
@@ -160,9 +160,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         version: '1.0',
       },
       source: source || 'popup',
-      referrer: referrer || null,
-      userAgent: userAgent || null,
-      ipAddress: ipAddress || null,
+      referrer: referrer || undefined,
+      userAgent: userAgent || undefined,
+      ipAddress: ipAddress || undefined,
       completed: false,
     });
 

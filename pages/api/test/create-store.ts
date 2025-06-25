@@ -34,7 +34,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       shopDomain,
       isEnabled: true,
       gameSettings: {
-        isEnabled: true,
         minScoreForDiscount: 150,
         maxPlaysPerCustomer: 3,
         maxPlaysPerDay: 10,
@@ -47,18 +46,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           { minScore: 1000, discount: 25, message: "LEGENDARY HUNTER! 🏆" }
         ],
         gameSpeed: 1,
-        difficulty: 'medium',
+        difficulty: 'medium' as 'easy' | 'medium' | 'hard',
       },
       widgetSettings: {
-        displayMode: 'tab',
-        triggerEvent: 'immediate',
-        position: 'bottom-right',
-        showOn: 'all_pages',
+        displayMode: 'tab' as 'popup' | 'tab' | 'inline',
+        triggerEvent: 'immediate' as 'immediate' | 'scroll' | 'exit_intent' | 'time_delay',
+        position: 'bottom-right' as 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center',
+        showOn: 'all_pages' as 'all_pages' | 'product_pages' | 'cart_page' | 'checkout_page',
       },
       appearance: {
         primaryColor: '#ff6b6b',
         secondaryColor: '#4ecdc4',
-        backgroundTheme: 'default',
+        backgroundTheme: 'default' as 'default' | 'dark' | 'light' | 'custom',
       },
       businessRules: {
         excludeDiscountedProducts: false,
