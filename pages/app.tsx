@@ -29,16 +29,20 @@ export default function ShopifyApp() {
 
   const checkInstallation = async () => {
     try {
-      const response = await fetch(`/api/stores/${shop}`);
-      if (response.ok) {
-        // Shop is installed, redirect to dashboard
-        router.push(`/dashboard?shop=${shop}`);
-      } else if (response.status === 404) {
-        // Shop not found, show installation option
-        setLoading(false);
-      } else {
-        throw new Error('Failed to check installation status');
-      }
+      console.log('Checking installation for shop:', shop);
+
+      // Skip installation check for now and go directly to OAuth
+      setLoading(false);
+
+      // Uncomment when Firebase is working:
+      // const response = await fetch(`/api/stores/${shop}`);
+      // if (response.ok) {
+      //   router.push(`/dashboard?shop=${shop}`);
+      // } else if (response.status === 404) {
+      //   setLoading(false);
+      // } else {
+      //   throw new Error('Failed to check installation status');
+      // }
     } catch (err) {
       console.error('Installation check error:', err);
       setError('Failed to check installation status');
