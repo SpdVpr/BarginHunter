@@ -22,24 +22,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('Environment check:', envCheck);
 
-    // Try to initialize Firebase
+    // Try to initialize Firebase using safe helper
     let firebaseTest = 'Not tested';
     try {
-      const { initializeApp, getApps, cert } = await import('firebase-admin/app');
-
-      if (getApps().length === 0) {
-        const app = initializeApp({
-          credential: cert({
-            projectId: process.env.FIREBASE_PROJECT_ID,
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-          }),
-          projectId: process.env.FIREBASE_PROJECT_ID,
-        });
-        firebaseTest = 'Initialized successfully';
-      } else {
-        firebaseTest = 'Already initialized';
-      }
+      const { initFirebase } = await import('../../../src/lib/firebase-safe');
+      await initFirebase();
+      firebaseTest = 'Initialized successfully';
     } catch (error) {
       firebaseTest = `Initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`;
     }
