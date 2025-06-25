@@ -7,15 +7,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    console.log('🔄 Simple callback received:', req.query);
+    console.log('🔄 Simple callback received:');
+    console.log('- Full URL:', req.url);
+    console.log('- Query params:', req.query);
+    console.log('- Method:', req.method);
 
-    const { shop, code, state } = req.query;
+    const { shop, code, state, hmac, host, timestamp } = req.query;
+
+    console.log('🔍 Parameter analysis:');
+    console.log('- shop:', shop, typeof shop);
+    console.log('- code:', code, typeof code);
+    console.log('- state:', state, typeof state);
+    console.log('- hmac:', hmac, typeof hmac);
+    console.log('- host:', host, typeof host);
+    console.log('- timestamp:', timestamp, typeof timestamp);
 
     if (!shop || !code || typeof shop !== 'string' || typeof code !== 'string') {
-      console.error('❌ Missing parameters:', { shop, code, state });
+      console.error('❌ Missing parameters validation failed');
       return res.status(400).json({
         success: false,
-        error: 'Missing required parameters'
+        error: 'Missing required parameters',
+        debug: {
+          shop: { value: shop, type: typeof shop, present: !!shop },
+          code: { value: code, type: typeof code, present: !!code },
+          state: { value: state, type: typeof state, present: !!state },
+          allParams: req.query
+        }
       });
     }
 
