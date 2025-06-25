@@ -17,14 +17,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Validate shop domain format
-    const shopDomain = shop.includes('.myshopify.com') ? shop : `${shop}.myshopify.com`;
+    // Validate and normalize shop domain format
+    let shopDomain = typeof shop === 'string' ? shop.trim() : '';
+
+    // Remove trailing slash if present
+    shopDomain = shopDomain.replace(/\/$/, '');
+
+    // Add .myshopify.com if not present
+    if (!shopDomain.includes('.myshopify.com')) {
+      shopDomain = `${shopDomain}.myshopify.com`;
+    }
+
+    // More flexible regex that allows numbers at the beginning
     const shopRegex = /^[a-zA-Z0-9][a-zA-Z0-9\-]*\.myshopify\.com$/;
-    
+
     if (!shopRegex.test(shopDomain)) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Invalid shop domain format' 
+      console.log('Shop domain validation failed:', shopDomain);
+      return res.status(400).json({
+        success: false,
+        error: `Invalid shop domain format: ${shopDomain}`
       });
     }
 

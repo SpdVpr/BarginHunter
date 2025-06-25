@@ -11,8 +11,12 @@ export default function ShopifyApp() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('App.tsx - Router query:', router.query);
+    console.log('App.tsx - Shop parameter:', shop);
+
     // If no shop parameter, show installation instructions
     if (!shop) {
+      console.log('No shop parameter found');
       setLoading(false);
       return;
     }
