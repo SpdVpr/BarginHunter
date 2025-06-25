@@ -109,7 +109,7 @@ export default function StatusPage() {
                 <p><strong>🔥 Firebase ready!</strong> Now you need Shopify API keys to complete setup.</p>
               </Banner>
             ) : (
-              <Banner status="attention">
+              <Banner status="warning">
                 <p><strong>⚠️ Configuration needed</strong> Please configure Firebase and Shopify.</p>
               </Banner>
             )}
