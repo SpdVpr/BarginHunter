@@ -47,12 +47,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     const authUrl = generateAuthUrl(shopDomain, state);
 
-    return res.json({
-      success: true,
-      authUrl,
-      state,
-      shop: shopDomain,
-    });
+    console.log('🔄 Redirecting to Shopify OAuth:', authUrl);
+
+    // Redirect directly to Shopify OAuth instead of returning JSON
+    return res.redirect(302, authUrl);
 
   } catch (error) {
     console.error('Install error:', error);

@@ -57,15 +57,11 @@ export default function ShopifyApp() {
   const handleInstall = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/auth/install?shop=${shop}`);
-      const data = await response.json();
-      
-      if (data.success && data.authUrl) {
-        // Redirect to Shopify OAuth
-        window.location.href = data.authUrl;
-      } else {
-        throw new Error(data.error || 'Failed to start installation');
-      }
+      console.log('🔄 Starting installation for shop:', shop);
+
+      // Direct redirect to install API (which will redirect to Shopify OAuth)
+      window.location.href = `/api/auth/install?shop=${shop}`;
+
     } catch (err) {
       console.error('Installation error:', err);
       setError(err instanceof Error ? err.message : 'Installation failed');
