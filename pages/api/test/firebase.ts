@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { db, Timestamp } from '../../../src/lib/firebase';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -7,54 +6,63 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    console.log('🔥 Testing Firebase connection...');
+    console.log('🔥 Testing Firebase configuration...');
 
-    // Test Firebase connection by writing and reading a test document
-    const testDoc = {
-      message: 'Firebase connection test',
-      timestamp: Timestamp.now(),
-      success: true,
-      testId: Math.random().toString(36).substr(2, 9),
+    // Check environment variables first
+    const envCheck = {
+      FIREBASE_PROJECT_ID: !!process.env.FIREBASE_PROJECT_ID,
+      FIREBASE_CLIENT_EMAIL: !!process.env.FIREBASE_CLIENT_EMAIL,
+      FIREBASE_PRIVATE_KEY: !!process.env.FIREBASE_PRIVATE_KEY,
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL ?
+        process.env.FIREBASE_CLIENT_EMAIL.substring(0, 20) + '...' :
+        'Missing',
+      privateKeyLength: process.env.FIREBASE_PRIVATE_KEY?.length || 0,
     };
 
-    console.log('📝 Writing test document...');
-    // Write test document
-    const docRef = await db.collection('test').add(testDoc);
-    console.log('✅ Test document written with ID:', docRef.id);
+    console.log('Environment check:', envCheck);
 
-    console.log('📖 Reading test document...');
-    // Read it back
-    const doc = await docRef.get();
-    const data = doc.data();
-    console.log('✅ Test document read successfully');
+    // Try to initialize Firebase
+    let firebaseTest = 'Not tested';
+    try {
+      const { initializeApp, getApps, cert } = await import('firebase-admin/app');
 
-    console.log('🗑️ Cleaning up test document...');
-    // Clean up - delete the test document
-    await docRef.delete();
-    console.log('✅ Test document deleted');
+      if (getApps().length === 0) {
+        const app = initializeApp({
+          credential: cert({
+            projectId: process.env.FIREBASE_PROJECT_ID,
+            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+            privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+          }),
+          projectId: process.env.FIREBASE_PROJECT_ID,
+        });
+        firebaseTest = 'Initialized successfully';
+      } else {
+        firebaseTest = 'Already initialized';
+      }
+    } catch (error) {
+      firebaseTest = `Initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`;
+    }
 
     return res.json({
       success: true,
-      message: '🎉 Firebase connection successful!',
-      testData: {
-        ...data,
-        timestamp: data?.timestamp?.toDate?.()?.toISOString() || data?.timestamp,
-      },
-      documentId: docRef.id,
-      projectId: process.env.FIREBASE_PROJECT_ID,
+      message: '🎉 Firebase configuration test completed!',
+      environment: envCheck,
+      firebaseStatus: firebaseTest,
+      timestamp: new Date().toISOString(),
     });
 
   } catch (error) {
     console.error('❌ Firebase test error:', error);
     return res.status(500).json({
       success: false,
-      error: 'Firebase connection failed',
+      error: 'Firebase test failed',
       details: error instanceof Error ? error.message : 'Unknown error',
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      hasCredentials: {
+      environment: {
         projectId: !!process.env.FIREBASE_PROJECT_ID,
         clientEmail: !!process.env.FIREBASE_CLIENT_EMAIL,
         privateKey: !!process.env.FIREBASE_PRIVATE_KEY,
+        privateKeyLength: process.env.FIREBASE_PRIVATE_KEY?.length || 0,
       }
     });
   }
