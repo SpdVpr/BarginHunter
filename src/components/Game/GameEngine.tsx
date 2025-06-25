@@ -39,6 +39,11 @@ interface GameObject {
   value?: number;
 }
 
+interface Collectible extends GameObject {
+  type: 'collectible';
+  value: number;
+}
+
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 400;
 const GROUND_Y = CANVAS_HEIGHT - 60;
