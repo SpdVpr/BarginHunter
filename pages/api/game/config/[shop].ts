@@ -19,7 +19,7 @@ const defaultConfig = {
       { minScore: 1000, discount: 25, message: "LEGENDARY HUNTER! 🏆" }
     ],
     gameSpeed: 1,
-    difficulty: 'medium'
+    difficulty: 'medium' as 'easy' | 'medium' | 'hard'
   },
   widgetSettings: {
     displayMode: 'tab',
