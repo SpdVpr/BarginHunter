@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { GameConfigService } from '../../../../src/lib/database';
+import { Timestamp } from 'firebase-admin/firestore';
 
 // Default configuration for new stores
 const defaultConfig = {
@@ -58,7 +59,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // If no config exists, use default configuration
     if (!shopConfig) {
-      const now = new Date();
+      const now = Timestamp.now();
       shopConfig = {
         ...defaultConfig,
         id: `config_${shop}_${Date.now()}`,
