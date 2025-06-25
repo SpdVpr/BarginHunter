@@ -58,9 +58,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // If no config exists, use default configuration
     if (!shopConfig) {
+      const now = new Date();
       shopConfig = {
         ...defaultConfig,
+        id: `config_${shop}_${Date.now()}`,
         shopDomain: shop,
+        createdAt: now,
+        updatedAt: now,
       };
     }
 
