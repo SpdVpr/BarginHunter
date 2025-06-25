@@ -63,7 +63,12 @@ export function verifyWebhook(data: string, hmacHeader: string): boolean {
 
 // OAuth helpers
 export function generateAuthUrl(shop: string, state: string): string {
-  const authUrl = `https://${shop}/admin/oauth/authorize?client_id=${process.env.SHOPIFY_API_KEY}&scope=${process.env.SHOPIFY_SCOPES}&redirect_uri=${process.env.HOST}/api/auth/callback&state=${state}`;
+  const host = process.env.HOST || 'localhost:3000';
+  const redirectUri = host.startsWith('http') ? `${host}/api/auth/callback` : `https://${host}/api/auth/callback`;
+
+  const authUrl = `https://${shop}/admin/oauth/authorize?client_id=${process.env.SHOPIFY_API_KEY}&scope=${process.env.SHOPIFY_SCOPES}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`;
+
+  console.log('Generated OAuth URL:', authUrl);
   return authUrl;
 }
 
