@@ -11,7 +11,6 @@ import {
   TextContainer,
   Heading,
   List,
-  Code,
 } from '@shopify/polaris';
 
 export default function Installation() {
@@ -19,6 +18,9 @@ export default function Installation() {
   const { shop } = router.query;
   const [installing, setInstalling] = useState(false);
   const [installResult, setInstallResult] = useState<string | null>(null);
+
+  // Handle case where shop might be undefined during static generation
+  const shopDomain = typeof shop === 'string' ? shop : 'your-shop.myshopify.com';
 
   const handleInstallScript = async () => {
     setInstalling(true);
@@ -37,9 +39,9 @@ export default function Installation() {
   const embedScript = `<!-- Bargain Hunter Widget -->
 <script>
   (function() {
-    if (window.Shopify && window.Shopify.shop === '${shop}') {
+    if (window.Shopify && window.Shopify.shop === '${shopDomain}') {
       var script = document.createElement('script');
-      script.src = 'https://bargin-hunter2.vercel.app/api/widget/embed.js?shop=${shop}';
+      script.src = 'https://bargin-hunter2.vercel.app/api/widget/embed.js?shop=${shopDomain}';
       script.async = true;
       document.head.appendChild(script);
     }
@@ -48,7 +50,7 @@ export default function Installation() {
 
   return (
     <Page
-      breadcrumbs={[{ content: 'Dashboard', url: `/dashboard?shop=${shop}` }]}
+      breadcrumbs={[{ content: 'Dashboard', url: `/dashboard?shop=${shopDomain}` }]}
       title="Widget Installation"
       subtitle="Add the Bargain Hunter widget to your store"
     >
@@ -103,7 +105,7 @@ export default function Installation() {
                   Find the <strong>theme.liquid</strong> file (usually in Templates or Layout)
                 </List.Item>
                 <List.Item>
-                  Add the following script just before the closing <Code>&lt;/body&gt;</Code> tag:
+                  Add the following script just before the closing <strong>&lt;/body&gt;</strong> tag:
                 </List.Item>
               </List>
 
@@ -166,17 +168,17 @@ export default function Installation() {
 
               <Stack distribution="equalSpacing">
                 <Button
-                  onClick={() => router.push(`/dashboard/settings?shop=${shop}`)}
+                  onClick={() => router.push(`/dashboard/settings?shop=${shopDomain}`)}
                 >
                   Widget Settings
                 </Button>
                 <Button
-                  onClick={() => window.open(`https://${shop}`, '_blank')}
+                  onClick={() => window.open(`https://${shopDomain}`, '_blank')}
                 >
                   Visit Store
                 </Button>
                 <Button
-                  onClick={() => window.open(`/widget/game?shop=${shop}&test=true`, '_blank')}
+                  onClick={() => window.open(`/widget/game?shop=${shopDomain}&test=true`, '_blank')}
                 >
                   Test Widget
                 </Button>
