@@ -233,6 +233,11 @@ export default function Dashboard() {
                   >
                     View Analytics
                   </Button>
+                  <Button
+                    onClick={() => router.push(`/dashboard/installation?shop=${shop}`)}
+                  >
+                    Installation Guide
+                  </Button>
                 </Stack>
               </Stack>
             </Card>
