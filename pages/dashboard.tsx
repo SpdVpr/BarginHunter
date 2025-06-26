@@ -179,13 +179,17 @@ export default function Dashboard() {
         title="Bargain Hunter Dashboard"
         subtitle={`Store: ${shop}`}
         primaryAction={{
-          content: 'View Game',
-          onAction: () => window.open(`/widget/game?shop=${shop}`, '_blank'),
+          content: 'Configure Widget',
+          onAction: () => router.push(`/dashboard/settings?shop=${shop}`),
         }}
         secondaryActions={[
           {
-            content: 'Settings',
-            onAction: () => router.push(`/dashboard/settings?shop=${shop}`),
+            content: 'Test Game',
+            onAction: () => window.open(`/widget/game?shop=${shop}`, '_blank'),
+          },
+          {
+            content: 'Analytics',
+            onAction: () => router.push(`/dashboard/analytics?shop=${shop}`),
           },
         ]}
       >
@@ -201,6 +205,37 @@ export default function Dashboard() {
                 customize settings to maximize engagement.
               </p>
             </Banner>
+          </Layout.Section>
+
+          <Layout.Section>
+            <Card sectioned>
+              <Stack distribution="equalSpacing" alignment="center">
+                <Stack vertical spacing="tight">
+                  <Text variant="headingMd" as="h3">Quick Controls</Text>
+                  <Text variant="bodyMd" as="p" color="subdued">
+                    Manage your widget settings and test functionality
+                  </Text>
+                </Stack>
+                <Stack spacing="tight">
+                  <Button
+                    primary
+                    onClick={() => router.push(`/dashboard/settings?shop=${shop}`)}
+                  >
+                    Widget Settings
+                  </Button>
+                  <Button
+                    onClick={() => window.open(`/widget/game?shop=${shop}&test=true`, '_blank')}
+                  >
+                    Test Widget
+                  </Button>
+                  <Button
+                    onClick={() => router.push(`/dashboard/analytics?shop=${shop}`)}
+                  >
+                    View Analytics
+                  </Button>
+                </Stack>
+              </Stack>
+            </Card>
           </Layout.Section>
 
           {stats && (

@@ -63,16 +63,123 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
   function shouldShowWidget() {
     if (!widgetConfig) return false;
-    
+
+    // Check if test mode is enabled - if so, always show
+    if (widgetConfig.testMode) {
+      return checkPageTargeting();
+    }
+
+    // Check user percentage targeting
+    if (!checkUserPercentage()) {
+      return false;
+    }
+
+    // Check device targeting
+    if (!checkDeviceTargeting()) {
+      return false;
+    }
+
+    // Check time-based rules
+    if (!checkTimeBasedRules()) {
+      return false;
+    }
+
+    // Check page targeting
+    return checkPageTargeting();
+  }
+
+  function checkUserPercentage() {
+    const percentage = widgetConfig.userPercentage || 100;
+    if (percentage >= 100) return true;
+
+    // Generate a consistent hash based on user's session/IP
+    let userHash = localStorage.getItem('bargain-hunter-user-hash');
+    if (!userHash) {
+      userHash = Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('bargain-hunter-user-hash', userHash);
+    }
+
+    // Convert hash to number between 0-100
+    const hashNumber = parseInt(userHash.substring(0, 8), 36) % 100;
+    return hashNumber < percentage;
+  }
+
+  function checkDeviceTargeting() {
+    const deviceTarget = widgetConfig.deviceTargeting || 'all';
+    if (deviceTarget === 'all') return true;
+
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isMobile = /mobile|android|iphone|ipad|phone/i.test(userAgent);
+    const isTablet = /tablet|ipad/i.test(userAgent) && !/mobile/i.test(userAgent);
+    const isDesktop = !isMobile && !isTablet;
+
+    switch (deviceTarget) {
+      case 'mobile':
+        return isMobile && !isTablet;
+      case 'tablet':
+        return isTablet;
+      case 'desktop':
+        return isDesktop;
+      default:
+        return true;
+    }
+  }
+
+  function checkTimeBasedRules() {
+    const timeRules = widgetConfig.timeBasedRules;
+    if (!timeRules || !timeRules.enabled) return true;
+
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const currentDay = now.getDay(); // 0 = Sunday, 6 = Saturday
+
+    // Check days of week
+    if (timeRules.daysOfWeek && timeRules.daysOfWeek.length > 0) {
+      if (!timeRules.daysOfWeek.includes(currentDay)) {
+        return false;
+      }
+    }
+
+    // Check time range
+    if (timeRules.startTime && timeRules.endTime) {
+      const [startHour, startMinute] = timeRules.startTime.split(':').map(Number);
+      const [endHour, endMinute] = timeRules.endTime.split(':').map(Number);
+
+      const currentTimeMinutes = currentHour * 60 + currentMinute;
+      const startTimeMinutes = startHour * 60 + startMinute;
+      const endTimeMinutes = endHour * 60 + endMinute;
+
+      if (startTimeMinutes <= endTimeMinutes) {
+        // Same day range
+        if (currentTimeMinutes < startTimeMinutes || currentTimeMinutes > endTimeMinutes) {
+          return false;
+        }
+      } else {
+        // Overnight range (e.g., 22:00 to 06:00)
+        if (currentTimeMinutes < startTimeMinutes && currentTimeMinutes > endTimeMinutes) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  function checkPageTargeting() {
     const currentPath = window.location.pathname;
-    
+
     switch (widgetConfig.showOn) {
       case 'product_pages':
         return currentPath.includes('/products/');
       case 'collection_pages':
         return currentPath.includes('/collections/');
+      case 'cart_page':
+        return currentPath.includes('/cart');
+      case 'checkout_page':
+        return currentPath.includes('/checkout');
       case 'custom':
-        return widgetConfig.customPages && 
+        return widgetConfig.customPages &&
                widgetConfig.customPages.some(page => currentPath.includes(page));
       case 'all_pages':
       default:
@@ -292,23 +399,70 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         return;
       }
 
-      const container = createWidgetContainer();
-      
-      switch (widgetConfig.displayMode) {
-        case 'tab':
-          createTabWidget(container);
-          break;
-        case 'popup':
-          createPopupWidget(container);
-          break;
-        case 'inline':
-          // Inline mode would need to be handled differently
-          // as it requires a specific container element
-          console.log('Inline mode not implemented in embed script');
-          break;
+      const showDelay = widgetConfig.showDelay || 0;
+      const pageLoadTrigger = widgetConfig.pageLoadTrigger || 'immediate';
+
+      function showWidget() {
+        const container = createWidgetContainer();
+
+        switch (widgetConfig.displayMode) {
+          case 'tab':
+            createTabWidget(container);
+            break;
+          case 'popup':
+            createPopupWidget(container);
+            break;
+          case 'inline':
+            // Inline mode would need to be handled differently
+            // as it requires a specific container element
+            console.log('Inline mode not implemented in embed script');
+            break;
+        }
+
+        isWidgetLoaded = true;
       }
-      
-      isWidgetLoaded = true;
+
+      // Handle different trigger types
+      switch (pageLoadTrigger) {
+        case 'immediate':
+          if (showDelay > 0) {
+            setTimeout(showWidget, showDelay * 1000);
+          } else {
+            showWidget();
+          }
+          break;
+
+        case 'after_delay':
+          setTimeout(showWidget, showDelay * 1000);
+          break;
+
+        case 'on_scroll':
+          let scrollTriggered = false;
+          function handleScroll() {
+            if (!scrollTriggered && window.scrollY > 100) {
+              scrollTriggered = true;
+              setTimeout(showWidget, showDelay * 1000);
+              window.removeEventListener('scroll', handleScroll);
+            }
+          }
+          window.addEventListener('scroll', handleScroll);
+          break;
+
+        case 'on_exit_intent':
+          let exitTriggered = false;
+          function handleMouseLeave(e) {
+            if (!exitTriggered && e.clientY <= 0) {
+              exitTriggered = true;
+              setTimeout(showWidget, showDelay * 1000);
+              document.removeEventListener('mouseleave', handleMouseLeave);
+            }
+          }
+          document.addEventListener('mouseleave', handleMouseLeave);
+          break;
+
+        default:
+          showWidget();
+      }
     });
   }
 

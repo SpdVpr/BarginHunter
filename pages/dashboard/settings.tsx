@@ -46,9 +46,24 @@ interface WidgetSettings {
   displayMode: 'popup' | 'tab' | 'inline';
   triggerEvent: 'immediate' | 'scroll' | 'exit_intent' | 'time_delay';
   position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
-  showOn: 'all_pages' | 'product_pages' | 'cart_page' | 'checkout_page';
+  showOn: 'all_pages' | 'product_pages' | 'cart_page' | 'checkout_page' | 'collection_pages' | 'custom';
   timeDelay?: number;
   scrollPercentage?: number;
+  customPages?: string[];
+  // New targeting options
+  userPercentage: number;
+  testMode: boolean;
+  showDelay: number;
+  pageLoadTrigger: 'immediate' | 'after_delay' | 'on_scroll' | 'on_exit_intent';
+  deviceTargeting: 'all' | 'desktop' | 'mobile' | 'tablet';
+  geoTargeting?: string[];
+  timeBasedRules?: {
+    enabled: boolean;
+    startTime?: string;
+    endTime?: string;
+    timezone?: string;
+    daysOfWeek?: number[];
+  };
 }
 
 interface AppearanceSettings {
@@ -91,7 +106,27 @@ export default function Settings() {
       if (response.ok) {
         const config = await response.json();
         setGameSettings(config.gameSettings);
-        setWidgetSettings(config.widgetSettings);
+
+        // Ensure widget settings have all new properties with defaults
+        const widgetSettings = {
+          ...config.widgetSettings,
+          userPercentage: config.widgetSettings.userPercentage ?? 100,
+          testMode: config.widgetSettings.testMode ?? false,
+          showDelay: config.widgetSettings.showDelay ?? 0,
+          pageLoadTrigger: config.widgetSettings.pageLoadTrigger || 'immediate',
+          deviceTargeting: config.widgetSettings.deviceTargeting || 'all',
+          geoTargeting: config.widgetSettings.geoTargeting || [],
+          customPages: config.widgetSettings.customPages || [],
+          timeBasedRules: config.widgetSettings.timeBasedRules || {
+            enabled: false,
+            startTime: undefined,
+            endTime: undefined,
+            timezone: undefined,
+            daysOfWeek: undefined,
+          },
+        };
+        setWidgetSettings(widgetSettings);
+
         setAppearanceSettings(config.appearance);
         setBusinessRules(config.businessRules);
       }
@@ -384,12 +419,118 @@ export default function Settings() {
                       { label: 'Product pages', value: 'product_pages' },
                       { label: 'Cart page', value: 'cart_page' },
                       { label: 'Checkout page', value: 'checkout_page' },
+                      { label: 'Collection pages', value: 'collection_pages' },
+                      { label: 'Custom pages', value: 'custom' },
                     ]}
                     value={widgetSettings.showOn}
-                    onChange={(value) => 
-                      setWidgetSettings({ 
-                        ...widgetSettings, 
-                        showOn: value as any 
+                    onChange={(value) =>
+                      setWidgetSettings({
+                        ...widgetSettings,
+                        showOn: value as any
+                      })
+                    }
+                  />
+
+                  {widgetSettings.showOn === 'custom' && (
+                    <TextField
+                      label="Custom pages (comma separated URLs)"
+                      value={widgetSettings.customPages?.join(', ') || ''}
+                      onChange={(value) =>
+                        setWidgetSettings({
+                          ...widgetSettings,
+                          customPages: value.split(',').map(p => p.trim()).filter(p => p)
+                        })
+                      }
+                      helpText="Enter specific page URLs where the widget should appear"
+                      autoComplete="off"
+                    />
+                  )}
+                </FormLayout>
+              </Card>
+            </Layout.Section>
+          )}
+
+          {widgetSettings && (
+            <Layout.Section>
+              <Card sectioned>
+                <Heading>Targeting & Display Rules</Heading>
+                <FormLayout>
+                  <div>
+                    <label>User Percentage: {widgetSettings.userPercentage || 100}%</label>
+                    <RangeSlider
+                      label="Percentage of users who will see the widget"
+                      value={widgetSettings.userPercentage || 100}
+                      min={0}
+                      max={100}
+                      step={1}
+                      onChange={(value) =>
+                        setWidgetSettings({
+                          ...widgetSettings,
+                          userPercentage: value as number
+                        })
+                      }
+                    />
+                    <p style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                      Set to 100% to show to all users, 50% for every second user, etc.
+                    </p>
+                  </div>
+
+                  <Checkbox
+                    label="Enable Test Mode"
+                    checked={widgetSettings.testMode || false}
+                    onChange={(checked) =>
+                      setWidgetSettings({
+                        ...widgetSettings,
+                        testMode: checked
+                      })
+                    }
+                    helpText="Test mode shows the widget to all users regardless of percentage settings"
+                  />
+
+                  <TextField
+                    label="Show delay (seconds)"
+                    type="number"
+                    value={(widgetSettings.showDelay || 0).toString()}
+                    onChange={(value) =>
+                      setWidgetSettings({
+                        ...widgetSettings,
+                        showDelay: parseInt(value) || 0
+                      })
+                    }
+                    helpText="Delay before showing the widget after page load"
+                    autoComplete="off"
+                  />
+
+                  <Select
+                    label="Page Load Trigger"
+                    options={[
+                      { label: 'Immediate', value: 'immediate' },
+                      { label: 'After delay', value: 'after_delay' },
+                      { label: 'On scroll', value: 'on_scroll' },
+                      { label: 'On exit intent', value: 'on_exit_intent' },
+                    ]}
+                    value={widgetSettings.pageLoadTrigger || 'immediate'}
+                    onChange={(value) =>
+                      setWidgetSettings({
+                        ...widgetSettings,
+                        pageLoadTrigger: value as any
+                      })
+                    }
+                  />
+
+                  <Select
+                    label="Device Targeting"
+                    options={[
+                      { label: 'All devices', value: 'all' },
+                      { label: 'Desktop only', value: 'desktop' },
+                      { label: 'Mobile only', value: 'mobile' },
+                      { label: 'Tablet only', value: 'tablet' },
+                    ]}
+                    value={widgetSettings.deviceTargeting || 'all'}
+                    onChange={(value) =>
+                      setWidgetSettings({
+                        ...widgetSettings,
+                        deviceTargeting: value as any
                       })
                     }
                   />

@@ -41,10 +41,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!['popup', 'tab', 'inline'].includes(widgetSettings.displayMode) ||
         !['immediate', 'scroll', 'exit_intent', 'time_delay'].includes(widgetSettings.triggerEvent) ||
         !['top-left', 'top-right', 'bottom-left', 'bottom-right', 'center'].includes(widgetSettings.position) ||
-        !['all_pages', 'product_pages', 'cart_page', 'checkout_page'].includes(widgetSettings.showOn)) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Invalid widget settings' 
+        !['all_pages', 'product_pages', 'cart_page', 'checkout_page', 'collection_pages', 'custom'].includes(widgetSettings.showOn)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid widget settings'
+      });
+    }
+
+    // Validate new widget settings
+    if (widgetSettings.userPercentage !== undefined &&
+        (typeof widgetSettings.userPercentage !== 'number' ||
+         widgetSettings.userPercentage < 0 ||
+         widgetSettings.userPercentage > 100)) {
+      return res.status(400).json({
+        success: false,
+        error: 'User percentage must be between 0 and 100'
+      });
+    }
+
+    if (widgetSettings.testMode !== undefined && typeof widgetSettings.testMode !== 'boolean') {
+      return res.status(400).json({
+        success: false,
+        error: 'Test mode must be a boolean'
+      });
+    }
+
+    if (widgetSettings.showDelay !== undefined &&
+        (typeof widgetSettings.showDelay !== 'number' || widgetSettings.showDelay < 0)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Show delay must be a non-negative number'
       });
     }
 
@@ -99,6 +125,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         showOn: widgetSettings.showOn,
         timeDelay: widgetSettings.timeDelay,
         scrollPercentage: widgetSettings.scrollPercentage,
+        customPages: widgetSettings.customPages || [],
+        // New targeting options
+        userPercentage: widgetSettings.userPercentage ?? 100,
+        testMode: widgetSettings.testMode ?? false,
+        showDelay: widgetSettings.showDelay ?? 0,
+        pageLoadTrigger: widgetSettings.pageLoadTrigger || 'immediate',
+        deviceTargeting: widgetSettings.deviceTargeting || 'all',
+        geoTargeting: widgetSettings.geoTargeting || [],
+        timeBasedRules: widgetSettings.timeBasedRules || {
+          enabled: false,
+          startTime: undefined,
+          endTime: undefined,
+          timezone: undefined,
+          daysOfWeek: undefined,
+        },
       },
       appearance: {
         primaryColor: appearance.primaryColor,

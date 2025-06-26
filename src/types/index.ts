@@ -83,9 +83,24 @@ export interface WidgetConfiguration {
   displayMode: 'popup' | 'tab' | 'inline';
   triggerEvent: 'immediate' | 'exit_intent' | 'time_delay' | 'scroll';
   triggerDelay?: number;
-  position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
-  showOn: 'all_pages' | 'product_pages' | 'collection_pages' | 'custom';
+  position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
+  showOn: 'all_pages' | 'product_pages' | 'collection_pages' | 'cart_page' | 'checkout_page' | 'custom';
   customPages?: string[];
+  // New targeting options
+  userPercentage: number; // 0-100% of users who will see the widget
+  testMode: boolean; // Enable test mode for debugging
+  showDelay: number; // Delay in seconds before showing widget
+  pageLoadTrigger: 'immediate' | 'after_delay' | 'on_scroll' | 'on_exit_intent';
+  // Advanced targeting
+  deviceTargeting: 'all' | 'desktop' | 'mobile' | 'tablet';
+  geoTargeting?: string[]; // Country codes
+  timeBasedRules?: {
+    enabled: boolean;
+    startTime?: string; // HH:MM format
+    endTime?: string; // HH:MM format
+    timezone?: string;
+    daysOfWeek?: number[]; // 0-6 (Sunday-Saturday)
+  };
 }
 
 export interface AppearanceSettings {

@@ -77,9 +77,24 @@ export interface GameConfigDocument {
     displayMode: 'popup' | 'tab' | 'inline';
     triggerEvent: 'immediate' | 'scroll' | 'exit_intent' | 'time_delay';
     position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
-    showOn: 'all_pages' | 'product_pages' | 'cart_page' | 'checkout_page';
+    showOn: 'all_pages' | 'product_pages' | 'cart_page' | 'checkout_page' | 'collection_pages' | 'custom';
     timeDelay?: number;
     scrollPercentage?: number;
+    customPages?: string[];
+    // New targeting options
+    userPercentage: number;
+    testMode: boolean;
+    showDelay: number;
+    pageLoadTrigger: 'immediate' | 'after_delay' | 'on_scroll' | 'on_exit_intent';
+    deviceTargeting: 'all' | 'desktop' | 'mobile' | 'tablet';
+    geoTargeting?: string[];
+    timeBasedRules?: {
+      enabled: boolean;
+      startTime?: string;
+      endTime?: string;
+      timezone?: string;
+      daysOfWeek?: number[];
+    };
   };
   appearance: {
     primaryColor: string;
