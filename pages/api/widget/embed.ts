@@ -365,7 +365,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
     // Create iframe for the game
     const iframe = document.createElement('iframe');
-    iframe.src = WIDGET_BASE + '/game?shop=' + encodeURIComponent(SHOP_DOMAIN);
+    iframe.src = API_BASE.replace('/api', '') + '/widget/game?shop=' + encodeURIComponent(SHOP_DOMAIN);
     iframe.style.cssText = \`
       width: 600px;
       height: 500px;
