@@ -1,6 +1,6 @@
 {
   "name": "bargain-hunter",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Gamified discount application for Shopify stores",
   "main": "index.js",
   "scripts": {

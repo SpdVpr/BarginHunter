@@ -95,7 +95,7 @@ and targeted marketing campaigns.`;
     executeCommand(`git commit -m "${commitMessage}"`, 'Committing changes');
     
     // Push to GitHub
-    executeCommand('git push origin main', 'Pushing to GitHub');
+    executeCommand('git push origin master', 'Pushing to GitHub');
     
     log('🎉 Deployment completed successfully!');
     log('📡 Vercel will automatically deploy the changes');
