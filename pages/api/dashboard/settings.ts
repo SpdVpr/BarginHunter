@@ -7,6 +7,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    console.log('🔧 Settings API: Starting request processing...');
+    console.log('🔧 Settings API: Request method:', req.method);
+    console.log('🔧 Settings API: Request headers:', req.headers);
     console.log('🔧 Settings API: Received request body:', JSON.stringify(req.body, null, 2));
 
     const { shop, gameSettings, widgetSettings, appearance, businessRules } = req.body;
@@ -35,6 +38,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Validate game settings
     console.log('🔧 Settings API: Validating game settings:', gameSettings);
+
+    // Set default for isEnabled if not provided
+    if (gameSettings.isEnabled === undefined) {
+      gameSettings.isEnabled = true;
+    }
+
     if (typeof gameSettings.isEnabled !== 'boolean' ||
         typeof gameSettings.minScoreForDiscount !== 'number' ||
         typeof gameSettings.maxPlaysPerCustomer !== 'number' ||
@@ -125,6 +134,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Update or create game configuration
+    console.log('🔧 Settings API: Updating Firebase configuration...');
     await GameConfigService.createOrUpdateConfig({
       shopDomain: shop,
       isEnabled: gameSettings.isEnabled,
@@ -181,10 +191,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
   } catch (error) {
-    console.error('Settings update error:', error);
-    return res.status(500).json({ 
-      success: false, 
-      error: 'Failed to update settings' 
+    console.error('🔧 Settings API: Update error:', error);
+    console.error('🔧 Settings API: Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to update settings',
+      details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 }
