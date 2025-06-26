@@ -159,8 +159,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Don't fail the installation if script installation fails
     }
 
-    // Redirect to success page or app dashboard
-    const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/?shop=${shop}&installed=true`;
+    // Redirect to app with installed parameter
+    const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/app?shop=${shop}&installed=true`;
 
     return res.redirect(302, redirectUrl);
 

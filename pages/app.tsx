@@ -35,21 +35,42 @@ export default function ShopifyApp() {
     try {
       console.log('Checking installation for shop:', shop);
 
+      // Check if this is coming from OAuth callback with code parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      const hasCode = urlParams.has('code');
+      const hasInstalled = urlParams.has('installed');
+
+      if (hasCode) {
+        console.log('OAuth code detected, processing installation...');
+        // Let the OAuth flow handle this
+        setLoading(false);
+        return;
+      }
+
+      if (hasInstalled) {
+        console.log('Installation completed, redirecting to dashboard...');
+        router.push(`/dashboard?shop=${shop}`);
+        return;
+      }
+
       if (shop && typeof shop === 'string') {
         // Check if the app is actually installed by trying to fetch config
         try {
           const response = await fetch(`/api/game/config/${shop}`);
           if (response.ok) {
-            // App is installed, redirect to dashboard
-            console.log('App is installed, redirecting to dashboard...');
-            router.push(`/dashboard?shop=${shop}`);
-            return;
-          } else if (response.status === 404 || response.status === 500) {
-            // App is not installed or config doesn't exist, show installation
-            console.log('App not installed, showing installation...');
-            setLoading(false);
-            return;
+            const config = await response.json();
+            if (config && config.shopDomain) {
+              // App is properly installed, redirect to dashboard
+              console.log('App is installed, redirecting to dashboard...');
+              router.push(`/dashboard?shop=${shop}`);
+              return;
+            }
           }
+
+          // If we get here, app is not properly installed
+          console.log('App not installed or config missing, showing installation...');
+          setLoading(false);
+          return;
         } catch (configError) {
           console.log('Config check failed, assuming not installed:', configError);
           setLoading(false);
