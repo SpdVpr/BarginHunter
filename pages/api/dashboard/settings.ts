@@ -161,12 +161,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         pageLoadTrigger: widgetSettings.pageLoadTrigger || 'immediate',
         deviceTargeting: widgetSettings.deviceTargeting || 'all',
         geoTargeting: widgetSettings.geoTargeting || [],
-        timeBasedRules: widgetSettings.timeBasedRules || {
-          enabled: false,
-          startTime: undefined,
-          endTime: undefined,
-          timezone: undefined,
-          daysOfWeek: undefined,
+        timeBasedRules: {
+          enabled: widgetSettings.timeBasedRules?.enabled || false,
+          ...(widgetSettings.timeBasedRules?.startTime && { startTime: widgetSettings.timeBasedRules.startTime }),
+          ...(widgetSettings.timeBasedRules?.endTime && { endTime: widgetSettings.timeBasedRules.endTime }),
+          ...(widgetSettings.timeBasedRules?.timezone && { timezone: widgetSettings.timeBasedRules.timezone }),
+          ...(widgetSettings.timeBasedRules?.daysOfWeek && { daysOfWeek: widgetSettings.timeBasedRules.daysOfWeek }),
         },
       },
       appearance: {

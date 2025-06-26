@@ -44,10 +44,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           geoTargeting: [],
           timeBasedRules: {
             enabled: false,
-            startTime: undefined,
-            endTime: undefined,
-            timezone: undefined,
-            daysOfWeek: undefined,
           },
         },
         appearance: {
@@ -107,10 +103,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           geoTargeting: [],
           timeBasedRules: {
             enabled: false,
-            startTime: undefined,
-            endTime: undefined,
-            timezone: undefined,
-            daysOfWeek: undefined,
           },
         },
         appearance: {

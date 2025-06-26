@@ -22,6 +22,12 @@ if (getApps().length === 0) {
     const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 
     if (!privateKey || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PROJECT_ID) {
+      console.error('Missing Firebase configuration:', {
+        hasPrivateKey: !!privateKey,
+        hasClientEmail: !!process.env.FIREBASE_CLIENT_EMAIL,
+        hasProjectId: !!process.env.FIREBASE_PROJECT_ID,
+        privateKeyLength: privateKey?.length || 0
+      });
       throw new Error('Missing Firebase configuration. Please check your environment variables.');
     }
 
