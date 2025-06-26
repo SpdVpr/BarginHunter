@@ -56,7 +56,14 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       })
       .then(config => {
         console.log('🎮 Bargain Hunter: Config loaded:', config);
-        widgetConfig = config;
+        // Extract widget settings from nested structure
+        widgetConfig = {
+          ...config.widgetSettings,
+          gameSettings: config.gameSettings,
+          appearance: config.appearance,
+          success: config.success
+        };
+        console.log('🎮 Bargain Hunter: Widget config extracted:', widgetConfig);
         return config;
       })
       .catch(error => {
