@@ -35,12 +35,26 @@ export default function ShopifyApp() {
     try {
       console.log('Checking installation for shop:', shop);
 
-      // For installed apps, redirect directly to dashboard
-      // This handles the case when user accesses the app from Shopify admin
       if (shop && typeof shop === 'string') {
-        console.log('App is installed, redirecting to dashboard...');
-        router.push(`/dashboard?shop=${shop}`);
-        return;
+        // Check if the app is actually installed by trying to fetch config
+        try {
+          const response = await fetch(`/api/game/config/${shop}`);
+          if (response.ok) {
+            // App is installed, redirect to dashboard
+            console.log('App is installed, redirecting to dashboard...');
+            router.push(`/dashboard?shop=${shop}`);
+            return;
+          } else if (response.status === 404 || response.status === 500) {
+            // App is not installed or config doesn't exist, show installation
+            console.log('App not installed, showing installation...');
+            setLoading(false);
+            return;
+          }
+        } catch (configError) {
+          console.log('Config check failed, assuming not installed:', configError);
+          setLoading(false);
+          return;
+        }
       }
 
       setLoading(false);
@@ -57,7 +71,7 @@ export default function ShopifyApp() {
       console.log('🔄 Starting installation for shop:', shop);
 
       // Direct redirect to install API (which will redirect to Shopify OAuth)
-      window.location.href = `/api/auth/install?shop=${shop}`;
+      window.location.href = `/api/auth/install?shop=${shop}&fresh_install=true`;
 
     } catch (err) {
       console.error('Installation error:', err);
