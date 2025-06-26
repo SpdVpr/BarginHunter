@@ -39,13 +39,24 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
         const response = await fetch(`/api/game/config/${shopDomain}`);
         if (response.ok) {
           const config = await response.json();
-          setGameConfig(config);
+          // Extract game settings from nested structure
+          setGameConfig({
+            discountTiers: config.gameSettings?.discountTiers || DEFAULT_DISCOUNT_TIERS,
+            gameSpeed: config.gameSettings?.gameSpeed || 1,
+            difficulty: config.gameSettings?.difficulty || 'medium',
+            minScoreForDiscount: config.gameSettings?.minScoreForDiscount || 150,
+            maxPlaysPerCustomer: config.gameSettings?.maxPlaysPerCustomer || 3,
+            maxPlaysPerDay: config.gameSettings?.maxPlaysPerDay || 10
+          });
         } else {
           // Use default config
           setGameConfig({
             discountTiers: DEFAULT_DISCOUNT_TIERS,
             gameSpeed: 1,
-            difficulty: 'medium'
+            difficulty: 'medium',
+            minScoreForDiscount: 150,
+            maxPlaysPerCustomer: 3,
+            maxPlaysPerDay: 10
           });
         }
       } catch (error) {
