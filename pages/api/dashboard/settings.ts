@@ -7,33 +7,51 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    console.log('🔧 Settings API: Received request body:', JSON.stringify(req.body, null, 2));
+
     const { shop, gameSettings, widgetSettings, appearance, businessRules } = req.body;
 
     if (!shop || typeof shop !== 'string') {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Shop domain is required' 
+      console.log('🔧 Settings API: Missing or invalid shop domain:', shop);
+      return res.status(400).json({
+        success: false,
+        error: 'Shop domain is required'
       });
     }
 
     // Validate required fields
     if (!gameSettings || !widgetSettings || !appearance || !businessRules) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'All settings sections are required' 
+      console.log('🔧 Settings API: Missing required sections:', {
+        gameSettings: !!gameSettings,
+        widgetSettings: !!widgetSettings,
+        appearance: !!appearance,
+        businessRules: !!businessRules
+      });
+      return res.status(400).json({
+        success: false,
+        error: 'All settings sections are required'
       });
     }
 
     // Validate game settings
+    console.log('🔧 Settings API: Validating game settings:', gameSettings);
     if (typeof gameSettings.isEnabled !== 'boolean' ||
         typeof gameSettings.minScoreForDiscount !== 'number' ||
         typeof gameSettings.maxPlaysPerCustomer !== 'number' ||
         typeof gameSettings.maxPlaysPerDay !== 'number' ||
         typeof gameSettings.gameSpeed !== 'number' ||
         !['easy', 'medium', 'hard'].includes(gameSettings.difficulty)) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Invalid game settings' 
+      console.log('🔧 Settings API: Game settings validation failed:', {
+        isEnabled: typeof gameSettings.isEnabled,
+        minScoreForDiscount: typeof gameSettings.minScoreForDiscount,
+        maxPlaysPerCustomer: typeof gameSettings.maxPlaysPerCustomer,
+        maxPlaysPerDay: typeof gameSettings.maxPlaysPerDay,
+        gameSpeed: typeof gameSettings.gameSpeed,
+        difficulty: gameSettings.difficulty
+      });
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid game settings'
       });
     }
 
