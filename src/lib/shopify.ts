@@ -196,7 +196,7 @@ export async function installScriptTag(session: Session, shopDomain: string) {
   try {
     const client = new shopify.clients.Rest({ session });
     
-    const scriptSrc = `${process.env.NEXT_PUBLIC_APP_URL}/api/widget/embed.js?shop=${shopDomain}`;
+    const scriptSrc = `${process.env.NEXT_PUBLIC_APP_URL}/api/widget/embed?shop=${shopDomain}`;
     
     const response = await client.post({
       path: 'script_tags',

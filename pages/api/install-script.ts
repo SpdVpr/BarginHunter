@@ -20,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const scriptTagData = {
       script_tag: {
         event: 'onload',
-        src: `${process.env.NEXT_PUBLIC_APP_URL}/api/widget/embed.js?shop=${shop}`,
+        src: `${process.env.NEXT_PUBLIC_APP_URL}/api/widget/embed?shop=${shop}`,
         display_scope: 'online_store'
       }
     };
@@ -30,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.json({
       success: true,
       message: 'Script installation initiated. Please check the Installation Guide for manual steps if needed.',
-      scriptSrc: `${process.env.NEXT_PUBLIC_APP_URL}/api/widget/embed.js?shop=${shop}`,
+      scriptSrc: `${process.env.NEXT_PUBLIC_APP_URL}/api/widget/embed?shop=${shop}`,
     });
 
   } catch (error) {

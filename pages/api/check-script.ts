@@ -16,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // For now, we'll assume the script is installed since we install it automatically
     // In a real implementation, you'd check the Shopify API for existing script tags
-    const expectedScriptSrc = `${process.env.NEXT_PUBLIC_APP_URL}/api/widget/embed.js?shop=${shop}`;
+    const expectedScriptSrc = `${process.env.NEXT_PUBLIC_APP_URL}/api/widget/embed?shop=${shop}`;
 
     return res.json({
       success: true,

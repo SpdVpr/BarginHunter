@@ -41,7 +41,7 @@ export default function Installation() {
   (function() {
     if (window.Shopify && window.Shopify.shop === '${shopDomain}') {
       var script = document.createElement('script');
-      script.src = 'https://bargin-hunter2.vercel.app/api/widget/embed.js?shop=${shopDomain}';
+      script.src = 'https://bargin-hunter2.vercel.app/api/widget/embed?shop=${shopDomain}';
       script.async = true;
       document.head.appendChild(script);
     }

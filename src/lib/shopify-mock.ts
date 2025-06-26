@@ -246,7 +246,7 @@ export async function installScriptTag(session: any, shopDomain: string) {
   console.log('Mock installScriptTag:', session, shopDomain);
   return {
     id: Math.floor(Math.random() * 1000000),
-    src: `http://localhost:3000/api/widget/embed.js?shop=${shopDomain}`,
+    src: `http://localhost:3000/api/widget/embed?shop=${shopDomain}`,
     event: 'onload',
     display_scope: 'online_store',
     created_at: new Date().toISOString(),
