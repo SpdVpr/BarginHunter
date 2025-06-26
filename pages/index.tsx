@@ -5,7 +5,16 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    router.push('/demo');
+    // Check if this is a Shopify app context
+    const { shop } = router.query;
+
+    if (shop) {
+      // If shop parameter exists, this is a Shopify app access
+      router.push(`/app?shop=${shop}`);
+    } else {
+      // Otherwise, redirect to demo
+      router.push('/demo');
+    }
   }, [router]);
 
   return (

@@ -2,7 +2,7 @@
 
 name = "bargain-hunter"
 client_id = "YOUR_CLIENT_ID"
-application_url = "https://bargain-hunter.vercel.app"
+application_url = "https://bargin-hunter2.vercel.app"
 embedded = true
 
 [access_scopes]
@@ -11,8 +11,8 @@ scopes = "write_products,read_customers,write_discounts,write_script_tags,read_o
 
 [auth]
 redirect_urls = [
-  "https://bargain-hunter.vercel.app/api/auth/callback",
-  "https://bargain-hunter.vercel.app/api/auth/shopify/callback"
+  "https://bargin-hunter2.vercel.app/api/auth/callback",
+  "https://bargin-hunter2.vercel.app/api/auth/shopify/callback"
 ]
 
 [webhooks]
