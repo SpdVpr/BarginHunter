@@ -112,7 +112,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Return the configuration
     res.status(200).json({
       success: true,
-      ...shopConfig.gameSettings,
+      gameSettings: shopConfig.gameSettings,
       widgetSettings: shopConfig.widgetSettings,
       appearance: shopConfig.appearance,
       businessRules: shopConfig.businessRules
