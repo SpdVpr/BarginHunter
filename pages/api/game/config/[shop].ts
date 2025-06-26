@@ -70,16 +70,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Get shop configuration from database
     let shopConfig = await GameConfigService.getConfig(shop);
 
-    // If no config exists, use default configuration
+    // If no config exists, create default configuration in database
     if (!shopConfig) {
-      const now = Timestamp.now();
-      shopConfig = {
-        ...defaultConfig,
-        id: `config_${shop}_${Date.now()}`,
-        shopDomain: shop,
-        createdAt: now,
-        updatedAt: now,
-      };
+      console.log('No config found for shop:', shop, 'Creating default config...');
+
+      try {
+        const configId = await GameConfigService.createOrUpdateConfig({
+          shopDomain: shop,
+          isEnabled: defaultConfig.isEnabled,
+          gameSettings: defaultConfig.gameSettings,
+          widgetSettings: defaultConfig.widgetSettings,
+          appearance: defaultConfig.appearance,
+          businessRules: defaultConfig.businessRules,
+        });
+
+        // Fetch the newly created config
+        shopConfig = await GameConfigService.getConfig(shop);
+        console.log('Default config created with ID:', configId);
+      } catch (createError) {
+        console.error('Failed to create default config:', createError);
+        // Fallback to in-memory default config
+        const now = Timestamp.now();
+        shopConfig = {
+          ...defaultConfig,
+          id: `config_${shop}_${Date.now()}`,
+          shopDomain: shop,
+          createdAt: now,
+          updatedAt: now,
+        };
+      }
     }
 
     // Check if game is enabled
