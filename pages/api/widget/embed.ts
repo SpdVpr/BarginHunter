@@ -86,6 +86,12 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       return false;
     }
 
+    // Check if game is enabled
+    if (widgetConfig.gameSettings && !widgetConfig.gameSettings.isEnabled) {
+      console.log('🎮 Bargain Hunter: Game is not enabled - not showing');
+      return false;
+    }
+
     // Check if test mode is enabled - if so, always show
     if (widgetConfig.testMode) {
       console.log('🎮 Bargain Hunter: Test mode enabled - checking page targeting only');

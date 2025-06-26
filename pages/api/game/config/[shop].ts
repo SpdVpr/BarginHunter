@@ -101,13 +101,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    // Check if game is enabled
-    if (!shopConfig.isEnabled) {
-      return res.status(403).json({
-        success: false,
-        error: 'Game is not enabled for this shop'
-      });
-    }
+    // Always return config - let the widget decide based on isEnabled
+    // This allows admin panel to always load settings
 
     // Return the configuration
     res.status(200).json({
