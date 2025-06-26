@@ -11,6 +11,21 @@ import {
 } from './firebase';
 import { Timestamp } from 'firebase-admin/firestore';
 
+// Helper function to remove undefined values from objects
+function removeUndefinedValues(obj: any): any {
+  if (obj === null || obj === undefined) return obj;
+  if (typeof obj !== 'object') return obj;
+  if (Array.isArray(obj)) return obj.map(removeUndefinedValues);
+
+  const cleaned: any = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== undefined) {
+      cleaned[key] = removeUndefinedValues(value);
+    }
+  }
+  return cleaned;
+}
+
 // Store operations
 export class StoreService {
   static async createStore(storeData: Omit<StoreDocument, 'id' | 'installedAt' | 'updatedAt'>): Promise<string> {
@@ -55,12 +70,15 @@ export class StoreService {
 export class GameConfigService {
   static async createOrUpdateConfig(configData: Omit<GameConfigDocument, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
     const existing = await this.getConfig(configData.shopDomain);
-    
+
     if (existing) {
-      await db.collection(collections.gameConfigs).doc(existing.id).update({
+      // Clean undefined values before update
+      const cleanedData = removeUndefinedValues({
         ...configData,
         updatedAt: Timestamp.now(),
       });
+
+      await db.collection(collections.gameConfigs).doc(existing.id).update(cleanedData);
       return existing.id;
     } else {
       const docRef = db.collection(collections.gameConfigs).doc();
