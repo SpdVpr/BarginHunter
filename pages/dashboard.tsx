@@ -236,7 +236,7 @@ export default function Dashboard() {
                   <Button
                     onClick={() => router.push(`/dashboard/installation?shop=${shop}`)}
                   >
-                    Installation Guide
+                    Widget Status
                   </Button>
                 </Stack>
               </Stack>

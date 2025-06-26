@@ -149,9 +149,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.error('Failed to create default game config:', configError);
     }
 
+    // Install widget script automatically
+    try {
+      const session = { shop, accessToken };
+      await installScriptTag(session as any, shop);
+      console.log('Widget script installed automatically');
+    } catch (scriptError) {
+      console.error('Failed to install widget script:', scriptError);
+      // Don't fail the installation if script installation fails
+    }
+
     // Redirect to success page or app dashboard
     const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/?shop=${shop}&installed=true`;
-    
+
     return res.redirect(302, redirectUrl);
 
   } catch (error) {

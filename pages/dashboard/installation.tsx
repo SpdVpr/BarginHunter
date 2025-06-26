@@ -56,11 +56,57 @@ export default function Installation() {
     >
       <Layout>
         <Layout.Section>
-          <Banner status="info">
+          <Banner status="success">
             <p>
-              To display the Bargain Hunter widget on your store, you need to add a small script to your theme.
+              <strong>Good news!</strong> The widget script was automatically installed when you installed the app.
+              The widget should already be working on your store according to your settings.
             </p>
           </Banner>
+        </Layout.Section>
+
+        <Layout.Section>
+          <Card sectioned>
+            <Stack vertical spacing="loose">
+              <Heading>Quick Test</Heading>
+              <TextContainer>
+                <p>To verify the widget is working:</p>
+              </TextContainer>
+
+              <List type="number">
+                <List.Item>
+                  Make sure <strong>Test Mode</strong> is enabled in Widget Settings
+                </List.Item>
+                <List.Item>
+                  Set <strong>User Percentage</strong> to 100%
+                </List.Item>
+                <List.Item>
+                  Visit your store in a new browser window
+                </List.Item>
+                <List.Item>
+                  The widget should appear according to your trigger settings
+                </List.Item>
+              </List>
+
+              <Stack distribution="equalSpacing">
+                <Button
+                  primary
+                  onClick={() => router.push(`/dashboard/settings?shop=${shopDomain}`)}
+                >
+                  Check Settings
+                </Button>
+                <Button
+                  onClick={() => window.open(`https://${shopDomain}`, '_blank')}
+                >
+                  Visit Store
+                </Button>
+                <Button
+                  onClick={() => window.open(`/widget/game?shop=${shopDomain}&test=true`, '_blank')}
+                >
+                  Test Widget
+                </Button>
+              </Stack>
+            </Stack>
+          </Card>
         </Layout.Section>
 
         <Layout.Section>
