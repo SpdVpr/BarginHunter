@@ -17,17 +17,21 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   const embedScript = `
 (function() {
   'use strict';
-  
+
+  console.log('🎮 Bargain Hunter: Embed script starting...');
+
   // Prevent multiple initializations
   if (window.BargainHunterInitialized) {
+    console.log('🎮 Bargain Hunter: Already initialized, skipping...');
     return;
   }
   window.BargainHunterInitialized = true;
+  console.log('🎮 Bargain Hunter: Initialization started');
 
   // Configuration
   const SHOP_DOMAIN = '${shopDomain}';
-  const API_BASE = '${process.env.NEXT_PUBLIC_API_BASE || 'https://bargain-hunter.vercel.app/api'}';
-  const WIDGET_BASE = '${process.env.NEXT_PUBLIC_WIDGET_URL || 'https://bargain-hunter.vercel.app/widget'}';
+  const API_BASE = '${process.env.NEXT_PUBLIC_API_BASE || 'https://bargin-hunter2.vercel.app/api'}';
+  const WIDGET_BASE = '${process.env.NEXT_PUBLIC_WIDGET_URL || 'https://bargin-hunter2.vercel.app/widget'}';
 
   // Widget configuration (will be loaded from API)
   let widgetConfig = null;
@@ -42,50 +46,76 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   function loadWidgetConfig() {
+    console.log('🎮 Bargain Hunter: Loading config for shop:', SHOP_DOMAIN);
+    console.log('🎮 Bargain Hunter: API URL:', API_BASE + '/game/config/' + SHOP_DOMAIN);
+
     return fetch(API_BASE + '/game/config/' + SHOP_DOMAIN)
-      .then(response => response.json())
+      .then(response => {
+        console.log('🎮 Bargain Hunter: Config response status:', response.status);
+        return response.json();
+      })
       .then(config => {
+        console.log('🎮 Bargain Hunter: Config loaded:', config);
         widgetConfig = config;
         return config;
       })
       .catch(error => {
-        console.error('Failed to load Bargain Hunter config:', error);
+        console.error('🎮 Bargain Hunter: Failed to load config:', error);
         // Use default config
         widgetConfig = {
-          displayMode: 'tab',
+          displayMode: 'popup',
           triggerEvent: 'immediate',
           position: 'bottom-right',
-          showOn: 'all_pages'
+          showOn: 'all_pages',
+          userPercentage: 100,
+          testMode: true,
+          showDelay: 0,
+          pageLoadTrigger: 'immediate'
         };
+        console.log('🎮 Bargain Hunter: Using default config:', widgetConfig);
         return widgetConfig;
       });
   }
 
   function shouldShowWidget() {
-    if (!widgetConfig) return false;
+    console.log('🎮 Bargain Hunter: Checking if widget should show...');
+    console.log('🎮 Bargain Hunter: Widget config:', widgetConfig);
+
+    if (!widgetConfig) {
+      console.log('🎮 Bargain Hunter: No widget config - not showing');
+      return false;
+    }
 
     // Check if test mode is enabled - if so, always show
     if (widgetConfig.testMode) {
-      return checkPageTargeting();
+      console.log('🎮 Bargain Hunter: Test mode enabled - checking page targeting only');
+      const shouldShow = checkPageTargeting();
+      console.log('🎮 Bargain Hunter: Page targeting result:', shouldShow);
+      return shouldShow;
     }
 
     // Check user percentage targeting
     if (!checkUserPercentage()) {
+      console.log('🎮 Bargain Hunter: User percentage check failed');
       return false;
     }
 
     // Check device targeting
     if (!checkDeviceTargeting()) {
+      console.log('🎮 Bargain Hunter: Device targeting check failed');
       return false;
     }
 
     // Check time-based rules
     if (!checkTimeBasedRules()) {
+      console.log('🎮 Bargain Hunter: Time-based rules check failed');
       return false;
     }
 
     // Check page targeting
-    return checkPageTargeting();
+    const shouldShow = checkPageTargeting();
+    console.log('🎮 Bargain Hunter: Final result - should show:', shouldShow);
+    return shouldShow;
   }
 
   function checkUserPercentage() {
@@ -394,32 +424,44 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
   // Initialize widget
   function initWidget() {
+    console.log('🎮 Bargain Hunter: Initializing widget...');
+
     loadWidgetConfig().then(function() {
+      console.log('🎮 Bargain Hunter: Config loaded, checking if should show...');
+
       if (!shouldShowWidget()) {
+        console.log('🎮 Bargain Hunter: Widget should not show - stopping initialization');
         return;
       }
 
+      console.log('🎮 Bargain Hunter: Widget should show - proceeding with initialization');
       const showDelay = widgetConfig.showDelay || 0;
       const pageLoadTrigger = widgetConfig.pageLoadTrigger || 'immediate';
 
+      console.log('🎮 Bargain Hunter: Show delay:', showDelay, 'Page load trigger:', pageLoadTrigger);
+
       function showWidget() {
+        console.log('🎮 Bargain Hunter: Creating widget with display mode:', widgetConfig.displayMode);
         const container = createWidgetContainer();
 
         switch (widgetConfig.displayMode) {
           case 'tab':
+            console.log('🎮 Bargain Hunter: Creating tab widget');
             createTabWidget(container);
             break;
           case 'popup':
+            console.log('🎮 Bargain Hunter: Creating popup widget');
             createPopupWidget(container);
             break;
           case 'inline':
             // Inline mode would need to be handled differently
             // as it requires a specific container element
-            console.log('Inline mode not implemented in embed script');
+            console.log('🎮 Bargain Hunter: Inline mode not implemented in embed script');
             break;
         }
 
         isWidgetLoaded = true;
+        console.log('🎮 Bargain Hunter: Widget loaded successfully!');
       }
 
       // Handle different trigger types
