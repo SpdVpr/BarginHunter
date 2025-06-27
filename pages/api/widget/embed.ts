@@ -29,7 +29,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   console.log('🎮 Bargain Hunter: Initialization started');
 
   // Configuration
-  const SHOP_DOMAIN = '${shopDomain}';
+  const SHOP_DOMAIN = '${shopDomain}'.split(',')[0]; // Fix duplicate shop parameter
   const API_BASE = '${process.env.NEXT_PUBLIC_API_BASE || 'https://bargin-hunter2.vercel.app/api'}';
   const WIDGET_BASE = '${process.env.NEXT_PUBLIC_WIDGET_URL || 'https://bargin-hunter2.vercel.app/widget'}';
 
@@ -49,7 +49,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     console.log('🎮 Bargain Hunter: Loading config for shop:', SHOP_DOMAIN);
     console.log('🎮 Bargain Hunter: API URL:', API_BASE + '/game/config/' + SHOP_DOMAIN);
 
-    return fetch(API_BASE + '/game/config/' + SHOP_DOMAIN)
+    return fetch(API_BASE + '/game/config/' + SHOP_DOMAIN + '?t=' + Date.now())
       .then(response => {
         console.log('🎮 Bargain Hunter: Config response status:', response.status);
         return response.json();
