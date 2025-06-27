@@ -64,6 +64,13 @@ export class StoreService {
   static async deactivateStore(shopDomain: string): Promise<void> {
     await this.updateStore(shopDomain, { isActive: false });
   }
+
+  static async deleteStore(shopDomain: string): Promise<void> {
+    const store = await this.getStore(shopDomain);
+    if (!store) return; // Store doesn't exist, nothing to delete
+
+    await db.collection(collections.stores).doc(store.id).delete();
+  }
 }
 
 // Game configuration operations
