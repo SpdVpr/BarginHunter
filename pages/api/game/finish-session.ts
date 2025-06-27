@@ -59,45 +59,7 @@ function getScoreMessage(score: number, discountEarned: number): string {
   return "Great effort! Keep playing to improve! 🎮";
 }
 
-async function createShopifyDiscount(
-  shopDomain: string, 
-  code: string, 
-  discountPercent: number
-): Promise<{ success: boolean; shopifyDiscountId?: string; error?: string }> {
-  // TODO: Implement actual Shopify API integration
-  // This would use the Shopify Admin API to create a discount code
-  
-  try {
-    // Mock implementation for development
-    const mockShopifyDiscountId = `gid://shopify/DiscountCodeNode/${Date.now()}`;
-    
-    // In a real implementation, this would be:
-    // const shopifyClient = new Shopify.Clients.Rest(shopDomain, accessToken);
-    // const discount = await shopifyClient.post({
-    //   path: 'discount_codes',
-    //   data: {
-    //     discount_code: {
-    //       code: code,
-    //       discount_type: 'percentage',
-    //       value: discountPercent,
-    //       usage_limit: 1,
-    //       expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-    //     }
-    //   }
-    // });
-
-    return {
-      success: true,
-      shopifyDiscountId: mockShopifyDiscountId
-    };
-  } catch (error) {
-    console.error('Error creating Shopify discount:', error);
-    return {
-      success: false,
-      error: 'Failed to create discount code'
-    };
-  }
-}
+// This function is no longer needed - we use the real Shopify API function
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
