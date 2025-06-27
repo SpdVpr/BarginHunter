@@ -101,7 +101,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const body: StartGameRequest = req.body;
     const { shopDomain, customerData, source, referrer } = body;
 
-    console.log('🎮 Start session request:', { shopDomain, customerData, source, referrer });
+    console.log('🎮 Start session request:', {
+      shopDomain,
+      customerData,
+      source,
+      referrer,
+      headers: {
+        'user-agent': req.headers['user-agent'],
+        'referer': req.headers.referer,
+        'x-forwarded-for': req.headers['x-forwarded-for']
+      },
+      fullBody: req.body
+    });
 
     if (!shopDomain) {
       return res.status(400).json({
