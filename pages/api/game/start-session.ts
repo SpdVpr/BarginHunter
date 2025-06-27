@@ -190,8 +190,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     };
     console.log('🎮 Session data:', sessionData);
 
-    await GameSessionService.createSession(sessionData);
-    console.log('🎮 Session created successfully');
+    try {
+      await GameSessionService.createSession(sessionData);
+      console.log('🎮 Session created successfully');
+    } catch (dbError: any) {
+      console.error('🎮 Failed to create session in database:', dbError);
+      // Continue anyway - the game can still work without database logging
+    }
 
     const response: StartGameResponse = {
       success: true,

@@ -230,29 +230,46 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    // Complete the session in database
-    await GameSessionService.completeSession(sessionId, finalScore, discountEarned, discountCode);
+    // Complete the session in database (skip for temp sessions)
+    if (!sessionId.startsWith('temp-')) {
+      try {
+        await GameSessionService.completeSession(sessionId, finalScore, discountEarned, discountCode);
+        console.log('🎮 Session completed in database');
+      } catch (dbError: any) {
+        console.error('🎮 Failed to complete session in database:', dbError);
+      }
+    }
 
     // Record the score
-    await GameScoreService.recordScore({
-      shopDomain: session.shopDomain,
-      customerId: session.customerId,
-      customerEmail: session.customerEmail || playerEmail,
-      sessionId,
-      score: finalScore,
-      discountEarned,
-      discountCode,
-      gameData: {
-        moves: gameData?.objectsCollected || 0,
-        timeSpent: gameData?.duration || 0,
-        difficulty: session.gameData.difficulty,
-      },
-    });
+    try {
+      await GameScoreService.recordScore({
+        shopDomain: session.shopDomain,
+        customerId: session.customerId,
+        customerEmail: session.customerEmail || playerEmail,
+        sessionId,
+        score: finalScore,
+        discountEarned,
+        discountCode,
+        gameData: {
+          moves: gameData?.objectsCollected || 0,
+          timeSpent: gameData?.duration || 0,
+          difficulty: session.gameData.difficulty,
+        },
+      });
+      console.log('🎮 Score recorded in database');
+    } catch (dbError: any) {
+      console.error('🎮 Failed to record score in database:', dbError);
+    }
 
     // Update customer statistics
     if (session.customerId || session.customerEmail || playerEmail) {
-      const identifier = session.customerId || session.customerEmail || playerEmail!;
-      await CustomerService.updateCustomerStats(session.shopDomain, identifier, finalScore, discountEarned);
+      try {
+        const identifier = session.customerId || session.customerEmail || playerEmail!;
+        await CustomerService.updateCustomerStats(session.shopDomain, identifier, finalScore, discountEarned);
+        console.log('🎮 Customer stats updated');
+      } catch (dbError: any) {
+        console.error('🎮 Failed to update customer stats:', dbError);
+      }
     }
 
     const response: FinishGameResponse = {
