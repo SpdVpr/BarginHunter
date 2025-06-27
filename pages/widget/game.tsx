@@ -19,9 +19,31 @@ export default function WidgetGame() {
     const shop = router.query.shop as string;
     if (shop) {
       setShopDomain(shop);
-      setIsLoading(false);
+      // Check if app is properly installed before loading game
+      checkInstallation(shop);
     }
   }, [router.query]);
+
+  const checkInstallation = async (shop: string) => {
+    try {
+      // Check if app is properly installed with correct scopes
+      const response = await fetch(`/api/debug/installation-flow?shop=${shop}`);
+      const data = await response.json();
+
+      if (!data.success || !data.debug.installationComplete) {
+        console.log('🚨 App not properly installed, redirecting to install...');
+        // Redirect to proper installation
+        window.top!.location.href = `/api/auth/install?shop=${shop}`;
+        return;
+      }
+
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Installation check failed:', error);
+      // If check fails, try to install anyway
+      window.top!.location.href = `/api/auth/install?shop=${shop}`;
+    }
+  };
 
   const handleGameComplete = (result: GameResult) => {
     // Send message to parent window
