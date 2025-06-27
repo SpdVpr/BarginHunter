@@ -193,6 +193,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       await GameSessionService.createSession(sessionData);
       console.log('🎮 Session created successfully');
+
+      // Test: Try to retrieve the session immediately to verify it was saved
+      const testRetrieve = await GameSessionService.getSession(sessionId);
+      console.log('🎮 Session retrieval test:', !!testRetrieve);
+
+      // Test: Try to get sessions for this shop
+      const shopSessions = await GameSessionService.getSessionsByShop(shopDomain, 5);
+      console.log('🎮 Shop sessions count:', shopSessions.length);
+
     } catch (dbError: any) {
       console.error('🎮 Failed to create session in database:', dbError);
       // Continue anyway - the game can still work without database logging
