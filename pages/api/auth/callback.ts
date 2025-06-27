@@ -60,27 +60,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('✅ Access token obtained for shop:', shop);
 
-    // Skip database and shop data operations for now (Firebase bypass)
-    console.log('⏭️ Skipping database operations (Firebase bypass)');
+    // Get shop data and create store record
+    console.log('🔧 Auth Callback: Getting shop data...');
 
-    // // Get shop data
-    // const shopData = await getShopData(session);
-    //
-    // // Create store record in database
-    // const storeId = await StoreService.createStore({
-    //   shopDomain: shop,
-    //   accessToken: session.accessToken,
-    //   scopes: session.scope?.split(',') || [],
-    //   isActive: true,
-    //   shopData: {
-    //     name: shopData.name,
-    //     email: shopData.email,
-    //     domain: shopData.domain,
-    //     currency: shopData.currency,
-    //     timezone: shopData.timezone,
-    //     planName: shopData.plan_name,
-    //   },
-    // });
+    try {
+      const shopData = await getShopData(session);
+      console.log('🔧 Auth Callback: Shop data retrieved:', {
+        name: shopData.name,
+        domain: shopData.domain
+      });
+
+      // Create store record in database
+      const storeId = await StoreService.createStore({
+        shopDomain: shop,
+        accessToken: session.accessToken,
+        scopes: session.scope?.split(',') || [],
+        isActive: true,
+        shopData: {
+          name: shopData.name,
+          email: shopData.email,
+          domain: shopData.domain,
+          currency: shopData.currency,
+          timezone: shopData.timezone,
+          planName: shopData.plan_name,
+        },
+      });
+
+      console.log('🔧 Auth Callback: Store created with ID:', storeId);
+    } catch (storeError) {
+      console.error('🔧 Auth Callback: Failed to create store:', storeError);
+      // Continue with installation even if store creation fails
+    }
 
     try {
       // Install script tag for widget
