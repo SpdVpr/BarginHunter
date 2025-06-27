@@ -48,6 +48,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
     });
 
+    console.log('✅ Shopify discount created:', {
+      priceRuleId: shopifyDiscount.priceRule.id,
+      discountCodeId: shopifyDiscount.discountCode.id,
+      code: shopifyDiscount.discountCode.code
+    });
+
     console.log('🧪 Discount created successfully:', shopifyDiscount);
 
     return res.status(200).json({
