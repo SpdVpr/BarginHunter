@@ -243,47 +243,20 @@ export default function NewGameEngine({ onGameEnd, onScoreUpdate, discountTiers,
     );
   };
 
-  // Spawn game objects
-  const spawnObject = useCallback(() => {
-    const now = Date.now();
-    if (now - lastSpawnTime < 1500) return; // Spawn every 1.5 seconds
+  // Spawn logic moved to game loop to avoid callback dependencies
 
-    const isObstacle = Math.random() < 0.7; // 70% obstacles, 30% collectibles
-    
-    if (isObstacle) {
-      // Spawn cactus obstacle
-      const height = 40 + Math.random() * 20;
-      setGameObjects(prev => [...prev, {
-        x: CANVAS_WIDTH,
-        y: GROUND_Y - height,
-        width: 32,
-        height: height,
-        type: 'obstacle',
-        hitboxWidth: 20,
-        hitboxHeight: height - 4,
-        hitboxOffsetX: 6,
-        hitboxOffsetY: 2
-      }]);
-    } else {
-      // Spawn collectible
-      setGameObjects(prev => [...prev, {
-        x: CANVAS_WIDTH,
-        y: GROUND_Y - 60 - Math.random() * 40,
-        width: 20,
-        height: 20,
-        type: 'collectible',
-        value: 10,
-        hitboxWidth: 16,
-        hitboxHeight: 16,
-        hitboxOffsetX: 2,
-        hitboxOffsetY: 2
-      }]);
-    }
-    
-    setLastSpawnTime(now);
-  }, [lastSpawnTime]);
+  // Main game loop with refs to avoid infinite re-renders
+  const playerRef = useRef(player);
+  const gameObjectsRef = useRef(gameObjects);
+  const scoreRef = useRef(score);
+  const lastSpawnTimeRef = useRef(lastSpawnTime);
 
-  // Main game loop
+  // Update refs when state changes
+  useEffect(() => { playerRef.current = player; }, [player]);
+  useEffect(() => { gameObjectsRef.current = gameObjects; }, [gameObjects]);
+  useEffect(() => { scoreRef.current = score; }, [score]);
+  useEffect(() => { lastSpawnTimeRef.current = lastSpawnTime; }, [lastSpawnTime]);
+
   useEffect(() => {
     if (!isRunning) return;
 
@@ -292,116 +265,156 @@ export default function NewGameEngine({ onGameEnd, onScoreUpdate, discountTiers,
       if (!canvas) return;
 
       const ctx = canvas.getContext('2d')!;
-      
+
       // Clear canvas
       ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-      
+
       // Draw sky gradient
       const gradient = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
       gradient.addColorStop(0, '#87CEEB');
       gradient.addColorStop(1, '#E0F6FF');
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-      
+
       // Draw ground
       ctx.fillStyle = '#8B4513';
       ctx.fillRect(0, GROUND_Y, CANVAS_WIDTH, CANVAS_HEIGHT - GROUND_Y);
-      
+
       // Update player physics
-      setPlayer(prev => {
-        let newY = prev.y + prev.velocityY;
-        let newVelocityY = prev.velocityY + GRAVITY;
-        let newIsGrounded = prev.isGrounded;
-        let newIsJumping = prev.isJumping;
+      const currentPlayer = playerRef.current;
+      let newY = currentPlayer.y + currentPlayer.velocityY;
+      let newVelocityY = currentPlayer.velocityY + GRAVITY;
+      let newIsGrounded = currentPlayer.isGrounded;
+      let newIsJumping = currentPlayer.isJumping;
 
-        // Ground collision
-        if (newY >= GROUND_Y - CHAR_HEIGHT) {
-          newY = GROUND_Y - CHAR_HEIGHT;
-          newVelocityY = 0;
-          newIsGrounded = true;
-          newIsJumping = false;
-        } else {
-          newIsGrounded = false;
-        }
+      // Ground collision
+      if (newY >= GROUND_Y - CHAR_HEIGHT) {
+        newY = GROUND_Y - CHAR_HEIGHT;
+        newVelocityY = 0;
+        newIsGrounded = true;
+        newIsJumping = false;
+      } else {
+        newIsGrounded = false;
+      }
 
-        return {
-          ...prev,
-          y: newY,
-          velocityY: newVelocityY,
-          isGrounded: newIsGrounded,
-          isJumping: newIsJumping
-        };
-      });
+      const updatedPlayer = {
+        ...currentPlayer,
+        y: newY,
+        velocityY: newVelocityY,
+        isGrounded: newIsGrounded,
+        isJumping: newIsJumping
+      };
+
+      setPlayer(updatedPlayer);
+      playerRef.current = updatedPlayer;
 
       // Draw character
-      drawCharacter(ctx, player.x, player.y + CHAR_HEIGHT / 2);
+      drawCharacter(ctx, updatedPlayer.x, updatedPlayer.y + CHAR_HEIGHT / 2);
 
       // Spawn objects
-      spawnObject();
+      const now = Date.now();
+      if (now - lastSpawnTimeRef.current > 1500) {
+        const isObstacle = Math.random() < 0.7;
+
+        if (isObstacle) {
+          const height = 40 + Math.random() * 20;
+          const newObstacle = {
+            x: CANVAS_WIDTH,
+            y: GROUND_Y - height,
+            width: 32,
+            height: height,
+            type: 'obstacle' as const,
+            hitboxWidth: 20,
+            hitboxHeight: height - 4,
+            hitboxOffsetX: 6,
+            hitboxOffsetY: 2
+          };
+          setGameObjects(prev => [...prev, newObstacle]);
+        } else {
+          const newCollectible = {
+            x: CANVAS_WIDTH,
+            y: GROUND_Y - 60 - Math.random() * 40,
+            width: 20,
+            height: 20,
+            type: 'collectible' as const,
+            value: 10,
+            hitboxWidth: 16,
+            hitboxHeight: 16,
+            hitboxOffsetX: 2,
+            hitboxOffsetY: 2
+          };
+          setGameObjects(prev => [...prev, newCollectible]);
+        }
+
+        setLastSpawnTime(now);
+        lastSpawnTimeRef.current = now;
+      }
 
       // Update and draw game objects
-      setGameObjects(prev => {
-        const updated = prev.map(obj => ({
-          ...obj,
-          x: obj.x - GAME_SPEED
-        })).filter(obj => obj.x > -100);
+      const currentObjects = gameObjectsRef.current;
+      const updatedObjects = currentObjects.map(obj => ({
+        ...obj,
+        x: obj.x - GAME_SPEED
+      })).filter(obj => obj.x > -100);
 
-        // Check collisions
-        updated.forEach((obj, index) => {
-          if (checkCollision(player.x, player.y + CHAR_HEIGHT / 2, obj)) {
-            if (obj.type === 'obstacle') {
-              // Game over
-              setIsRunning(false);
-              onGameEnd(score, {
-                duration: Date.now() - gameStartTime.current,
-                objectsCollected: Math.floor(score / 10),
-                obstaclesHit: 1
-              });
-            } else if (obj.type === 'collectible') {
-              // Collect item
-              setScore(prev => {
-                const newScore = prev + (obj.value || 10);
-                onScoreUpdate(newScore);
-                return newScore;
-              });
-              updated.splice(index, 1);
-            }
-          }
-        });
-
-        // Draw objects
-        updated.forEach(obj => {
+      // Check collisions
+      let gameEnded = false;
+      updatedObjects.forEach((obj, index) => {
+        if (checkCollision(updatedPlayer.x, updatedPlayer.y + CHAR_HEIGHT / 2, obj)) {
           if (obj.type === 'obstacle') {
-            drawObstacle(ctx, obj);
-          } else {
-            drawCollectible(ctx, obj);
+            // Game over
+            gameEnded = true;
+            setIsRunning(false);
+            onGameEnd(scoreRef.current, {
+              duration: Date.now() - gameStartTime.current,
+              objectsCollected: Math.floor(scoreRef.current / 10),
+              obstaclesHit: 1
+            });
+          } else if (obj.type === 'collectible') {
+            // Collect item
+            const newScore = scoreRef.current + (obj.value || 10);
+            setScore(newScore);
+            scoreRef.current = newScore;
+            onScoreUpdate(newScore);
+            updatedObjects.splice(index, 1);
           }
-        });
-
-        return updated;
+        }
       });
+
+      // Draw objects
+      updatedObjects.forEach(obj => {
+        if (obj.type === 'obstacle') {
+          drawObstacle(ctx, obj);
+        } else {
+          drawCollectible(ctx, obj);
+        }
+      });
+
+      setGameObjects(updatedObjects);
+      gameObjectsRef.current = updatedObjects;
 
       // Update score based on distance
-      setScore(prev => {
-        const newScore = prev + 0.1;
+      if (!gameEnded) {
+        const newScore = scoreRef.current + 0.1;
+        setScore(newScore);
+        scoreRef.current = newScore;
         onScoreUpdate(Math.floor(newScore));
-        return newScore;
-      });
+      }
 
-      if (isRunning) {
+      if (isRunning && !gameEnded) {
         animationRef.current = requestAnimationFrame(gameLoop);
       }
     };
 
     gameStartTime.current = Date.now();
-    gameLoop();
+    animationRef.current = requestAnimationFrame(gameLoop);
 
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [isRunning, player.y, player.velocityY, spawnObject, score, onGameEnd, onScoreUpdate]);
+  }, [isRunning]);
 
   return (
     <div style={{ textAlign: 'center' }}>
