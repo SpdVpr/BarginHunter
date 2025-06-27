@@ -39,9 +39,12 @@ async function validatePlayEligibility(
 ): Promise<{ canPlay: boolean; reason?: string; playsRemaining: number }> {
   try {
     // Get game configuration
+    console.log('🎮 Getting game config for shop:', shopDomain);
     const gameConfig = await GameConfigService.getConfig(shopDomain);
+    console.log('🎮 Game config found:', !!gameConfig, gameConfig?.isEnabled);
 
     if (!gameConfig || !gameConfig.isEnabled) {
+      console.log('🎮 Shop inactive or config not found');
       return { canPlay: false, reason: 'shop_inactive', playsRemaining: 0 };
     }
 
@@ -98,6 +101,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const body: StartGameRequest = req.body;
     const { shopDomain, customerData, source, referrer } = body;
 
+    console.log('🎮 Start session request:', { shopDomain, customerData, source, referrer });
+
     if (!shopDomain) {
       return res.status(400).json({
         success: false,
@@ -114,9 +119,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Use IP address as customer identifier if no customer data provided
     const customerIdentifier = customerData?.email || customerData?.id || ipAddress;
 
+    // Get game configuration first
+    console.log('🎮 Getting game config for session...');
+    const gameConfigDoc = await GameConfigService.getConfig(shopDomain);
+    console.log('🎮 Game config doc:', !!gameConfigDoc);
+
+    if (!gameConfigDoc || !gameConfigDoc.isEnabled) {
+      return res.status(403).json({
+        success: false,
+        sessionId: '',
+        gameConfig: null,
+        canPlay: false,
+        playsRemaining: 0,
+        error: 'Game is not enabled for this shop'
+      });
+    }
+
     // Validate play eligibility
+    console.log('🎮 Validating play eligibility for:', customerIdentifier);
     const eligibility = await validatePlayEligibility(shopDomain, customerIdentifier);
-    
+    console.log('🎮 Eligibility result:', eligibility);
+
     if (!eligibility.canPlay) {
       const response: StartGameResponse = {
         success: false,
@@ -132,9 +155,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Generate session ID
     const sessionId = generateSessionId();
 
-    // Get game configuration
-    const gameConfigDoc = await GameConfigService.getConfig(shopDomain);
-    const gameConfig = gameConfigDoc?.gameSettings || {
+    // Prepare game configuration for response
+    const gameConfig = gameConfigDoc.gameSettings || {
       discountTiers: [
         { minScore: 0, discount: 0, message: "Keep hunting! 🔍" },
         { minScore: 150, discount: 5, message: "Nice start! 🎯" },
@@ -148,7 +170,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     };
 
     // Create game session in database
-    await GameSessionService.createSession({
+    console.log('🎮 Creating session in database...');
+    const sessionData = {
       shopDomain,
       customerId: customerData?.id || undefined,
       customerEmail: customerData?.email || undefined,
@@ -164,7 +187,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       userAgent: userAgent || undefined,
       ipAddress: ipAddress || undefined,
       completed: false,
-    });
+    };
+    console.log('🎮 Session data:', sessionData);
+
+    await GameSessionService.createSession(sessionData);
+    console.log('🎮 Session created successfully');
 
     const response: StartGameResponse = {
       success: true,

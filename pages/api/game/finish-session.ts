@@ -108,6 +108,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const body: FinishGameRequest = req.body;
     const { sessionId, finalScore, gameData, playerEmail } = body;
 
+    console.log('🎮 Finish session request:', { sessionId, finalScore, gameData, playerEmail });
+
     if (!sessionId) {
       return res.status(400).json({
         success: false,
@@ -117,15 +119,43 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Get session data from database
-    const session = await GameSessionService.getSession(sessionId);
-    if (!session) {
-      return res.status(404).json({
-        success: false,
-        discountEarned: 0,
-        message: 'Session not found',
-        error: 'Invalid session'
-      });
+    // Handle temporary sessions (when start-session failed)
+    let session: any;
+
+    if (sessionId.startsWith('temp-')) {
+      console.log('🎮 Handling temporary session:', sessionId);
+
+      // Extract shop domain from referrer or use a default
+      // For now, we'll try to get it from the request or use a fallback
+      const shopDomain = req.headers.referer?.includes('.myshopify.com')
+        ? req.headers.referer.match(/https?:\/\/([^.]+\.myshopify\.com)/)?.[1] || 'unknown.myshopify.com'
+        : 'unknown.myshopify.com';
+
+      console.log('🎮 Using shop domain for temp session:', shopDomain);
+
+      // Create a mock session for temporary sessions
+      session = {
+        id: sessionId,
+        shopDomain,
+        sessionId,
+        gameData: { difficulty: 'medium' },
+        completed: false
+      };
+    } else {
+      // Get session data from database
+      console.log('🎮 Getting session from database:', sessionId);
+      session = await GameSessionService.getSession(sessionId);
+      console.log('🎮 Session found:', !!session);
+
+      if (!session) {
+        console.log('🎮 Session not found in database');
+        return res.status(404).json({
+          success: false,
+          discountEarned: 0,
+          message: 'Session not found',
+          error: 'Invalid session'
+        });
+      }
     }
 
     // Validate score (basic fraud prevention)

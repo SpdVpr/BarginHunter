@@ -79,6 +79,8 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
   useEffect(() => {
     const startGameSession = async () => {
       try {
+        console.log('🎮 Starting game session for shop:', shopDomain);
+
         const response = await fetch('/api/game/start-session', {
           method: 'POST',
           headers: {
@@ -86,14 +88,25 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
           },
           body: JSON.stringify({
             shopDomain,
-            source: 'popup', // TODO: Make this dynamic
+            customerData: {
+              // Try to get customer data from Shopify if available
+              id: (window as any).ShopifyAnalytics?.meta?.page?.customerId || undefined,
+              email: undefined // Will be filled by IP address fallback
+            },
+            source: 'popup',
             referrer: window.location.href
           }),
         });
 
-        if (response.ok) {
-          const data = await response.json();
+        const data = await response.json();
+        console.log('🎮 Start session response:', data);
+
+        if (response.ok && data.success) {
           setSessionId(data.sessionId);
+        } else {
+          console.error('Failed to start game session:', data.error);
+          // Generate a temporary session ID
+          setSessionId(`temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
         }
       } catch (error) {
         console.error('Failed to start game session:', error);
@@ -109,13 +122,24 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
 
   const handleGameEnd = async (score: number, gameData: any) => {
     try {
+      console.log('🎮 Finishing game session:', { sessionId, score, gameData });
+
       // Calculate discount earned
       const discountTier = gameConfig.discountTiers
         .slice()
         .reverse()
         .find((tier: any) => score >= tier.minScore);
-      
+
       const discountEarned = discountTier?.discount || 0;
+
+      // Prepare game data in the expected format
+      const formattedGameData = {
+        duration: gameData?.duration || 0,
+        objectsCollected: gameData?.objectsCollected || 0,
+        obstaclesHit: gameData?.obstaclesHit || 0,
+        maxCombo: gameData?.maxCombo || 0,
+        distanceTraveled: gameData?.distanceTraveled || 0
+      };
 
       // Finish game session
       const response = await fetch('/api/game/finish-session', {
@@ -126,16 +150,20 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
         body: JSON.stringify({
           sessionId,
           finalScore: score,
-          gameData,
+          gameData: formattedGameData,
+          playerEmail: undefined // Optional
         }),
       });
 
       let discountCode: string | undefined;
-      
-      if (response.ok) {
-        const data = await response.json();
+
+      const data = await response.json();
+      console.log('🎮 Finish session response:', data);
+
+      if (response.ok && data.success) {
         discountCode = data.discountCode;
       } else {
+        console.error('Failed to finish game session:', data.error);
         // Generate a mock discount code for demo
         if (discountEarned > 0) {
           discountCode = `HUNTER${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
