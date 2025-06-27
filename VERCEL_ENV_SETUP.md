@@ -20,7 +20,7 @@ Musíme nastavit environment proměnné na Vercel dashboard.
 SHOPIFY_API_KEY = b33e93da065728ab025c58bfc6609d5e
 SHOPIFY_API_SECRET = 0db70f04a5477a00ead823d66f3f11d2
 SHOPIFY_WEBHOOK_SECRET = BargainHunterWebhookSecret2024_SuperSecure_RandomKey_12345
-SHOPIFY_SCOPES = read_products,write_discounts,read_customers,write_script_tags,read_orders
+SHOPIFY_SCOPES = read_products,write_discounts,write_price_rules,read_customers,write_script_tags,read_orders
 ```
 
 #### Application URLs
