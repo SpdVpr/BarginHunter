@@ -190,8 +190,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Script tag is already installed above, no need to install again
 
-    // Redirect to app with installed parameter
-    const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/app?shop=${shop}&installed=true`;
+    // Redirect to root URL (which will redirect to dashboard) with shop parameter
+    const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/?shop=${shop}&installed=true`;
 
     return res.redirect(302, redirectUrl);
 

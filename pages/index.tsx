@@ -6,11 +6,18 @@ export default function Home() {
 
   useEffect(() => {
     // Check if this is a Shopify app context
-    const { shop } = router.query;
+    const { shop, hmac, host, timestamp } = router.query;
 
     if (shop) {
       // If shop parameter exists, this is a Shopify app access
-      router.push(`/app?shop=${shop}`);
+      // Redirect to dashboard with all Shopify parameters
+      const params = new URLSearchParams();
+      if (shop) params.set('shop', shop as string);
+      if (hmac) params.set('hmac', hmac as string);
+      if (host) params.set('host', host as string);
+      if (timestamp) params.set('timestamp', timestamp as string);
+
+      router.push(`/dashboard?${params.toString()}`);
     } else {
       // Otherwise, redirect to demo
       router.push('/demo');
