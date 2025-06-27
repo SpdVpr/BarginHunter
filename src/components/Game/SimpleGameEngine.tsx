@@ -218,23 +218,25 @@ export default function SimpleGameEngine({
       const currentSpeed = Math.min(3 + Math.floor(score / 200), 8);
       setGameSpeed(currentSpeed);
 
-      // Spawn obstacles with dynamic timing
+      // Spawn obstacles with dynamic timing (more frequent like Chrome Dino)
       const now = Date.now();
-      const obstacleInterval = Math.max(1500 - Math.floor(score / 100) * 100, 800);
+      const obstacleInterval = Math.max(1200 - Math.floor(score / 100) * 50, 600); // Faster spawning
 
       if (now - lastObstacleSpawn > obstacleInterval) {
         const obstacleTypes = ['cart', 'box', 'cone', 'barrier'];
         const type = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
 
+        const obstacleHeight = 40 + Math.random() * 30;
         setObstacles(prev => [...prev, {
           x: CANVAS_WIDTH,
-          y: GROUND_Y - 60,
-          width: 45 + Math.random() * 20,
-          height: 45 + Math.random() * 20,
+          y: GROUND_Y - obstacleHeight, // Place on ground
+          width: 30 + Math.random() * 25,
+          height: obstacleHeight,
           type: type,
           speed: currentSpeed,
           id: now
         }]);
+        console.log('🌵 Spawned obstacle at:', GROUND_Y - obstacleHeight, 'height:', obstacleHeight);
         setLastObstacleSpawn(now);
       }
 
@@ -265,20 +267,13 @@ export default function SimpleGameEngine({
           x: obstacle.x - obstacle.speed
         })).filter(obstacle => obstacle.x > -100);
 
-        // Check obstacle collisions with precise hitbox
+        // Check obstacle collisions with precise hitbox (no gaps)
         updated.forEach(obstacle => {
-          // Get precise hitbox from pixel art character
-          const playerHitbox = pixelCharacterRef.current?.getHitbox(
-            player.x + player.width / 2,
-            player.y + player.height / 2,
-            2.0
-          );
-
-          if (playerHitbox &&
-              playerHitbox.x < obstacle.x + obstacle.width &&
-              playerHitbox.x + playerHitbox.width > obstacle.x &&
-              playerHitbox.y < obstacle.y + obstacle.height &&
-              playerHitbox.y + playerHitbox.height > obstacle.y) {
+          // Precise collision detection - no offset gaps
+          if (player.x < obstacle.x + obstacle.width &&
+              player.x + player.width > obstacle.x &&
+              player.y < obstacle.y + obstacle.height &&
+              player.y + player.height > obstacle.y) {
             setIsRunning(false);
             onGameEnd(score, {
               duration: Date.now() - (now - score * 16),
@@ -301,18 +296,11 @@ export default function SimpleGameEngine({
 
         // Check collectible collisions with precise hitbox
         updated.forEach((collectible, index) => {
-          // Get precise hitbox from pixel art character
-          const playerHitbox = pixelCharacterRef.current?.getHitbox(
-            player.x + player.width / 2,
-            player.y + player.height / 2,
-            2.0
-          );
-
-          if (playerHitbox &&
-              playerHitbox.x < collectible.x + collectible.width &&
-              playerHitbox.x + playerHitbox.width > collectible.x &&
-              playerHitbox.y < collectible.y + collectible.height &&
-              playerHitbox.y + playerHitbox.height > collectible.y) {
+          // Precise collision detection for collectibles
+          if (player.x < collectible.x + collectible.width &&
+              player.x + player.width > collectible.x &&
+              player.y < collectible.y + collectible.height &&
+              player.y + player.height > collectible.y) {
             // Collected!
             setScore(prev => prev + collectible.value);
 

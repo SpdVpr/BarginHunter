@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import NewGameEngine from './NewGameEngine';
+import SimpleGameEngine from './SimpleGameEngine';
 import GameOverScreen from './GameOverScreen';
 
 interface GameProps {
@@ -271,7 +271,7 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
         </p>
       </div>
 
-      <NewGameEngine
+      <SimpleGameEngine
         onGameEnd={handleGameEnd}
         onScoreUpdate={setCurrentScore}
         discountTiers={gameConfig.discountTiers}
