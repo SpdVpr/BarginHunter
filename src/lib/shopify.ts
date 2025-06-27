@@ -195,9 +195,9 @@ export async function createDiscountCode(
 export async function installScriptTag(session: Session, shopDomain: string) {
   try {
     const client = new shopify.clients.Rest({ session });
-    
+
     const scriptSrc = `${process.env.NEXT_PUBLIC_APP_URL}/api/widget/embed?shop=${shopDomain}`;
-    
+
     const response = await client.post({
       path: 'script_tags',
       data: {
@@ -212,6 +212,52 @@ export async function installScriptTag(session: Session, shopDomain: string) {
     return response.body.script_tag;
   } catch (error) {
     console.error('Failed to install script tag:', error);
+    throw error;
+  }
+}
+
+// Webhook management
+export async function installWebhooks(session: Session) {
+  try {
+    const client = new shopify.clients.Rest({ session });
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+
+    const webhooks = [
+      {
+        topic: 'orders/create',
+        address: `${baseUrl}/api/webhooks/orders/create`,
+        format: 'json'
+      },
+      {
+        topic: 'app/uninstalled',
+        address: `${baseUrl}/api/webhooks/app/uninstalled`,
+        format: 'json'
+      },
+      {
+        topic: 'customers/create',
+        address: `${baseUrl}/api/webhooks/customers/create`,
+        format: 'json'
+      }
+    ];
+
+    const installedWebhooks = [];
+
+    for (const webhook of webhooks) {
+      try {
+        const response = await client.post({
+          path: 'webhooks',
+          data: { webhook },
+        });
+        installedWebhooks.push(response.body.webhook);
+        console.log(`✅ Webhook installed: ${webhook.topic} -> ${webhook.address}`);
+      } catch (error) {
+        console.error(`❌ Failed to install webhook ${webhook.topic}:`, error);
+      }
+    }
+
+    return installedWebhooks;
+  } catch (error) {
+    console.error('Failed to install webhooks:', error);
     throw error;
   }
 }

@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { exchangeCodeForToken, getShopData, installScriptTag } from '../../../src/lib/shopify';
+import { exchangeCodeForToken, getShopData, installScriptTag, installWebhooks } from '../../../src/lib/shopify';
 import { StoreService, GameConfigService } from '../../../src/lib/database';
 import crypto from 'crypto';
 
@@ -112,6 +112,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         stack: scriptError instanceof Error ? scriptError.stack : 'No stack trace'
       });
       // Don't fail the installation if script tag fails
+    }
+
+    // Install webhooks for order tracking
+    try {
+      console.log('🔧 Auth Callback: Installing webhooks for shop:', shop);
+      const webhooks = await installWebhooks(session);
+      console.log('🔧 Auth Callback: Webhooks installed successfully:', webhooks.length);
+
+      // Store webhook IDs for later cleanup
+      const webhookIds = webhooks.map(w => w.id);
+      await StoreService.updateStore(shop, { webhookIds });
+      console.log('🔧 Auth Callback: Store updated with webhook IDs:', webhookIds);
+    } catch (webhookError) {
+      console.error('🔧 Auth Callback: Failed to install webhooks:', webhookError);
+      console.error('🔧 Auth Callback: Webhook error details:', {
+        message: webhookError instanceof Error ? webhookError.message : 'Unknown error',
+        stack: webhookError instanceof Error ? webhookError.stack : 'No stack trace'
+      });
+      // Don't fail the installation if webhooks fail
     }
 
     // Create default game configuration
