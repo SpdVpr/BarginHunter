@@ -154,66 +154,95 @@ export default function NewGameEngine({ onGameEnd, onScoreUpdate, discountTiers,
     ctx.fillRect(drawX + 16*scale, drawY + 40*scale, 5*scale, 4*scale);
   };
 
-  // Draw pixel art obstacle
+  // Draw pixel art obstacle (Chrome Dino style cactus)
   const drawObstacle = (ctx: CanvasRenderingContext2D, obj: GameObject) => {
     ctx.imageSmoothingEnabled = false;
-    
-    // Cactus obstacle
+
     const colors = {
       cactus: '#228B22',
       cactusDark: '#006400',
-      spikes: '#8B4513'
+      cactusLight: '#32CD32'
     };
 
-    // Main cactus body
+    const centerX = obj.x + obj.width / 2;
+    const baseWidth = Math.min(obj.width, 16);
+    const baseX = centerX - baseWidth / 2;
+
+    // Main cactus trunk
     ctx.fillStyle = colors.cactus;
-    ctx.fillRect(obj.x + 8, obj.y, 16, obj.height);
-    
-    // Cactus arms
-    ctx.fillRect(obj.x + 4, obj.y + 12, 8, 12);
-    ctx.fillRect(obj.x + 20, obj.y + 8, 8, 16);
-    
-    // Shading
+    ctx.fillRect(baseX, obj.y, baseWidth, obj.height);
+
+    // Shading on right side
     ctx.fillStyle = colors.cactusDark;
-    ctx.fillRect(obj.x + 22, obj.y, 2, obj.height);
-    ctx.fillRect(obj.x + 26, obj.y + 8, 2, 16);
-    ctx.fillRect(obj.x + 10, obj.y + 12, 2, 12);
-    
-    // Spikes
-    ctx.fillStyle = colors.spikes;
-    for (let i = 0; i < obj.height; i += 8) {
-      ctx.fillRect(obj.x + 6, obj.y + i + 2, 2, 2);
-      ctx.fillRect(obj.x + 24, obj.y + i + 4, 2, 2);
+    ctx.fillRect(baseX + baseWidth - 3, obj.y, 3, obj.height);
+
+    // Highlight on left side
+    ctx.fillStyle = colors.cactusLight;
+    ctx.fillRect(baseX, obj.y, 2, obj.height);
+
+    // Add arms based on cactus size
+    if (obj.width >= 32) {
+      // Wide cactus - add side arms
+      ctx.fillStyle = colors.cactus;
+      // Left arm
+      ctx.fillRect(obj.x + 2, obj.y + obj.height * 0.3, 8, obj.height * 0.4);
+      // Right arm
+      ctx.fillRect(obj.x + obj.width - 10, obj.y + obj.height * 0.2, 8, obj.height * 0.5);
+
+      // Arm shading
+      ctx.fillStyle = colors.cactusDark;
+      ctx.fillRect(obj.x + 8, obj.y + obj.height * 0.3, 2, obj.height * 0.4);
+      ctx.fillRect(obj.x + obj.width - 4, obj.y + obj.height * 0.2, 2, obj.height * 0.5);
+    }
+
+    // Add spikes/texture
+    ctx.fillStyle = colors.cactusDark;
+    for (let i = 4; i < obj.height - 4; i += 8) {
+      // Small spikes on main trunk
+      ctx.fillRect(baseX - 1, obj.y + i, 1, 2);
+      ctx.fillRect(baseX + baseWidth, obj.y + i + 3, 1, 2);
     }
   };
 
-  // Draw collectible
+  // Draw collectible (discount tag)
   const drawCollectible = (ctx: CanvasRenderingContext2D, obj: GameObject) => {
     ctx.imageSmoothingEnabled = false;
-    
-    // Coin/gem collectible
+
     const colors = {
-      gold: '#FFD700',
-      goldDark: '#FFA500',
-      shine: '#FFFF99'
+      tag: '#FF6B6B',
+      tagDark: '#E55555',
+      tagLight: '#FF8888',
+      text: '#FFFFFF'
     };
 
     const centerX = obj.x + obj.width / 2;
     const centerY = obj.y + obj.height / 2;
-    
-    // Main coin body
-    ctx.fillStyle = colors.gold;
-    ctx.fillRect(centerX - 8, centerY - 8, 16, 16);
-    
+
+    // Discount tag shape (like a price tag)
+    ctx.fillStyle = colors.tag;
+    ctx.fillRect(centerX - 10, centerY - 8, 20, 16);
+
+    // Tag point (right side)
+    ctx.fillRect(centerX + 10, centerY - 4, 4, 8);
+
     // Shading
-    ctx.fillStyle = colors.goldDark;
-    ctx.fillRect(centerX + 6, centerY - 8, 2, 16);
-    ctx.fillRect(centerX - 8, centerY + 6, 16, 2);
-    
-    // Shine effect
-    ctx.fillStyle = colors.shine;
-    ctx.fillRect(centerX - 6, centerY - 6, 4, 4);
-    ctx.fillRect(centerX + 2, centerY + 2, 2, 2);
+    ctx.fillStyle = colors.tagDark;
+    ctx.fillRect(centerX + 8, centerY - 8, 2, 16);
+    ctx.fillRect(centerX - 10, centerY + 6, 20, 2);
+
+    // Highlight
+    ctx.fillStyle = colors.tagLight;
+    ctx.fillRect(centerX - 10, centerY - 8, 20, 2);
+
+    // Hole for string
+    ctx.fillStyle = colors.tagDark;
+    ctx.fillRect(centerX - 6, centerY - 4, 2, 2);
+
+    // Percentage symbol
+    ctx.fillStyle = colors.text;
+    ctx.fillRect(centerX - 2, centerY - 3, 1, 1);
+    ctx.fillRect(centerX + 1, centerY + 2, 1, 1);
+    ctx.fillRect(centerX - 1, centerY - 1, 3, 1);
   };
 
   // Precise collision detection
@@ -311,39 +340,55 @@ export default function NewGameEngine({ onGameEnd, onScoreUpdate, discountTiers,
       // Draw character
       drawCharacter(ctx, updatedPlayer.x, updatedPlayer.y + CHAR_HEIGHT / 2);
 
-      // Spawn objects
+      // Spawn objects (Chrome Dino style - mostly obstacles)
       const now = Date.now();
-      if (now - lastSpawnTimeRef.current > 1500) {
-        const isObstacle = Math.random() < 0.7;
+      const spawnInterval = 1200 + Math.random() * 800; // Random interval 1.2-2.0 seconds
+
+      if (now - lastSpawnTimeRef.current > spawnInterval) {
+        // 85% obstacles (like Chrome Dino), 15% collectibles
+        const isObstacle = Math.random() < 0.85;
 
         if (isObstacle) {
-          const height = 40 + Math.random() * 20;
+          // Spawn cactus obstacle (like Chrome Dino)
+          const obstacleTypes = [
+            { width: 24, height: 48 }, // Tall cactus
+            { width: 32, height: 32 }, // Wide cactus
+            { width: 20, height: 56 }  // Very tall cactus
+          ];
+
+          const obstacleType = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
+
           const newObstacle = {
-            x: CANVAS_WIDTH,
-            y: GROUND_Y - height,
-            width: 32,
-            height: height,
+            x: CANVAS_WIDTH + 50, // Start off-screen
+            y: GROUND_Y - obstacleType.height,
+            width: obstacleType.width,
+            height: obstacleType.height,
             type: 'obstacle' as const,
-            hitboxWidth: 20,
-            hitboxHeight: height - 4,
-            hitboxOffsetX: 6,
+            hitboxWidth: obstacleType.width - 8, // Slightly smaller hitbox
+            hitboxHeight: obstacleType.height - 4,
+            hitboxOffsetX: 4,
             hitboxOffsetY: 2
           };
+
           setGameObjects(prev => [...prev, newObstacle]);
+          console.log('🌵 Spawned obstacle:', newObstacle);
         } else {
+          // Spawn collectible (discount coin)
           const newCollectible = {
-            x: CANVAS_WIDTH,
-            y: GROUND_Y - 60 - Math.random() * 40,
-            width: 20,
-            height: 20,
+            x: CANVAS_WIDTH + 50,
+            y: GROUND_Y - 80 - Math.random() * 60, // Higher in air
+            width: 24,
+            height: 24,
             type: 'collectible' as const,
-            value: 10,
-            hitboxWidth: 16,
-            hitboxHeight: 16,
+            value: 25, // Higher value for fewer collectibles
+            hitboxWidth: 20,
+            hitboxHeight: 20,
             hitboxOffsetX: 2,
             hitboxOffsetY: 2
           };
+
           setGameObjects(prev => [...prev, newCollectible]);
+          console.log('💰 Spawned collectible:', newCollectible);
         }
 
         setLastSpawnTime(now);
@@ -393,9 +438,9 @@ export default function NewGameEngine({ onGameEnd, onScoreUpdate, discountTiers,
       setGameObjects(updatedObjects);
       gameObjectsRef.current = updatedObjects;
 
-      // Update score based on distance
+      // Update score based on distance (like Chrome Dino)
       if (!gameEnded) {
-        const newScore = scoreRef.current + 0.1;
+        const newScore = scoreRef.current + 0.5; // Faster score increase
         setScore(newScore);
         scoreRef.current = newScore;
         onScoreUpdate(Math.floor(newScore));
