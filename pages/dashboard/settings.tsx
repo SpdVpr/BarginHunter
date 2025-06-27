@@ -91,6 +91,7 @@ export default function Settings() {
   const [businessRules, setBusinessRules] = useState<BusinessRules | null>(null);
   const [toastActive, setToastActive] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [reinstalling, setReinstalling] = useState(false);
   const [mobileNavigationActive, setMobileNavigationActive] = useState(false);
 
   useEffect(() => {
@@ -173,6 +174,34 @@ export default function Settings() {
     setMobileNavigationActive(!mobileNavigationActive);
   };
 
+  const forceReinstall = async () => {
+    try {
+      setReinstalling(true);
+      const response = await fetch('/api/force-reinstall', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ shop }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setToastMessage('Widget script reinstalled successfully! Please check your store.');
+        setToastActive(true);
+      } else {
+        throw new Error(result.error || 'Failed to reinstall');
+      }
+    } catch (error) {
+      console.error('Failed to reinstall:', error);
+      setToastMessage('Failed to reinstall widget script. Please try again.');
+      setToastActive(true);
+    } finally {
+      setReinstalling(false);
+    }
+  };
+
   const navigationMarkup = (
     <Navigation location="/">
       <Navigation.Section
@@ -252,6 +281,11 @@ export default function Settings() {
           {
             content: 'Test Game',
             onAction: () => window.open(`/widget/game?shop=${shop}`, '_blank'),
+          },
+          {
+            content: 'Reinstall Widget',
+            onAction: forceReinstall,
+            loading: reinstalling,
           },
         ]}
       >
