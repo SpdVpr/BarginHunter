@@ -220,18 +220,43 @@ export class DiscountService {
     return docRef.id;
   }
 
-  static async markDiscountUsed(discountCode: string, orderId: string): Promise<void> {
+  static async markDiscountUsed(
+    discountCode: string,
+    orderId: string,
+    orderData?: {
+      orderValue: number;
+      discountAmount: number;
+      currency: string;
+      customerEmail?: string;
+      orderDate: Date;
+      shopDomain: string;
+    }
+  ): Promise<void> {
     const snapshot = await db.collection(collections.discountCodes)
       .where('code', '==', discountCode)
       .limit(1)
       .get();
-    
+
     if (!snapshot.empty) {
-      await snapshot.docs[0].ref.update({
+      const updateData: any = {
         isUsed: true,
         usedAt: Timestamp.now(),
         orderId,
-      });
+      };
+
+      // Add order data if provided
+      if (orderData) {
+        updateData.orderValue = orderData.orderValue;
+        updateData.discountAmount = orderData.discountAmount;
+        updateData.currency = orderData.currency;
+        updateData.actualRevenue = orderData.orderValue - orderData.discountAmount;
+        if (orderData.customerEmail) {
+          updateData.orderCustomerEmail = orderData.customerEmail;
+        }
+        updateData.orderDate = Timestamp.fromDate(orderData.orderDate);
+      }
+
+      await snapshot.docs[0].ref.update(updateData);
     }
   }
 

@@ -32,17 +32,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // Check if this is one of our generated discount codes
         if (discountCode.code && discountCode.code.startsWith('BARGAIN')) {
           try {
-            await DiscountService.markDiscountUsed(discountCode.code, order.id.toString());
-            console.log('Marked discount as used:', discountCode.code);
+            // Mark discount as used with order details
+            await DiscountService.markDiscountUsed(
+              discountCode.code,
+              order.id.toString(),
+              {
+                orderValue: parseFloat(order.total_price || '0'),
+                discountAmount: parseFloat(discountCode.amount || '0'),
+                currency: order.currency || 'USD',
+                customerEmail: order.email,
+                orderDate: new Date(order.created_at),
+                shopDomain
+              }
+            );
+            console.log('✅ Marked discount as used with order data:', {
+              code: discountCode.code,
+              orderId: order.id,
+              orderValue: order.total_price,
+              discountAmount: discountCode.amount
+            });
           } catch (error) {
-            console.error('Failed to mark discount as used:', error);
+            console.error('❌ Failed to mark discount as used:', error);
           }
         }
       }
     }
-
-    // TODO: Update analytics with order data
-    // This would involve updating revenue metrics, conversion tracking, etc.
 
     return res.status(200).json({ received: true });
 

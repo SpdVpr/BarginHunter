@@ -50,15 +50,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Calculate conversion rate (completed sessions / total sessions)
     const conversionRate = totalSessions > 0 ? (totalCompletedSessions / totalSessions) * 100 : 0;
     
-    // Calculate revenue (this would need integration with Shopify orders)
-    // For now, we'll estimate based on used discounts
-    const estimatedRevenue = usedDiscounts.reduce((sum, discount) => {
-      // Estimate average order value and discount impact
-      const estimatedOrderValue = 100; // This should come from actual order data
-      const discountAmount = discount.type === 'percentage' 
-        ? (estimatedOrderValue * discount.value / 100)
-        : discount.value;
+    // Calculate actual revenue from order data
+    const actualRevenue = usedDiscounts.reduce((sum, discount) => {
+      // Use actual order data if available
+      if (discount.actualRevenue) {
+        return sum + discount.actualRevenue;
+      }
+      // Fallback to estimation for older records
+      const estimatedOrderValue = discount.orderValue || 100;
+      const discountAmount = discount.discountAmount ||
+        (discount.type === 'percentage'
+          ? (estimatedOrderValue * discount.value / 100)
+          : discount.value);
       return sum + (estimatedOrderValue - discountAmount);
+    }, 0);
+
+    // Calculate total order value (before discounts)
+    const totalOrderValue = usedDiscounts.reduce((sum, discount) => {
+      return sum + (discount.orderValue || 100); // Fallback for older records
+    }, 0);
+
+    // Calculate total discount amount given
+    const totalDiscountAmount = usedDiscounts.reduce((sum, discount) => {
+      return sum + (discount.discountAmount ||
+        (discount.type === 'percentage'
+          ? ((discount.orderValue || 100) * discount.value / 100)
+          : discount.value));
     }, 0);
 
     // Get unique customers count
@@ -77,7 +94,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       conversionRate: Math.round(conversionRate * 10) / 10,
       averageScore,
       activeCustomers,
-      revenue: Math.round(estimatedRevenue),
+      revenue: Math.round(actualRevenue),
+      totalOrderValue: Math.round(totalOrderValue),
+      totalDiscountAmount: Math.round(totalDiscountAmount),
       
       // Additional metrics
       completionRate: totalSessions > 0 ? Math.round((totalCompletedSessions / totalSessions) * 100) : 0,
