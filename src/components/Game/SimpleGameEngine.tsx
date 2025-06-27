@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { DirectImageManager } from './DirectImageManager';
+import { PixelArtCharacter } from './PixelArtCharacter';
 
 interface SimpleGameEngineProps {
   onGameEnd: (score: number, gameData: any) => void;
@@ -19,14 +19,14 @@ export default function SimpleGameEngine({
 }: SimpleGameEngineProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
-  const spriteManagerRef = useRef<DirectImageManager | null>(null);
+  const pixelCharacterRef = useRef<PixelArtCharacter | null>(null);
   const [score, setScore] = useState(0);
   const [isRunning, setIsRunning] = useState(true);
   const [player, setPlayer] = useState({
     x: 100,
-    y: GROUND_Y - 80,
-    width: 64,
-    height: 80,
+    y: GROUND_Y - 48, // Height of pixel art character
+    width: 24, // Hitbox width (precise collision)
+    height: 40, // Hitbox height (precise collision)
     velocityY: 0,
     isJumping: false
   });
@@ -50,11 +50,14 @@ export default function SimpleGameEngine({
     }
   };
 
-  // Initialize sprite manager and clouds
+  // Initialize pixel art character and clouds
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (canvas && !spriteManagerRef.current) {
-      spriteManagerRef.current = new DirectImageManager(canvas);
+    if (canvas && !pixelCharacterRef.current) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        pixelCharacterRef.current = new PixelArtCharacter(ctx);
+      }
     }
 
     const initialClouds = [];
@@ -159,9 +162,10 @@ export default function SimpleGameEngine({
         let newVelocityY = prev.velocityY + 0.8; // gravity
         let newIsJumping = prev.isJumping;
 
-        // Ground collision
-        if (newY >= GROUND_Y - prev.height) {
-          newY = GROUND_Y - prev.height;
+        // Ground collision (using pixel art character height)
+        const characterHeight = 48; // Pixel art character height
+        if (newY >= GROUND_Y - characterHeight) {
+          newY = GROUND_Y - characterHeight;
           newVelocityY = 0;
           newIsJumping = false;
         }
@@ -188,15 +192,19 @@ export default function SimpleGameEngine({
       ctx.ellipse(playerCenterX, GROUND_Y - 8, player.width / 1.5, 12, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Draw your exact PNG image
-      if (spriteManagerRef.current && spriteManagerRef.current.isReady()) {
-        spriteManagerRef.current.drawCharacter(
+      // Draw pixel art character
+      if (pixelCharacterRef.current && pixelCharacterRef.current.isReady()) {
+        pixelCharacterRef.current.drawCharacter(
           playerCenterX,
           playerCenterY,
-          2.0 // Scale up to make your character clearly visible
+          2.0, // Scale up for visibility
+          player.isJumping
         );
+
+        // Debug: Draw hitbox (remove this in production)
+        // pixelCharacterRef.current.drawHitbox(playerCenterX, playerCenterY, 2.0);
       } else {
-        // Fallback to simple rectangle while image loads
+        // Fallback to simple rectangle while character loads
         ctx.fillStyle = '#4ECDC4';
         ctx.fillRect(player.x, player.y, player.width, player.height);
 
@@ -257,12 +265,20 @@ export default function SimpleGameEngine({
           x: obstacle.x - obstacle.speed
         })).filter(obstacle => obstacle.x > -100);
 
-        // Check obstacle collisions (adjusted for larger character)
+        // Check obstacle collisions with precise hitbox
         updated.forEach(obstacle => {
-          if (player.x + 10 < obstacle.x + obstacle.width - 10 &&
-              player.x + player.width - 10 > obstacle.x + 10 &&
-              player.y + 10 < obstacle.y + obstacle.height - 10 &&
-              player.y + player.height - 10 > obstacle.y + 10) {
+          // Get precise hitbox from pixel art character
+          const playerHitbox = pixelCharacterRef.current?.getHitbox(
+            player.x + player.width / 2,
+            player.y + player.height / 2,
+            2.0
+          );
+
+          if (playerHitbox &&
+              playerHitbox.x < obstacle.x + obstacle.width &&
+              playerHitbox.x + playerHitbox.width > obstacle.x &&
+              playerHitbox.y < obstacle.y + obstacle.height &&
+              playerHitbox.y + playerHitbox.height > obstacle.y) {
             setIsRunning(false);
             onGameEnd(score, {
               duration: Date.now() - (now - score * 16),
@@ -283,12 +299,20 @@ export default function SimpleGameEngine({
           y: collectible.y + Math.sin(Date.now() * 0.005 + collectible.id) * 0.5 // Floating animation
         })).filter(collectible => collectible.x > -50);
 
-        // Check collectible collisions
+        // Check collectible collisions with precise hitbox
         updated.forEach((collectible, index) => {
-          if (player.x < collectible.x + collectible.width &&
-              player.x + player.width > collectible.x &&
-              player.y < collectible.y + collectible.height &&
-              player.y + player.height > collectible.y) {
+          // Get precise hitbox from pixel art character
+          const playerHitbox = pixelCharacterRef.current?.getHitbox(
+            player.x + player.width / 2,
+            player.y + player.height / 2,
+            2.0
+          );
+
+          if (playerHitbox &&
+              playerHitbox.x < collectible.x + collectible.width &&
+              playerHitbox.x + playerHitbox.width > collectible.x &&
+              playerHitbox.y < collectible.y + collectible.height &&
+              playerHitbox.y + playerHitbox.height > collectible.y) {
             // Collected!
             setScore(prev => prev + collectible.value);
 
