@@ -84,13 +84,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     try {
       // Install script tag for widget
+      console.log('🔧 Auth Callback: Installing script tag for shop:', shop);
       const scriptTag = await installScriptTag(session, shop);
-      console.log('Script tag installed:', scriptTag.id);
+      console.log('🔧 Auth Callback: Script tag installed successfully:', {
+        id: scriptTag.id,
+        src: scriptTag.src,
+        event: scriptTag.event
+      });
 
       // Update store with script tag ID
       await StoreService.updateStore(shop, { scriptTagId: scriptTag.id });
+      console.log('🔧 Auth Callback: Store updated with script tag ID:', scriptTag.id);
     } catch (scriptError) {
-      console.error('Failed to install script tag:', scriptError);
+      console.error('🔧 Auth Callback: Failed to install script tag:', scriptError);
+      console.error('🔧 Auth Callback: Script error details:', {
+        message: scriptError instanceof Error ? scriptError.message : 'Unknown error',
+        stack: scriptError instanceof Error ? scriptError.stack : 'No stack trace'
+      });
       // Don't fail the installation if script tag fails
     }
 
