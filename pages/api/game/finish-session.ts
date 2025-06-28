@@ -180,7 +180,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           });
 
           // Save discount record to database
-          await DiscountService.createDiscountRecord({
+          console.log('💾 Saving discount record to database...', {
+            shopDomain: session.shopDomain,
+            code: discountCode,
+            customerId: session.customerId,
+            customerEmail: session.customerEmail || playerEmail,
+            sessionId
+          });
+
+          const discountRecordId = await DiscountService.createDiscountRecord({
             shopDomain: session.shopDomain,
             code: discountCode,
             value: discountEarned,
@@ -193,9 +201,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             expiresAt: Timestamp.fromDate(new Date(expiresAt)),
             isUsed: false,
           });
+
+          console.log('✅ Discount record saved with ID:', discountRecordId);
         }
       } catch (error) {
-        console.error('Failed to create Shopify discount:', error);
+        console.error('❌ Failed to create discount:', error);
         // Continue with the response even if discount creation fails
       }
     }
