@@ -377,3 +377,8 @@ export default function Analytics() {
     </Frame>
   );
 }
+
+// Use the same layout as other dashboard pages
+Analytics.getLayout = function getLayout(page: React.ReactElement) {
+  return page;
+};

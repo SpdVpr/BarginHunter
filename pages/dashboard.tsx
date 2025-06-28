@@ -74,11 +74,24 @@ export default function Dashboard() {
         setStats(statsData);
       }
 
-      // Load recent sessions
-      const sessionsResponse = await fetch(`/api/dashboard/sessions?shop=${shop}&limit=10`);
-      if (sessionsResponse.ok) {
-        const sessionsData = await sessionsResponse.json();
-        setRecentSessions(sessionsData.sessions || []);
+      // Load recent discount codes (same data as Analytics)
+      const discountsResponse = await fetch(`/api/dashboard/discounts?shop=${shop}`);
+      if (discountsResponse.ok) {
+        const discountsData = await discountsResponse.json();
+        // Convert discount codes to session format for display
+        const recentDiscounts = (discountsData.discounts || [])
+          .filter((discount: any) => discount.isUsed) // Only show used discounts
+          .slice(0, 10) // Limit to 10 most recent
+          .map((discount: any) => ({
+            customerEmail: discount.customerEmail || 'Anonymous',
+            score: Math.round(discount.value * 20), // Estimate score from discount (5% = ~100 points)
+            discount: discount.value,
+            status: 'completed',
+            completedAt: discount.usedAt || discount.createdAt,
+            orderValue: discount.orderValue,
+            revenue: discount.actualRevenue
+          }));
+        setRecentSessions(recentDiscounts);
       }
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
@@ -149,9 +162,7 @@ export default function Dashboard() {
     session.customerEmail || 'Anonymous',
     session.score.toString(),
     session.discount > 0 ? `${session.discount}%` : 'No discount',
-    <Badge status={session.status === 'completed' ? 'success' : 'attention'}>
-      {session.status}
-    </Badge>,
+    <Badge status="success">Used</Badge>,
     new Date(session.completedAt).toLocaleDateString(),
   ]);
 
@@ -307,7 +318,7 @@ export default function Dashboard() {
                 <Card>
                   <div style={{ padding: '1rem' }}>
                     <Stack vertical spacing="loose">
-                      <Heading>Recent Game Sessions</Heading>
+                      <Heading>Recent Successful Games</Heading>
                       <DataTable
                         columnContentTypes={['text', 'numeric', 'text', 'text', 'text']}
                         headings={['Customer', 'Score', 'Discount', 'Status', 'Date']}
