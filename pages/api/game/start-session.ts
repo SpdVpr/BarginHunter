@@ -184,8 +184,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('🎮 Creating session in database...');
     const sessionData = {
       shopDomain,
-      customerId: customerData?.id || undefined,
-      customerEmail: customerData?.email || undefined,
+      customerId: customerData?.id || null,
+      customerEmail: customerData?.email || null,
       sessionId,
       gameData: {
         moves: 0,

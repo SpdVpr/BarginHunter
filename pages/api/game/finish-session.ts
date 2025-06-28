@@ -195,8 +195,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             type: 'percentage',
             priceRuleId: shopifyDiscount.priceRule.id.toString(),
             discountCodeId: shopifyDiscount.discountCode.id.toString(),
-            customerId: session.customerId,
-            customerEmail: session.customerEmail || playerEmail,
+            customerId: session.customerId || null,
+            customerEmail: session.customerEmail || playerEmail || null,
             sessionId,
             expiresAt: Timestamp.fromDate(new Date(expiresAt)),
             isUsed: false,
@@ -224,8 +224,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       await GameScoreService.recordScore({
         shopDomain: session.shopDomain,
-        customerId: session.customerId,
-        customerEmail: session.customerEmail || playerEmail,
+        customerId: session.customerId || null,
+        customerEmail: session.customerEmail || playerEmail || null,
         sessionId,
         score: finalScore,
         discountEarned,
@@ -245,8 +245,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (session.customerId || session.customerEmail || playerEmail) {
       try {
         const identifier = session.customerId || session.customerEmail || playerEmail!;
-        await CustomerService.updateCustomerStats(session.shopDomain, identifier, finalScore, discountEarned);
-        console.log('🎮 Customer stats updated');
+        if (identifier) {
+          await CustomerService.updateCustomerStats(session.shopDomain, identifier, finalScore, discountEarned);
+          console.log('🎮 Customer stats updated');
+        }
       } catch (dbError: any) {
         console.error('🎮 Failed to update customer stats:', dbError);
       }
