@@ -65,8 +65,8 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 npm run dev
 ```
 
-5. **Open the demo**
-Visit `http://localhost:3000` to see the game demo.
+5. **Open the application**
+Visit `http://localhost:3000` to access the application.
 
 ## 📁 Project Structure
 
@@ -77,7 +77,7 @@ bargain-hunter/
 │   │   ├── game/           # Game-related APIs
 │   │   └── widget/         # Widget embed script
 │   ├── widget/             # Widget pages
-│   ├── demo.tsx            # Game demo page
+│   ├── dashboard.tsx       # Main dashboard page
 │   └── index.tsx           # Main entry point
 ├── src/
 │   ├── components/         # React components

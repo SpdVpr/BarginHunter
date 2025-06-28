@@ -19,8 +19,8 @@ export default function Home() {
 
       router.push(`/dashboard?${params.toString()}`);
     } else {
-      // Otherwise, redirect to demo
-      router.push('/demo');
+      // Otherwise, show installation instructions
+      router.push('/app');
     }
   }, [router]);
 
@@ -35,7 +35,7 @@ export default function Home() {
       <div style={{ textAlign: 'center' }}>
         <div className="loading-spinner"></div>
         <p style={{ marginTop: '20px', color: '#666' }}>
-          Redirecting to Bargain Hunter Demo...
+          Loading Bargain Hunter...
         </p>
       </div>
     </div>

@@ -54,8 +54,8 @@ bargain-hunter/
 │
 ├── 📁 pages/                          # Next.js pages
 │   ├── 📄 _app.tsx                    # App wrapper with Polaris
-│   ├── 📄 index.tsx                   # Home page (redirects to demo)
-│   ├── 📄 demo.tsx                    # Interactive game demo
+│   ├── 📄 index.tsx                   # Home page (redirects to app)
+│   ├── 📄 dashboard.tsx               # Main dashboard interface
 │   │
 │   ├── 📁 api/                        # API endpoints
 │   │   ├── 📁 game/                   # Game-related APIs
