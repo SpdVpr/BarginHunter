@@ -54,28 +54,11 @@ export default function ShopifyApp() {
       }
 
       if (shop && typeof shop === 'string') {
-        // Check if the app is actually installed by trying to fetch config
-        try {
-          const response = await fetch(`/api/game/config/${shop}`);
-          if (response.ok) {
-            const config = await response.json();
-            if (config && config.shopDomain) {
-              // App is properly installed, redirect to dashboard
-              console.log('App is installed, redirecting to dashboard...');
-              router.push(`/dashboard?shop=${shop}`);
-              return;
-            }
-          }
-
-          // If we get here, app is not properly installed
-          console.log('App not installed or config missing, showing installation...');
-          setLoading(false);
-          return;
-        } catch (configError) {
-          console.log('Config check failed, assuming not installed:', configError);
-          setLoading(false);
-          return;
-        }
+        // For now, always redirect to dashboard if shop parameter exists
+        // TODO: Implement proper installation check
+        console.log('Shop parameter found, redirecting to dashboard...');
+        router.push(`/dashboard?shop=${shop}`);
+        return;
       }
 
       setLoading(false);
