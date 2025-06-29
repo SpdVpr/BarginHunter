@@ -30,6 +30,7 @@ export default function GameIntroScreen({
   const minDiscount = gameConfig.minDiscount || 5;
   const maxDiscount = gameConfig.maxDiscount || 20;
   const isFlappyBird = gameConfig.gameType === 'flappy_bird';
+  const isTetris = gameConfig.gameType === 'tetris';
 
   // Get the lowest score requirement for any discount
   const lowestScoreForDiscount = gameConfig.discountTiers.length > 0
@@ -78,7 +79,7 @@ export default function GameIntroScreen({
           margin: '0 0 10px 0',
           textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
         }}>
-          {isFlappyBird ? '🐦 Flappy Hunter' : '🦕 Bargain Hunter'}
+          {isFlappyBird ? '🐦 Flappy Hunter' : isTetris ? '🧩 Tetris Hunter' : '🦕 Bargain Hunter'}
         </h1>
         <p style={{
           fontSize: '18px',
@@ -87,6 +88,8 @@ export default function GameIntroScreen({
         }}>
           {isFlappyBird
             ? 'Fly through pipes and earn amazing discounts!'
+            : isTetris
+            ? 'Stack blocks, clear lines, and earn amazing discounts!'
             : 'Jump, dodge, and earn amazing discounts!'
           }
         </p>
@@ -150,6 +153,47 @@ export default function GameIntroScreen({
                   background: '#228B22',
                   borderRadius: '4px 4px 0 0'
                 }} />
+              </div>
+            </>
+          ) : isTetris ? (
+            // Tetris preview
+            <>
+              {/* Tetris grid */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(6, 12px)',
+                gridTemplateRows: 'repeat(6, 12px)',
+                gap: '1px',
+                animation: 'pulse 1.5s infinite'
+              }}>
+                {/* Bottom row - filled */}
+                <div style={{ background: '#FF0000' }} />
+                <div style={{ background: '#FF0000' }} />
+                <div style={{ background: '#00FF00' }} />
+                <div style={{ background: '#00FF00' }} />
+                <div style={{ background: '#0000FF' }} />
+                <div style={{ background: '#0000FF' }} />
+
+                {/* Second row - partially filled */}
+                <div style={{ background: '#FFFF00' }} />
+                <div style={{ background: '#FFFF00' }} />
+                <div />
+                <div />
+                <div style={{ background: '#FF00FF' }} />
+                <div style={{ background: '#FF00FF' }} />
+
+                {/* Falling piece */}
+                <div />
+                <div style={{ background: '#00FFFF' }} />
+                <div style={{ background: '#00FFFF' }} />
+                <div style={{ background: '#00FFFF' }} />
+                <div style={{ background: '#00FFFF' }} />
+                <div />
+
+                {/* Empty rows */}
+                <div /><div /><div /><div /><div /><div />
+                <div /><div /><div /><div /><div /><div />
+                <div /><div /><div /><div /><div /><div />
               </div>
             </>
           ) : (
@@ -269,11 +313,11 @@ export default function GameIntroScreen({
         }}>
           <div>
             <strong>🖱️ Click/Space</strong><br />
-            {isFlappyBird ? 'to flap' : 'to jump'}
+            {isFlappyBird ? 'to flap' : isTetris ? 'to rotate' : 'to jump'}
           </div>
           <div>
-            <strong>{isFlappyBird ? '🟢 Fly through' : '🚧 Avoid'}</strong><br />
-            {isFlappyBird ? 'pipe gaps' : 'obstacles'}
+            <strong>{isFlappyBird ? '🟢 Fly through' : isTetris ? '🧩 Stack blocks' : '🚧 Avoid'}</strong><br />
+            {isFlappyBird ? 'pipe gaps' : isTetris ? 'clear lines' : 'obstacles'}
           </div>
           <div>
             <strong>🏆 Score</strong><br />
