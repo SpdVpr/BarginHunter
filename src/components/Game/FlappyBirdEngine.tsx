@@ -39,11 +39,11 @@ const getCanvasSize = () => {
   }
 };
 
-// Flappy Bird physics
-const GRAVITY = 0.6;
-const FLAP_FORCE = -12;
-const PIPE_SPEED = 2;
-const PIPE_GAP = 120;
+// Flappy Bird physics - adjusted for better playability
+const GRAVITY = 0.4; // Reduced gravity for better control
+const FLAP_FORCE = -8; // Reduced flap force to match gravity
+const PIPE_SPEED = 1.5; // Slower pipe movement
+const PIPE_GAP = 140; // Larger gap for easier gameplay
 const PIPE_WIDTH = 60;
 
 // Bird constants
@@ -82,7 +82,7 @@ export default function FlappyBirdEngine({
   
   const [bird, setBird] = useState<Bird>({
     x: BIRD_X,
-    y: canvasSize.height / 2,
+    y: canvasSize.height * 0.4, // Start higher up (40% from top)
     velocityY: 0,
     size: BIRD_SIZE,
   });
@@ -98,7 +98,7 @@ export default function FlappyBirdEngine({
       // Update bird position proportionally
       setBird(prev => ({
         ...prev,
-        y: newSize.height / 2,
+        y: newSize.height * 0.4,
       }));
     };
 
@@ -210,24 +210,26 @@ export default function FlappyBirdEngine({
     setPipes(prev => [...prev, newPipe]);
   }, [canvasSize]);
 
-  // Check collision
+  // Check collision - slightly more forgiving
   const checkCollision = useCallback((bird: Bird, pipes: Pipe[]) => {
+    const tolerance = 3; // 3px tolerance for more forgiving gameplay
+
     // Ground collision
     if (bird.y + bird.size / 2 >= canvasSize.height || bird.y - bird.size / 2 <= 0) {
       return true;
     }
-    
-    // Pipe collision
+
+    // Pipe collision with tolerance
     for (const pipe of pipes) {
-      if (bird.x + bird.size / 2 > pipe.x && 
-          bird.x - bird.size / 2 < pipe.x + PIPE_WIDTH) {
-        if (bird.y - bird.size / 2 < pipe.topHeight || 
-            bird.y + bird.size / 2 > pipe.bottomY) {
+      if (bird.x + bird.size / 2 - tolerance > pipe.x &&
+          bird.x - bird.size / 2 + tolerance < pipe.x + PIPE_WIDTH) {
+        if (bird.y - bird.size / 2 + tolerance < pipe.topHeight ||
+            bird.y + bird.size / 2 - tolerance > pipe.bottomY) {
           return true;
         }
       }
     }
-    
+
     return false;
   }, [canvasSize.height]);
 
@@ -259,7 +261,7 @@ export default function FlappyBirdEngine({
     
     // Spawn pipes
     const now = Date.now();
-    if (now - lastPipeSpawn > 2000) { // Every 2 seconds
+    if (now - lastPipeSpawn > 2500) { // Every 2.5 seconds for easier gameplay
       spawnPipe();
       setLastPipeSpawn(now);
     }
@@ -313,7 +315,7 @@ export default function FlappyBirdEngine({
     setLastPipeSpawn(0);
     setBird({
       x: BIRD_X,
-      y: canvasSize.height / 2,
+      y: canvasSize.height * 0.4,
       velocityY: 0,
       size: BIRD_SIZE,
     });
