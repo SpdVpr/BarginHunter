@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import SimpleGameEngine from './SimpleGameEngine';
+import EnhancedGameEngine from './EnhancedGameEngine';
+import GameIntroScreen from './GameIntroScreen';
 import GameOverScreen from './GameOverScreen';
 
 interface GameProps {
@@ -25,11 +26,12 @@ const DEFAULT_DISCOUNT_TIERS = [
 ];
 
 export default function Game({ shopDomain, onGameComplete, onClose }: GameProps) {
-  const [gameState, setGameState] = useState<'loading' | 'playing' | 'gameOver'>('loading');
+  const [gameState, setGameState] = useState<'loading' | 'intro' | 'playing' | 'gameOver'>('loading');
   const [gameConfig, setGameConfig] = useState<any>(null);
   const [gameResult, setGameResult] = useState<GameResult | null>(null);
   const [currentScore, setCurrentScore] = useState(0);
   const [sessionId, setSessionId] = useState<string>('');
+  const [attemptsUsed, setAttemptsUsed] = useState(0);
 
   // Load game configuration
   useEffect(() => {
@@ -45,8 +47,11 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
             gameSpeed: config.gameSettings?.gameSpeed || 1,
             difficulty: config.gameSettings?.difficulty || 'medium',
             minScoreForDiscount: config.gameSettings?.minScoreForDiscount || 150,
-            maxPlaysPerCustomer: config.gameSettings?.maxPlaysPerCustomer || 3,
-            maxPlaysPerDay: config.gameSettings?.maxPlaysPerDay || 10
+            maxAttempts: config.gameSettings?.maxPlaysPerCustomer || 3,
+            maxPlaysPerDay: config.gameSettings?.maxPlaysPerDay || 10,
+            minDiscount: Math.min(...(config.gameSettings?.discountTiers || DEFAULT_DISCOUNT_TIERS).map((t: any) => t.discount).filter((d: number) => d > 0)),
+            maxDiscount: Math.max(...(config.gameSettings?.discountTiers || DEFAULT_DISCOUNT_TIERS).map((t: any) => t.discount)),
+            shopName: config.shopName || shopDomain
           });
         } else {
           // Use default config
@@ -55,8 +60,11 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
             gameSpeed: 1,
             difficulty: 'medium',
             minScoreForDiscount: 150,
-            maxPlaysPerCustomer: 3,
-            maxPlaysPerDay: 10
+            maxAttempts: 3,
+            maxPlaysPerDay: 10,
+            minDiscount: 5,
+            maxDiscount: 25,
+            shopName: shopDomain
           });
         }
       } catch (error) {
@@ -65,10 +73,14 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
         setGameConfig({
           discountTiers: DEFAULT_DISCOUNT_TIERS,
           gameSpeed: 1,
-          difficulty: 'medium'
+          difficulty: 'medium',
+          maxAttempts: 3,
+          minDiscount: 5,
+          maxDiscount: 25,
+          shopName: shopDomain
         });
       } finally {
-        setGameState('playing');
+        setGameState('intro');
       }
     };
 
@@ -123,6 +135,9 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
   const handleGameEnd = async (score: number, gameData: any) => {
     try {
       console.log('🎮 Finishing game session:', { sessionId, score, gameData });
+
+      // Increment attempts used
+      setAttemptsUsed(prev => prev + 1);
 
       // Calculate discount earned
       const discountTier = gameConfig.discountTiers
@@ -239,6 +254,17 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
     );
   }
 
+  if (gameState === 'intro') {
+    return (
+      <GameIntroScreen
+        gameConfig={gameConfig}
+        onStartGame={() => setGameState('playing')}
+        onClose={onClose}
+        attemptsUsed={attemptsUsed}
+      />
+    );
+  }
+
   if (gameState === 'gameOver' && gameResult) {
     return (
       <GameOverScreen
@@ -255,27 +281,11 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
 
   return (
     <div>
-      <div style={{ 
-        textAlign: 'center', 
-        marginBottom: '20px',
-        padding: '15px',
-        background: 'linear-gradient(45deg, #ff6b6b, #4ecdc4)',
-        color: 'white',
-        borderRadius: '8px'
-      }}>
-        <h2 style={{ margin: '0 0 10px 0', fontSize: '24px' }}>
-          🎮 Bargain Hunter
-        </h2>
-        <p style={{ margin: '0', fontSize: '14px' }}>
-          Collect discount tags and avoid obstacles to earn your discount!
-        </p>
-      </div>
-
-      <SimpleGameEngine
+      <EnhancedGameEngine
         onGameEnd={handleGameEnd}
         onScoreUpdate={setCurrentScore}
-        discountTiers={gameConfig.discountTiers}
         gameConfig={gameConfig}
+        onShowIntro={() => setGameState('intro')}
       />
 
       <div style={{ 

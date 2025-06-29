@@ -389,6 +389,7 @@ export default function Settings() {
                     label="Show on"
                     options={[
                       { label: 'All pages', value: 'all_pages' },
+                      { label: 'Homepage', value: 'homepage' },
                       { label: 'Product pages', value: 'product_pages' },
                       { label: 'Cart page', value: 'cart_page' },
                       { label: 'Checkout page', value: 'checkout_page' },
