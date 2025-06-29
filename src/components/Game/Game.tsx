@@ -87,46 +87,47 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
     loadGameConfig();
   }, [shopDomain]);
 
-  // Start game session
-  useEffect(() => {
-    const startGameSession = async () => {
-      try {
-        console.log('🎮 Starting game session for shop:', shopDomain);
+  // Start game session function
+  const startGameSession = async () => {
+    try {
+      console.log('🎮 Starting game session for shop:', shopDomain);
 
-        const response = await fetch('/api/game/start-session', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+      const response = await fetch('/api/game/start-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          shopDomain,
+          customerData: {
+            // Try to get customer data from Shopify if available
+            id: (window as any).ShopifyAnalytics?.meta?.page?.customerId || undefined,
+            email: undefined // Will be filled by IP address fallback
           },
-          body: JSON.stringify({
-            shopDomain,
-            customerData: {
-              // Try to get customer data from Shopify if available
-              id: (window as any).ShopifyAnalytics?.meta?.page?.customerId || undefined,
-              email: undefined // Will be filled by IP address fallback
-            },
-            source: 'popup',
-            referrer: window.location.href
-          }),
-        });
+          source: 'popup',
+          referrer: window.location.href
+        }),
+      });
 
-        const data = await response.json();
-        console.log('🎮 Start session response:', data);
+      const data = await response.json();
+      console.log('🎮 Start session response:', data);
 
-        if (response.ok && data.success) {
-          setSessionId(data.sessionId);
-        } else {
-          console.error('Failed to start game session:', data.error);
-          // Generate a temporary session ID
-          setSessionId(`temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
-        }
-      } catch (error) {
-        console.error('Failed to start game session:', error);
+      if (response.ok && data.success) {
+        setSessionId(data.sessionId);
+      } else {
+        console.error('Failed to start game session:', data.error);
         // Generate a temporary session ID
         setSessionId(`temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
       }
-    };
+    } catch (error) {
+      console.error('Failed to start game session:', error);
+      // Generate a temporary session ID
+      setSessionId(`temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
+    }
+  };
 
+  // Auto-start session when entering playing state
+  useEffect(() => {
     if (gameState === 'playing') {
       startGameSession();
     }
@@ -258,7 +259,11 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
     return (
       <GameIntroScreen
         gameConfig={gameConfig}
-        onStartGame={() => setGameState('playing')}
+        onStartGame={() => {
+          setGameState('playing');
+          // Start game session immediately
+          startGameSession();
+        }}
         onClose={onClose}
         attemptsUsed={attemptsUsed}
       />

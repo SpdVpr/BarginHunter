@@ -366,6 +366,11 @@ export default function EnhancedGameEngine({
     gameStartTime.current = Date.now();
   }, []);
 
+  // Auto-start game when component mounts
+  useEffect(() => {
+    startGame();
+  }, [startGame]);
+
   // Event listeners
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -428,41 +433,7 @@ export default function EnhancedGameEngine({
         </div>
       </div>
       
-      {!isRunning && (
-        <div style={{ marginTop: '20px' }}>
-          <button
-            onClick={startGame}
-            style={{
-              background: 'linear-gradient(45deg, #ff6b6b, #4ecdc4)',
-              color: 'white',
-              border: 'none',
-              padding: '15px 30px',
-              borderRadius: '8px',
-              fontSize: '18px',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              marginRight: '10px'
-            }}
-          >
-            🚀 Start Game
-          </button>
-          <button
-            onClick={onShowIntro}
-            style={{
-              background: '#6c757d',
-              color: 'white',
-              border: 'none',
-              padding: '15px 30px',
-              borderRadius: '8px',
-              fontSize: '18px',
-              fontWeight: 'bold',
-              cursor: 'pointer'
-            }}
-          >
-            📖 How to Play
-          </button>
-        </div>
-      )}
+
     </div>
   );
 }

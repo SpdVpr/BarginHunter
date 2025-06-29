@@ -175,52 +175,48 @@ export default function GameIntroScreen({
       <div style={{
         background: 'rgba(255,255,255,0.15)',
         borderRadius: '15px',
-        padding: '25px',
-        marginBottom: '30px',
+        padding: '20px',
+        marginBottom: '25px',
         border: '2px solid rgba(255,255,255,0.2)'
       }}>
-        <h2 style={{ 
-          fontSize: '24px', 
-          margin: '0 0 15px 0',
+        <h2 style={{
+          fontSize: '22px',
+          margin: '0 0 10px 0',
           color: '#FFD700'
         }}>
-          💰 Earn Discounts!
+          💰 Win {minDiscount}% - {maxDiscount}% OFF!
         </h2>
-        <p style={{ 
-          fontSize: '16px', 
-          margin: '0 0 15px 0',
-          lineHeight: '1.5'
+        <p style={{
+          fontSize: '15px',
+          margin: '0',
+          lineHeight: '1.4'
         }}>
-          Score <strong>{lowestScoreForDiscount}+ points</strong> to earn a discount between{' '}
-          <strong style={{ color: '#FFD700' }}>{minDiscount}% - {maxDiscount}%</strong> off your purchase!
+          Score <strong>{lowestScoreForDiscount}+ points</strong> to earn your discount!
         </p>
-        
+
         {gameConfig.discountTiers.length > 0 && (
-          <div style={{ marginTop: '20px' }}>
-            <h3 style={{ fontSize: '18px', margin: '0 0 10px 0' }}>
-              🎯 Discount Tiers:
-            </h3>
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-              gap: '10px'
-            }}>
-              {gameConfig.discountTiers.map((tier, index) => (
-                <div key={index} style={{
-                  background: 'rgba(255,255,255,0.1)',
-                  padding: '10px',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(255,255,255,0.2)'
-                }}>
-                  <div style={{ fontSize: '14px', fontWeight: 'bold' }}>
-                    {tier.minScore}+ pts
-                  </div>
-                  <div style={{ fontSize: '16px', color: '#FFD700' }}>
-                    {tier.discount}% OFF
-                  </div>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+            gap: '8px',
+            marginTop: '15px'
+          }}>
+            {gameConfig.discountTiers.map((tier, index) => (
+              <div key={index} style={{
+                background: 'rgba(255,255,255,0.1)',
+                padding: '8px',
+                borderRadius: '6px',
+                border: '1px solid rgba(255,255,255,0.2)',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '12px', fontWeight: 'bold' }}>
+                  {tier.minScore}+ pts
                 </div>
-              ))}
-            </div>
+                <div style={{ fontSize: '14px', color: '#FFD700' }}>
+                  {tier.discount}% OFF
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
@@ -229,34 +225,31 @@ export default function GameIntroScreen({
       <div style={{
         background: 'rgba(255,255,255,0.1)',
         borderRadius: '15px',
-        padding: '20px',
-        marginBottom: '30px',
+        padding: '15px',
+        marginBottom: '25px',
         border: '2px solid rgba(255,255,255,0.2)'
       }}>
-        <h3 style={{ fontSize: '20px', margin: '0 0 15px 0' }}>
+        <h3 style={{ fontSize: '18px', margin: '0 0 10px 0' }}>
           🎯 How to Play:
         </h3>
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '15px',
-          textAlign: 'left'
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+          gap: '10px',
+          textAlign: 'center',
+          fontSize: '14px'
         }}>
           <div>
-            <strong>🖱️ Controls:</strong><br />
-            Click mouse or press SPACE to jump
+            <strong>🖱️ Click/Space</strong><br />
+            to jump
           </div>
           <div>
-            <strong>🚧 Avoid:</strong><br />
-            Cacti, rocks, trees, and other obstacles
+            <strong>🚧 Avoid</strong><br />
+            obstacles
           </div>
           <div>
-            <strong>📈 Difficulty:</strong><br />
-            Game gets faster and harder as you progress
-          </div>
-          <div>
-            <strong>🏆 Goal:</strong><br />
-            Survive as long as possible to earn points
+            <strong>🏆 Survive</strong><br />
+            for points
           </div>
         </div>
       </div>
