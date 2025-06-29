@@ -18,43 +18,52 @@ interface EnhancedGameEngineProps {
   onShowIntro: () => void;
 }
 
-// Game constants - responsive
+// Game constants - Chrome Dino style
 const getCanvasSize = () => {
   const isMobile = window.innerWidth <= 768;
-  const maxWidth = Math.min(window.innerWidth - 40, isMobile ? 350 : 800);
-  const aspectRatio = isMobile ? 1.2 : 2; // More square on mobile
 
-  return {
-    width: maxWidth,
-    height: Math.round(maxWidth / aspectRatio),
-    groundY: Math.round((maxWidth / aspectRatio) * 0.8), // 80% down from top
-  };
+  if (isMobile) {
+    // Mobile: more compact, square-ish
+    const width = Math.min(window.innerWidth - 20, 400);
+    return {
+      width,
+      height: 250,
+      groundY: 200,
+    };
+  } else {
+    // Desktop: wide like Chrome Dino, use available width
+    const width = Math.min(window.innerWidth - 40, 1000);
+    return {
+      width,
+      height: 200, // Fixed height like Chrome Dino
+      groundY: 160, // Ground at 80% of height
+    };
+  }
 };
 
-const GRAVITY = 0.8;
-const JUMP_FORCE = -15;
+// Chrome Dino physics
+const GRAVITY = 0.5; // Reduced gravity for better control
+const JUMP_FORCE = -12; // Adjusted for new gravity
 
-// Player constants
-const PLAYER_WIDTH = 40;
-const PLAYER_HEIGHT = 40;
+// Player constants - Chrome Dino style
+const PLAYER_WIDTH = 32;
+const PLAYER_HEIGHT = 32;
 const PLAYER_X = 80;
 
-// Difficulty progression
+// Difficulty progression - Chrome Dino style
 const DIFFICULTY_LEVELS = [
-  { speed: 3, spawnRate: 2000, obstacleSize: 0.8 }, // Easy
-  { speed: 4, spawnRate: 1800, obstacleSize: 0.9 }, // Medium
-  { speed: 5, spawnRate: 1600, obstacleSize: 1.0 }, // Hard
-  { speed: 6, spawnRate: 1400, obstacleSize: 1.1 }, // Very Hard
-  { speed: 7, spawnRate: 1200, obstacleSize: 1.2 }, // Expert
+  { speed: 4, spawnRate: 2500, obstacleSize: 0.8 }, // Easy start
+  { speed: 5, spawnRate: 2200, obstacleSize: 0.9 }, // Medium
+  { speed: 6, spawnRate: 2000, obstacleSize: 1.0 }, // Hard
+  { speed: 7, spawnRate: 1800, obstacleSize: 1.0 }, // Very Hard
+  { speed: 8, spawnRate: 1600, obstacleSize: 1.0 }, // Expert
 ];
 
-// Obstacle types with pixel art designs
+// Obstacle types - Chrome Dino style (simpler, consistent)
 const OBSTACLE_TYPES = [
-  { name: 'cactus', width: 30, height: 60, color: '#228B22' },
-  { name: 'rock', width: 40, height: 30, color: '#696969' },
-  { name: 'tree', width: 35, height: 70, color: '#8B4513' },
-  { name: 'spike', width: 25, height: 45, color: '#FF4500' },
-  { name: 'barrel', width: 35, height: 50, color: '#8B4513' },
+  { name: 'cactus', width: 20, height: 40, color: '#228B22' },
+  { name: 'rock', width: 24, height: 20, color: '#696969' },
+  { name: 'cactus2', width: 16, height: 35, color: '#228B22' }, // Smaller cactus
 ];
 
 interface Player {
@@ -122,141 +131,81 @@ export default function EnhancedGameEngine({
   
   const [obstacles, setObstacles] = useState<Obstacle[]>([]);
 
-  // Draw pixel art character
+  // Draw simple character - Chrome Dino style
   const drawPlayer = useCallback((ctx: CanvasRenderingContext2D, player: Player) => {
     const { x, y, width, height } = player;
-    
-    // Character body (simple pixel art style)
-    ctx.fillStyle = '#FF6B6B';
-    ctx.fillRect(x + 8, y + 8, width - 16, height - 16);
-    
+
+    // Simple character body
+    ctx.fillStyle = '#535353';
+    ctx.fillRect(x + 2, y + 4, width - 4, height - 8);
+
     // Character head
-    ctx.fillStyle = '#FFE4B5';
-    ctx.fillRect(x + 12, y + 4, width - 24, 16);
-    
-    // Eyes
+    ctx.fillStyle = '#535353';
+    ctx.fillRect(x + 4, y, width - 8, 12);
+
+    // Eye
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(x + width - 12, y + 2, 6, 4);
     ctx.fillStyle = '#000';
-    ctx.fillRect(x + 16, y + 8, 3, 3);
-    ctx.fillRect(x + 25, y + 8, 3, 3);
-    
-    // Legs (simple animation)
-    ctx.fillStyle = '#4169E1';
-    const legOffset = Math.sin(Date.now() * 0.01) * 2;
-    ctx.fillRect(x + 12, y + height - 8, 6, 8);
-    ctx.fillRect(x + 22, y + height - 8 + legOffset, 6, 8);
-    
-    // Add a simple cape effect when jumping
-    if (player.isJumping) {
-      ctx.fillStyle = '#FF4500';
-      ctx.fillRect(x + width - 8, y + 12, 4, 16);
+    ctx.fillRect(x + width - 10, y + 3, 2, 2);
+
+    // Simple legs animation
+    if (!player.isJumping) {
+      ctx.fillStyle = '#535353';
+      const legOffset = Math.floor(Date.now() / 100) % 2;
+      ctx.fillRect(x + 6, y + height - 4, 4, 4);
+      ctx.fillRect(x + width - 10, y + height - 4 + legOffset, 4, 4);
     }
   }, []);
 
-  // Draw pixel art obstacles
+  // Draw simple obstacles - Chrome Dino style
   const drawObstacle = useCallback((ctx: CanvasRenderingContext2D, obstacle: Obstacle) => {
     const { x, y, width, height, type } = obstacle;
-    
+
     switch (type) {
       case 'cactus':
-        // Cactus body
+        // Simple cactus
         ctx.fillStyle = '#228B22';
-        ctx.fillRect(x + 8, y, width - 16, height);
+        ctx.fillRect(x + 4, y, width - 8, height);
         // Cactus arms
-        ctx.fillRect(x, y + height * 0.3, 8, height * 0.4);
-        ctx.fillRect(x + width - 8, y + height * 0.5, 8, height * 0.3);
-        // Spikes
-        ctx.fillStyle = '#32CD32';
-        for (let i = 0; i < 3; i++) {
-          ctx.fillRect(x + 4, y + i * (height / 3) + 5, 4, 4);
-          ctx.fillRect(x + width - 8, y + i * (height / 3) + 5, 4, 4);
-        }
+        ctx.fillRect(x, y + height * 0.3, 6, height * 0.4);
+        ctx.fillRect(x + width - 6, y + height * 0.5, 6, height * 0.3);
         break;
-        
+
+      case 'cactus2':
+        // Smaller simple cactus
+        ctx.fillStyle = '#228B22';
+        ctx.fillRect(x + 2, y, width - 4, height);
+        ctx.fillRect(x + width - 4, y + height * 0.4, 4, height * 0.3);
+        break;
+
       case 'rock':
-        // Rock body
+        // Simple rock
         ctx.fillStyle = '#696969';
         ctx.fillRect(x, y, width, height);
-        // Rock highlights
         ctx.fillStyle = '#A9A9A9';
-        ctx.fillRect(x + 4, y + 4, width - 12, 8);
-        ctx.fillRect(x + 8, y + height - 12, width - 16, 8);
-        break;
-        
-      case 'tree':
-        // Tree trunk
-        ctx.fillStyle = '#8B4513';
-        ctx.fillRect(x + width/3, y + height * 0.6, width/3, height * 0.4);
-        // Tree leaves
-        ctx.fillStyle = '#228B22';
-        ctx.fillRect(x, y, width, height * 0.7);
-        // Tree details
-        ctx.fillStyle = '#32CD32';
-        ctx.fillRect(x + 4, y + 8, width - 8, 8);
-        break;
-        
-      case 'spike':
-        // Spike base
-        ctx.fillStyle = '#FF4500';
-        ctx.fillRect(x, y + height - 8, width, 8);
-        // Spike points
-        for (let i = 0; i < 3; i++) {
-          const spikeX = x + (i * width / 3) + 4;
-          ctx.beginPath();
-          ctx.moveTo(spikeX, y + height - 8);
-          ctx.lineTo(spikeX + 4, y);
-          ctx.lineTo(spikeX + 8, y + height - 8);
-          ctx.fill();
-        }
-        break;
-        
-      case 'barrel':
-        // Barrel body
-        ctx.fillStyle = '#8B4513';
-        ctx.fillRect(x, y, width, height);
-        // Barrel bands
-        ctx.fillStyle = '#654321';
-        ctx.fillRect(x, y + height * 0.2, width, 4);
-        ctx.fillRect(x, y + height * 0.5, width, 4);
-        ctx.fillRect(x, y + height * 0.8, width, 4);
+        ctx.fillRect(x + 2, y + 2, width - 6, 4);
         break;
     }
   }, []);
 
-  // Draw background with parallax effect
+  // Draw simple background - Chrome Dino style
   const drawBackground = useCallback((ctx: CanvasRenderingContext2D) => {
     const { width, height, groundY } = canvasSize;
 
-    // Sky gradient
-    const gradient = ctx.createLinearGradient(0, 0, 0, height);
-    gradient.addColorStop(0, '#87CEEB');
-    gradient.addColorStop(1, '#E0F6FF');
-    ctx.fillStyle = gradient;
+    // Simple sky
+    ctx.fillStyle = '#f7f7f7';
     ctx.fillRect(0, 0, width, height);
 
-    // Clouds (simple pixel art) - responsive
-    ctx.fillStyle = '#FFFFFF';
-    const cloudOffset = (Date.now() * 0.02) % (width + 100);
-    const cloudSpacing = Math.max(200, width / 4);
-    for (let i = 0; i < 3; i++) {
-      const cloudX = (i * cloudSpacing - cloudOffset) % (width + 100);
-      const cloudY = height * 0.1 + i * (height * 0.08);
-      const cloudSize = Math.max(40, width * 0.08);
-      // Cloud pixels
-      ctx.fillRect(cloudX, cloudY, cloudSize, cloudSize * 0.33);
-      ctx.fillRect(cloudX + cloudSize * 0.17, cloudY - cloudSize * 0.13, cloudSize * 0.67, cloudSize * 0.27);
-      ctx.fillRect(cloudX + cloudSize * 0.33, cloudY - cloudSize * 0.2, cloudSize * 0.33, cloudSize * 0.2);
-    }
+    // Simple ground line
+    ctx.fillStyle = '#535353';
+    ctx.fillRect(0, groundY, width, 2);
 
-    // Ground
-    ctx.fillStyle = '#8B4513';
-    ctx.fillRect(0, groundY, width, height - groundY);
-
-    // Ground texture - responsive
-    ctx.fillStyle = '#A0522D';
-    const textureSpacing = Math.max(15, width * 0.025);
-    for (let x = 0; x < width; x += textureSpacing) {
-      ctx.fillRect(x, groundY + 4, textureSpacing * 0.8, 4);
-      ctx.fillRect(x + textureSpacing * 0.4, groundY + 12, textureSpacing * 0.4, 4);
+    // Moving ground dots for speed effect
+    ctx.fillStyle = '#535353';
+    const dotOffset = (Date.now() * 0.1) % 40;
+    for (let x = -dotOffset; x < width; x += 40) {
+      ctx.fillRect(x, groundY + 8, 2, 2);
     }
   }, [canvasSize]);
 
@@ -276,21 +225,18 @@ export default function EnhancedGameEngine({
     });
   }, [isRunning]);
 
-  // Spawn obstacles with progressive difficulty
+  // Spawn obstacles - Chrome Dino style
   const spawnObstacle = useCallback(() => {
     const currentDifficulty = DIFFICULTY_LEVELS[Math.min(difficultyLevel, DIFFICULTY_LEVELS.length - 1)];
     const obstacleType = OBSTACLE_TYPES[Math.floor(Math.random() * OBSTACLE_TYPES.length)];
 
-    // Scale obstacles based on canvas size
-    const scale = Math.min(1, canvasSize.width / 800);
-
     const newObstacle: Obstacle = {
       x: canvasSize.width,
-      y: canvasSize.groundY - (obstacleType.height * currentDifficulty.obstacleSize * scale),
-      width: obstacleType.width * currentDifficulty.obstacleSize * scale,
-      height: obstacleType.height * currentDifficulty.obstacleSize * scale,
+      y: canvasSize.groundY - obstacleType.height,
+      width: obstacleType.width,
+      height: obstacleType.height,
       type: obstacleType.name,
-      speed: currentDifficulty.speed * scale,
+      speed: currentDifficulty.speed,
       id: Date.now()
     };
 
@@ -332,13 +278,13 @@ export default function EnhancedGameEngine({
       };
     });
     
-    // Update score and difficulty
-    const newScore = score + 1;
+    // Update score and difficulty - Chrome Dino style
+    const newScore = score + 0.5; // Slower score increment
     setScore(newScore);
-    onScoreUpdate(newScore);
-    
-    // Update difficulty every 500 points
-    const newDifficultyLevel = Math.floor(newScore / 500);
+    onScoreUpdate(Math.floor(newScore));
+
+    // Update difficulty every 300 points (faster progression)
+    const newDifficultyLevel = Math.floor(newScore / 300);
     if (newDifficultyLevel !== difficultyLevel) {
       setDifficultyLevel(newDifficultyLevel);
     }
@@ -455,10 +401,10 @@ export default function EnhancedGameEngine({
         width={canvasSize.width}
         height={canvasSize.height}
         style={{
-          border: '3px solid #4ECDC4',
-          borderRadius: '12px',
+          border: '2px solid #535353',
+          borderRadius: '4px',
           cursor: 'pointer',
-          background: '#87CEEB',
+          background: '#f7f7f7',
           maxWidth: '100%',
           height: 'auto',
           display: 'block',
@@ -468,13 +414,13 @@ export default function EnhancedGameEngine({
       
       <div style={{ marginTop: '15px' }}>
         <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#333' }}>
-          Score: {score}
+          Score: {Math.floor(score)}
         </div>
-        <div style={{ fontSize: '16px', color: '#666', marginTop: '5px' }}>
-          Difficulty Level: {difficultyLevel + 1} | Speed: {DIFFICULTY_LEVELS[Math.min(difficultyLevel, DIFFICULTY_LEVELS.length - 1)]?.speed || 3}
+        <div style={{ fontSize: '14px', color: '#666', marginTop: '5px' }}>
+          Level: {difficultyLevel + 1} | Speed: {DIFFICULTY_LEVELS[Math.min(difficultyLevel, DIFFICULTY_LEVELS.length - 1)]?.speed || 4}
         </div>
         <div style={{ fontSize: '14px', color: '#888', marginTop: '10px' }}>
-          Click or press SPACE to jump! Avoid obstacles to earn your discount!
+          Click or SPACE to jump!
         </div>
       </div>
       
