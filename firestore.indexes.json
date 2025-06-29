@@ -1,0 +1,111 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "gameSessions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "shopDomain",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "startedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "gameSessions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "shopDomain",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "completed",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "startedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "discountCodes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "shopDomain",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "discountCodes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "shopDomain",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "isUsed",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "customers",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "shopDomain",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "lastPlayedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "gameScores",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "shopDomain",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "score",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "gameScores",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "shopDomain",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "achievedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

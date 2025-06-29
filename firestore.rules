@@ -1,0 +1,43 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow read/write access to all documents for authenticated users
+    // In production, you should implement more granular security rules
+    match /{document=**} {
+      allow read, write: if true;
+    }
+    
+    // More specific rules for production (commented out for now)
+    /*
+    // Game sessions - only allow access to sessions for the specific shop
+    match /gameSessions/{sessionId} {
+      allow read, write: if request.auth != null && 
+        resource.data.shopDomain == request.auth.token.shop;
+    }
+    
+    // Discount codes - only allow access to codes for the specific shop
+    match /discountCodes/{codeId} {
+      allow read, write: if request.auth != null && 
+        resource.data.shopDomain == request.auth.token.shop;
+    }
+    
+    // Customers - only allow access to customers for the specific shop
+    match /customers/{customerId} {
+      allow read, write: if request.auth != null && 
+        resource.data.shopDomain == request.auth.token.shop;
+    }
+    
+    // Game scores - only allow access to scores for the specific shop
+    match /gameScores/{scoreId} {
+      allow read, write: if request.auth != null && 
+        resource.data.shopDomain == request.auth.token.shop;
+    }
+    
+    // Store configurations - only allow access to config for the specific shop
+    match /stores/{shopDomain} {
+      allow read, write: if request.auth != null && 
+        shopDomain == request.auth.token.shop;
+    }
+    */
+  }
+}
