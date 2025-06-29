@@ -21,6 +21,7 @@ import { DashboardLayout } from '../../src/components/shared/DashboardLayout';
 
 interface GameSettings {
   isEnabled: boolean;
+  gameType: 'dino' | 'flappy_bird';
   minScoreForDiscount: number;
   maxPlaysPerCustomer: number;
   maxPlaysPerDay: number;
@@ -97,9 +98,10 @@ export default function Settings() {
       if (response.ok) {
         const config = await response.json();
 
-        // Ensure gameSettings have default discount tiers
+        // Ensure gameSettings have default values
         const gameSettings = {
           ...config.gameSettings,
+          gameType: config.gameSettings?.gameType || 'dino',
           discountTiers: config.gameSettings?.discountTiers || [
             { minScore: 100, discount: 5, message: 'Great job! You earned 5% off!' },
             { minScore: 300, discount: 10, message: 'Amazing! You earned 10% off!' },
@@ -258,9 +260,25 @@ export default function Settings() {
                   <Checkbox
                     label="Enable game"
                     checked={gameSettings.isEnabled}
-                    onChange={(checked) => 
+                    onChange={(checked) =>
                       setGameSettings({ ...gameSettings, isEnabled: checked })
                     }
+                  />
+
+                  <Select
+                    label="Game Type"
+                    options={[
+                      { label: '🦕 Dino Runner (Chrome Dino style)', value: 'dino' },
+                      { label: '🐦 Flappy Bird (Tap to fly)', value: 'flappy_bird' },
+                    ]}
+                    value={gameSettings.gameType}
+                    onChange={(value) =>
+                      setGameSettings({
+                        ...gameSettings,
+                        gameType: value as 'dino' | 'flappy_bird'
+                      })
+                    }
+                    helpText="Choose which game your customers will play"
                   />
                   
                   <TextField

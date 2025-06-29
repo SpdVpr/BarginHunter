@@ -10,6 +10,7 @@ interface GameConfig {
   minDiscount: number;
   maxDiscount: number;
   shopName?: string;
+  gameType?: 'dino' | 'flappy_bird';
 }
 
 interface GameIntroScreenProps {
@@ -19,18 +20,19 @@ interface GameIntroScreenProps {
   attemptsUsed: number;
 }
 
-export default function GameIntroScreen({ 
-  gameConfig, 
-  onStartGame, 
-  onClose, 
-  attemptsUsed 
+export default function GameIntroScreen({
+  gameConfig,
+  onStartGame,
+  onClose,
+  attemptsUsed
 }: GameIntroScreenProps) {
   const remainingAttempts = gameConfig.maxAttempts - attemptsUsed;
   const minDiscount = gameConfig.minDiscount || 5;
   const maxDiscount = gameConfig.maxDiscount || 20;
-  
+  const isFlappyBird = gameConfig.gameType === 'flappy_bird';
+
   // Get the lowest score requirement for any discount
-  const lowestScoreForDiscount = gameConfig.discountTiers.length > 0 
+  const lowestScoreForDiscount = gameConfig.discountTiers.length > 0
     ? Math.min(...gameConfig.discountTiers.map(tier => tier.minScore))
     : 100;
 
@@ -71,19 +73,22 @@ export default function GameIntroScreen({
 
       {/* Game title */}
       <div style={{ marginBottom: '30px' }}>
-        <h1 style={{ 
-          fontSize: '48px', 
+        <h1 style={{
+          fontSize: '48px',
           margin: '0 0 10px 0',
           textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
         }}>
-          🎮 Bargain Hunter
+          {isFlappyBird ? '🐦 Flappy Hunter' : '🦕 Bargain Hunter'}
         </h1>
-        <p style={{ 
-          fontSize: '18px', 
+        <p style={{
+          fontSize: '18px',
           margin: '0',
           opacity: 0.9
         }}>
-          Jump, dodge, and earn amazing discounts!
+          {isFlappyBird
+            ? 'Fly through pipes and earn amazing discounts!'
+            : 'Jump, dodge, and earn amazing discounts!'
+          }
         </p>
       </div>
 
@@ -95,79 +100,102 @@ export default function GameIntroScreen({
         marginBottom: '30px',
         border: '2px solid rgba(255,255,255,0.2)'
       }}>
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
           justifyContent: 'center',
           height: '80px',
           position: 'relative',
           overflow: 'hidden'
         }}>
-          {/* Animated character */}
-          <div style={{
-            width: '40px',
-            height: '40px',
-            background: '#FF6B6B',
-            borderRadius: '8px',
-            position: 'relative',
-            animation: 'bounce 1s infinite',
-            marginRight: '60px'
-          }}>
-            <div style={{
-              width: '30px',
-              height: '16px',
-              background: '#FFE4B5',
-              borderRadius: '4px',
-              position: 'absolute',
-              top: '4px',
-              left: '5px'
-            }} />
-            <div style={{
-              width: '3px',
-              height: '3px',
-              background: '#000',
-              borderRadius: '50%',
-              position: 'absolute',
-              top: '8px',
-              left: '12px'
-            }} />
-            <div style={{
-              width: '3px',
-              height: '3px',
-              background: '#000',
-              borderRadius: '50%',
-              position: 'absolute',
-              top: '8px',
-              left: '20px'
-            }} />
-          </div>
+          {isFlappyBird ? (
+            // Flappy Bird preview
+            <>
+              {/* Flying bird */}
+              <div style={{
+                width: '30px',
+                height: '30px',
+                background: '#FFD700',
+                borderRadius: '50%',
+                position: 'relative',
+                animation: 'flap 0.8s infinite',
+                marginRight: '40px'
+              }}>
+                <div style={{
+                  width: '8px',
+                  height: '6px',
+                  background: '#FF4500',
+                  position: 'absolute',
+                  right: '-8px',
+                  top: '12px'
+                }} />
+              </div>
 
-          {/* Animated obstacles */}
-          <div style={{
-            width: '30px',
-            height: '50px',
-            background: '#228B22',
-            borderRadius: '4px',
-            position: 'relative',
-            animation: 'slideLeft 2s infinite linear'
-          }}>
-            <div style={{
-              width: '8px',
-              height: '20px',
-              background: '#228B22',
-              position: 'absolute',
-              left: '-8px',
-              top: '15px'
-            }} />
-            <div style={{
-              width: '8px',
-              height: '15px',
-              background: '#228B22',
-              position: 'absolute',
-              right: '-8px',
-              top: '25px'
-            }} />
-          </div>
+              {/* Pipes */}
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '30px',
+                animation: 'slideLeft 2s infinite linear'
+              }}>
+                <div style={{
+                  width: '20px',
+                  height: '25px',
+                  background: '#228B22',
+                  borderRadius: '0 0 4px 4px'
+                }} />
+                <div style={{
+                  width: '20px',
+                  height: '25px',
+                  background: '#228B22',
+                  borderRadius: '4px 4px 0 0'
+                }} />
+              </div>
+            </>
+          ) : (
+            // Dino preview
+            <>
+              {/* Running dino */}
+              <div style={{
+                width: '40px',
+                height: '40px',
+                background: '#535353',
+                borderRadius: '8px',
+                position: 'relative',
+                animation: 'bounce 1s infinite',
+                marginRight: '60px'
+              }}>
+                <div style={{
+                  width: '6px',
+                  height: '4px',
+                  background: '#fff',
+                  borderRadius: '2px',
+                  position: 'absolute',
+                  top: '8px',
+                  right: '8px'
+                }} />
+              </div>
+
+              {/* Cactus */}
+              <div style={{
+                width: '20px',
+                height: '40px',
+                background: '#228B22',
+                borderRadius: '4px',
+                position: 'relative',
+                animation: 'slideLeft 2s infinite linear'
+              }}>
+                <div style={{
+                  width: '6px',
+                  height: '15px',
+                  background: '#228B22',
+                  position: 'absolute',
+                  left: '-6px',
+                  top: '12px'
+                }} />
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -241,14 +269,14 @@ export default function GameIntroScreen({
         }}>
           <div>
             <strong>🖱️ Click/Space</strong><br />
-            to jump
+            {isFlappyBird ? 'to flap' : 'to jump'}
           </div>
           <div>
-            <strong>🚧 Avoid</strong><br />
-            obstacles
+            <strong>{isFlappyBird ? '🟢 Fly through' : '🚧 Avoid'}</strong><br />
+            {isFlappyBird ? 'pipe gaps' : 'obstacles'}
           </div>
           <div>
-            <strong>🏆 Survive</strong><br />
+            <strong>🏆 Score</strong><br />
             for points
           </div>
         </div>
@@ -360,7 +388,16 @@ export default function GameIntroScreen({
             transform: translateY(-5px);
           }
         }
-        
+
+        @keyframes flap {
+          0%, 100% {
+            transform: translateY(0) rotate(0deg);
+          }
+          50% {
+            transform: translateY(-8px) rotate(-10deg);
+          }
+        }
+
         @keyframes slideLeft {
           0% {
             transform: translateX(100px);

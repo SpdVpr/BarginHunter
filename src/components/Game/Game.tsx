@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import EnhancedGameEngine from './EnhancedGameEngine';
+import FlappyBirdEngine from './FlappyBirdEngine';
 import GameIntroScreen from './GameIntroScreen';
 import GameOverScreen from './GameOverScreen';
 
@@ -286,12 +287,21 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
 
   return (
     <div>
-      <EnhancedGameEngine
-        onGameEnd={handleGameEnd}
-        onScoreUpdate={setCurrentScore}
-        gameConfig={gameConfig}
-        onShowIntro={() => setGameState('intro')}
-      />
+      {gameConfig.gameType === 'flappy_bird' ? (
+        <FlappyBirdEngine
+          onGameEnd={handleGameEnd}
+          onScoreUpdate={setCurrentScore}
+          gameConfig={gameConfig}
+          onShowIntro={() => setGameState('intro')}
+        />
+      ) : (
+        <EnhancedGameEngine
+          onGameEnd={handleGameEnd}
+          onScoreUpdate={setCurrentScore}
+          gameConfig={gameConfig}
+          onShowIntro={() => setGameState('intro')}
+        />
+      )}
 
       <div style={{ 
         marginTop: '15px', 
