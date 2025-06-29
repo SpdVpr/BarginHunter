@@ -49,7 +49,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         typeof gameSettings.maxPlaysPerCustomer !== 'number' ||
         typeof gameSettings.maxPlaysPerDay !== 'number' ||
         typeof gameSettings.gameSpeed !== 'number' ||
-        !['easy', 'medium', 'hard'].includes(gameSettings.difficulty)) {
+        !['easy', 'medium', 'hard'].includes(gameSettings.difficulty) ||
+        (gameSettings.gameType && !['dino', 'flappy_bird'].includes(gameSettings.gameType))) {
       console.log('🔧 Settings API: Game settings validation failed:', {
         isEnabled: typeof gameSettings.isEnabled,
         minScoreForDiscount: typeof gameSettings.minScoreForDiscount,
@@ -68,7 +69,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!['popup', 'tab', 'inline'].includes(widgetSettings.displayMode) ||
         !['immediate', 'scroll', 'exit_intent', 'time_delay'].includes(widgetSettings.triggerEvent) ||
         !['top-left', 'top-right', 'bottom-left', 'bottom-right', 'center'].includes(widgetSettings.position) ||
-        !['all_pages', 'product_pages', 'cart_page', 'checkout_page', 'collection_pages', 'custom'].includes(widgetSettings.showOn)) {
+        !['all_pages', 'homepage', 'product_pages', 'cart_page', 'checkout_page', 'collection_pages', 'custom'].includes(widgetSettings.showOn)) {
       return res.status(400).json({
         success: false,
         error: 'Invalid widget settings'
@@ -139,6 +140,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       shopDomain: shop,
       isEnabled: gameSettings.isEnabled,
       gameSettings: {
+        isEnabled: gameSettings.isEnabled,
+        gameType: gameSettings.gameType || 'dino',
         minScoreForDiscount: Math.max(0, gameSettings.minScoreForDiscount),
         maxPlaysPerCustomer: Math.max(1, gameSettings.maxPlaysPerCustomer),
         maxPlaysPerDay: Math.max(1, gameSettings.maxPlaysPerDay),

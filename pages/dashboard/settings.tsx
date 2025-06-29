@@ -143,6 +143,28 @@ export default function Settings() {
   const saveSettings = async () => {
     try {
       setSaving(true);
+
+      // Check if all required settings are loaded
+      if (!gameSettings || !widgetSettings || !appearanceSettings || !businessRules) {
+        console.error('Settings not loaded yet:', {
+          gameSettings: !!gameSettings,
+          widgetSettings: !!widgetSettings,
+          appearanceSettings: !!appearanceSettings,
+          businessRules: !!businessRules
+        });
+        setToastMessage('Settings not loaded yet. Please wait and try again.');
+        setToastActive(true);
+        return;
+      }
+
+      console.log('Saving settings:', {
+        shop,
+        gameSettings,
+        widgetSettings,
+        appearanceSettings,
+        businessRules
+      });
+
       const response = await fetch(`/api/dashboard/settings`, {
         method: 'POST',
         headers: {
@@ -158,14 +180,18 @@ export default function Settings() {
       });
 
       if (response.ok) {
+        const result = await response.json();
+        console.log('Settings saved successfully:', result);
         setToastMessage('Settings saved successfully!');
         setToastActive(true);
       } else {
-        throw new Error('Failed to save settings');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Failed to save settings:', response.status, errorData);
+        throw new Error(`Failed to save settings: ${errorData.error || response.statusText}`);
       }
     } catch (error) {
       console.error('Failed to save settings:', error);
-      setToastMessage('Failed to save settings. Please try again.');
+      setToastMessage(`Failed to save settings: ${error.message}`);
       setToastActive(true);
     } finally {
       setSaving(false);
