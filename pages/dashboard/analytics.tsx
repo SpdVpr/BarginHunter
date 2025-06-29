@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import {
   Page,
@@ -10,135 +10,19 @@ import {
   Stack,
   Heading,
   Spinner,
-  Frame,
-  TopBar,
-  Navigation,
   Badge,
   ProgressBar,
 } from '@shopify/polaris';
-import {
-  HomeMinor,
-  SettingsMinor,
-  AnalyticsMinor,
-  CustomersMinor,
-  DiscountsMajor,
-} from '@shopify/polaris-icons';
-
-interface AnalyticsData {
-  period: string;
-  dateRange: {
-    start: string;
-    end: string;
-  };
-  metrics: {
-    totalSessions: number;
-    completedSessions: number;
-    completionRate: number;
-    totalDiscounts: number;
-    usedDiscounts: number;
-    discountUsageRate: number;
-    averageScore: number;
-    uniqueCustomers: number;
-    estimatedRevenue: number;
-  };
-  timeSeries: Array<{
-    date: string;
-    sessions: number;
-    completedSessions: number;
-    discounts: number;
-    usedDiscounts: number;
-    averageScore: number;
-  }>;
-  hourlyBreakdown: Array<{
-    hour: number;
-    sessions: number;
-    completions: number;
-    discounts: number;
-  }>;
-  topScores: Array<{
-    customerEmail: string;
-    score: number;
-    discount: number;
-    achievedAt: string;
-  }>;
-  sourceBreakdown: Record<string, number>;
-}
+import { DashboardLayout } from '../../src/components/shared/DashboardLayout';
+import { StatsCards, StatsLoading } from '../../src/components/shared/StatsCards';
+import { useAnalyticsData } from '../../src/hooks/useSharedStats';
 
 export default function Analytics() {
   const router = useRouter();
   const { shop } = router.query;
-  
-  const [loading, setLoading] = useState(true);
-  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+
   const [selectedPeriod, setSelectedPeriod] = useState('30d');
-  const [mobileNavigationActive, setMobileNavigationActive] = useState(false);
-
-  useEffect(() => {
-    if (shop) {
-      loadAnalyticsData();
-    }
-  }, [shop, selectedPeriod]);
-
-  const loadAnalyticsData = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/stores/${shop}/analytics?period=${selectedPeriod}`);
-      if (response.ok) {
-        const data = await response.json();
-        setAnalyticsData(data);
-      }
-    } catch (error) {
-      console.error('Failed to load analytics data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const toggleMobileNavigation = () => {
-    setMobileNavigationActive(!mobileNavigationActive);
-  };
-
-  const navigationMarkup = (
-    <Navigation location="/">
-      <Navigation.Section
-        items={[
-          {
-            url: `/dashboard?shop=${shop}`,
-            label: 'Dashboard',
-            icon: HomeMinor,
-          },
-          {
-            url: `/dashboard/analytics?shop=${shop}`,
-            label: 'Analytics',
-            icon: AnalyticsMinor,
-            selected: true,
-          },
-          {
-            url: `/dashboard/customers?shop=${shop}`,
-            label: 'Customers',
-            icon: CustomersMinor,
-          },
-          {
-            url: `/dashboard/discounts?shop=${shop}`,
-            label: 'Discounts',
-            icon: DiscountsMajor,
-          },
-          {
-            url: `/dashboard/settings?shop=${shop}`,
-            label: 'Settings',
-            icon: SettingsMinor,
-          },
-        ]}
-      />
-    </Navigation>
-  );
-
-  const topBarMarkup = (
-    <TopBar
-      showNavigationToggle
-      onNavigationToggle={toggleMobileNavigation}
-    />
-  );
+  const { analyticsData, loading, error, refreshAnalytics } = useAnalyticsData(shop, selectedPeriod);
 
   const periodOptions = [
     { label: 'Last 7 days', value: '7d' },
@@ -164,24 +48,31 @@ export default function Analytics() {
 
   if (loading) {
     return (
-      <Frame>
+      <DashboardLayout shop={typeof shop === 'string' ? shop : ''} currentPage="analytics">
         <div style={{ padding: '2rem', textAlign: 'center' }}>
           <Spinner size="large" />
           <Text variant="bodyMd" as="p" color="subdued">
             Loading analytics...
           </Text>
         </div>
-      </Frame>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout shop={typeof shop === 'string' ? shop : ''} currentPage="analytics">
+        <div style={{ padding: '2rem', textAlign: 'center' }}>
+          <Text variant="bodyMd" as="p" color="critical">
+            Failed to load analytics: {error}
+          </Text>
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <Frame
-      topBar={topBarMarkup}
-      navigation={navigationMarkup}
-      showMobileNavigation={mobileNavigationActive}
-      onNavigationDismiss={toggleMobileNavigation}
-    >
+    <DashboardLayout shop={typeof shop === 'string' ? shop : ''} currentPage="analytics">
       <Page
         title="Analytics"
         subtitle={`Performance insights for ${shop}`}
@@ -210,6 +101,33 @@ export default function Analytics() {
 
           {analyticsData && (
             <>
+              {/* Convert analytics data to shared stats format for display */}
+              <Layout.Section>
+                <StatsCards
+                  stats={{
+                    totalSessions: analyticsData.metrics.totalSessions,
+                    completedSessions: analyticsData.metrics.completedSessions,
+                    totalDiscounts: analyticsData.metrics.totalDiscounts,
+                    usedDiscounts: analyticsData.metrics.usedDiscounts,
+                    conversionRate: analyticsData.metrics.completionRate,
+                    completionRate: analyticsData.metrics.completionRate,
+                    discountUsageRate: analyticsData.metrics.discountUsageRate,
+                    averageScore: analyticsData.metrics.averageScore,
+                    totalScore: 0,
+                    activeCustomers: analyticsData.metrics.uniqueCustomers,
+                    uniqueCustomers: analyticsData.metrics.uniqueCustomers,
+                    revenue: analyticsData.metrics.estimatedRevenue,
+                    totalOrderValue: 0,
+                    totalDiscountAmount: 0,
+                    today: { sessions: 0, discounts: 0 },
+                    loading: false,
+                    error: null,
+                    lastUpdated: new Date(),
+                  }}
+                  variant="detailed"
+                />
+              </Layout.Section>
+
               <Layout.Section>
                 <Layout>
                   <Layout.Section oneHalf>
@@ -225,8 +143,8 @@ export default function Analytics() {
                           <Text variant="bodyMd" as="p" color="subdued">
                             Completion Rate
                           </Text>
-                          <ProgressBar 
-                            progress={analyticsData.metrics.completionRate} 
+                          <ProgressBar
+                            progress={analyticsData.metrics.completionRate}
                             size="small" 
                           />
                           <Text variant="bodyMd" as="p" color="subdued">
@@ -374,11 +292,7 @@ export default function Analytics() {
           )}
         </Layout>
       </Page>
-    </Frame>
+    </DashboardLayout>
   );
 }
 
-// Use the same layout as other dashboard pages
-Analytics.getLayout = function getLayout(page: React.ReactElement) {
-  return page;
-};

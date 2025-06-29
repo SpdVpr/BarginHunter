@@ -322,10 +322,20 @@ export class CustomerService {
     return snapshot.docs[0].data() as CustomerDocument;
   }
 
+  static async getCustomersByShop(shopDomain: string, limit = 100): Promise<CustomerDocument[]> {
+    const snapshot = await db.collection(collections.customers)
+      .where('shopDomain', '==', shopDomain)
+      .orderBy('lastPlayedAt', 'desc')
+      .limit(limit)
+      .get();
+
+    return snapshot.docs.map(doc => doc.data() as CustomerDocument);
+  }
+
   static async updateCustomerStats(
-    shopDomain: string, 
-    identifier: string, 
-    score: number, 
+    shopDomain: string,
+    identifier: string,
+    score: number,
     discountEarned: number
   ): Promise<void> {
     const customer = await this.getCustomer(shopDomain, identifier);

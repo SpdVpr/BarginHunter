@@ -9,34 +9,13 @@ import {
   Button,
   Badge,
   DataTable,
-  Tabs,
   Stack,
-  Heading,
   Banner,
   Spinner,
-  Frame,
-  TopBar,
-  Navigation,
 } from '@shopify/polaris';
-import {
-  HomeMinor,
-  SettingsMinor,
-  AnalyticsMinor,
-  CustomersMinor,
-  DiscountsMajor,
-  GamesConsoleMajor,
-} from '@shopify/polaris-icons';
-
-interface DashboardStats {
-  totalSessions: number;
-  completedSessions: number;
-  totalDiscounts: number;
-  usedDiscounts: number;
-  conversionRate: number;
-  averageScore: number;
-  activeCustomers: number;
-  revenue: number;
-}
+import { DashboardLayout } from '../src/components/shared/DashboardLayout';
+import { StatsCards, QuickStats, StatsLoading } from '../src/components/shared/StatsCards';
+import { useSharedStats } from '../src/hooks/useSharedStats';
 
 interface RecentSession {
   id: string;
@@ -50,29 +29,19 @@ interface RecentSession {
 export default function Dashboard() {
   const router = useRouter();
   const { shop } = router.query;
-  
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const { stats, isLoading, error, refreshStats } = useSharedStats(shop);
   const [recentSessions, setRecentSessions] = useState<RecentSession[]>([]);
-  const [selectedTab, setSelectedTab] = useState(0);
-  const [mobileNavigationActive, setMobileNavigationActive] = useState(false);
+  const [sessionsLoading, setSessionsLoading] = useState(true);
 
   useEffect(() => {
     if (shop) {
-      loadDashboardData();
+      loadRecentSessions();
     }
   }, [shop]);
 
-  const loadDashboardData = async () => {
+  const loadRecentSessions = async () => {
     try {
-      setLoading(true);
-      
-      // Load dashboard statistics
-      const statsResponse = await fetch(`/api/dashboard/stats?shop=${shop}`);
-      if (statsResponse.ok) {
-        const statsData = await statsResponse.json();
-        setStats(statsData);
-      }
+      setSessionsLoading(true);
 
       // Load recent discount codes (same data as Analytics)
       const discountsResponse = await fetch(`/api/dashboard/discounts?shop=${shop}`);
@@ -83,80 +52,23 @@ export default function Dashboard() {
           .filter((discount: any) => discount.isUsed) // Only show used discounts
           .slice(0, 10) // Limit to 10 most recent
           .map((discount: any) => ({
+            id: discount.id,
             customerEmail: discount.customerEmail || 'Anonymous',
             score: Math.round(discount.value * 20), // Estimate score from discount (5% = ~100 points)
             discount: discount.value,
-            status: 'completed',
+            status: 'completed' as const,
             completedAt: discount.usedAt || discount.createdAt,
-            orderValue: discount.orderValue,
-            revenue: discount.actualRevenue
           }));
         setRecentSessions(recentDiscounts);
       }
     } catch (error) {
-      console.error('Failed to load dashboard data:', error);
+      console.error('Failed to load recent sessions:', error);
     } finally {
-      setLoading(false);
+      setSessionsLoading(false);
     }
   };
 
-  const toggleMobileNavigation = () => {
-    setMobileNavigationActive(!mobileNavigationActive);
-  };
 
-  const navigationMarkup = (
-    <Navigation location="/">
-      <Navigation.Section
-        items={[
-          {
-            url: `/dashboard?shop=${shop}`,
-            label: 'Dashboard',
-            icon: HomeMinor,
-            selected: selectedTab === 0,
-          },
-          {
-            url: `/dashboard/analytics?shop=${shop}`,
-            label: 'Analytics',
-            icon: AnalyticsMinor,
-            selected: selectedTab === 1,
-          },
-          {
-            url: `/dashboard/customers?shop=${shop}`,
-            label: 'Customers',
-            icon: CustomersMinor,
-            selected: selectedTab === 2,
-          },
-          {
-            url: `/dashboard/discounts?shop=${shop}`,
-            label: 'Discounts',
-            icon: DiscountsMajor,
-            selected: selectedTab === 3,
-          },
-          {
-            url: `/dashboard/settings?shop=${shop}`,
-            label: 'Settings',
-            icon: SettingsMinor,
-            selected: selectedTab === 4,
-          },
-        ]}
-      />
-    </Navigation>
-  );
-
-  const topBarMarkup = (
-    <TopBar
-      showNavigationToggle
-      onNavigationToggle={toggleMobileNavigation}
-    />
-  );
-
-  const tabs = [
-    { id: 'overview', content: 'Overview' },
-    { id: 'analytics', content: 'Analytics' },
-    { id: 'customers', content: 'Customers' },
-    { id: 'discounts', content: 'Discounts' },
-    { id: 'settings', content: 'Settings' },
-  ];
 
   const recentSessionsRows = recentSessions.map((session) => [
     session.customerEmail || 'Anonymous',
@@ -166,26 +78,35 @@ export default function Dashboard() {
     new Date(session.completedAt).toLocaleDateString(),
   ]);
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <Frame>
+      <DashboardLayout shop={typeof shop === 'string' ? shop : ''} currentPage="dashboard">
         <div style={{ padding: '2rem', textAlign: 'center' }}>
           <Spinner size="large" />
           <Text variant="bodyMd" as="p" color="subdued">
             Loading dashboard...
           </Text>
         </div>
-      </Frame>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout shop={typeof shop === 'string' ? shop : ''} currentPage="dashboard">
+        <div style={{ padding: '2rem', textAlign: 'center' }}>
+          <Banner status="critical">
+            <Text variant="bodyMd" as="p">
+              Failed to load dashboard data: {error}
+            </Text>
+          </Banner>
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <Frame
-      topBar={topBarMarkup}
-      navigation={navigationMarkup}
-      showMobileNavigation={mobileNavigationActive}
-      onNavigationDismiss={toggleMobileNavigation}
-    >
+    <DashboardLayout shop={typeof shop === 'string' ? shop : ''} currentPage="dashboard">
       <Page
         title="Bargain Hunter Dashboard"
         subtitle={`Store: ${shop}`}
@@ -254,113 +175,43 @@ export default function Dashboard() {
             </Card>
           </Layout.Section>
 
-          {stats && (
-            <>
-              <Layout.Section>
-                <Layout>
-                  <Layout.Section oneThird>
-                    <Card>
-                      <div style={{ padding: '1rem' }}>
-                        <Stack vertical spacing="tight">
-                          <Text variant="headingMd" as="h3">
-                            Game Sessions
-                          </Text>
-                          <Text variant="heading2xl" as="p">
-                            {stats.totalSessions}
-                          </Text>
-                          <Text variant="bodyMd" as="p" color="subdued">
-                            {stats.completedSessions} completed ({Math.round((stats.completedSessions / stats.totalSessions) * 100)}%)
-                          </Text>
-                        </Stack>
-                      </div>
-                    </Card>
-                  </Layout.Section>
+          {/* Statistics Overview */}
+          <Layout.Section>
+            <StatsCards stats={stats} variant="overview" />
+          </Layout.Section>
 
-                  <Layout.Section oneThird>
-                    <Card>
-                      <div style={{ padding: '1rem' }}>
-                        <Stack vertical spacing="tight">
-                          <Text variant="headingMd" as="h3">
-                            Discounts Generated
-                          </Text>
-                          <Text variant="heading2xl" as="p">
-                            {stats.totalDiscounts}
-                          </Text>
-                          <Text variant="bodyMd" as="p" color="subdued">
-                            {stats.usedDiscounts} used ({Math.round((stats.usedDiscounts / stats.totalDiscounts) * 100)}%)
-                          </Text>
-                        </Stack>
-                      </div>
-                    </Card>
-                  </Layout.Section>
+          {/* Today's Quick Stats */}
+          <Layout.Section>
+            <QuickStats stats={stats} showToday={true} />
+          </Layout.Section>
 
-                  <Layout.Section oneThird>
-                    <Card>
-                      <div style={{ padding: '1rem' }}>
-                        <Stack vertical spacing="tight">
-                          <Text variant="headingMd" as="h3">
-                            Conversion Rate
-                          </Text>
-                          <Text variant="heading2xl" as="p">
-                            {stats.conversionRate.toFixed(1)}%
-                          </Text>
-                          <Text variant="bodyMd" as="p" color="subdued">
-                            Average score: {stats.averageScore}
-                          </Text>
-                        </Stack>
-                      </div>
-                    </Card>
-                  </Layout.Section>
-                </Layout>
-              </Layout.Section>
-
-              <Layout.Section>
-                <Card>
-                  <div style={{ padding: '1rem' }}>
-                    <Stack vertical spacing="loose">
-                      <Heading>Recent Successful Games</Heading>
-                      <DataTable
-                        columnContentTypes={['text', 'numeric', 'text', 'text', 'text']}
-                        headings={['Customer', 'Score', 'Discount', 'Status', 'Date']}
-                        rows={recentSessionsRows}
-                        footerContent={`Showing ${recentSessions.length} of ${stats.totalSessions} sessions`}
-                      />
-                    </Stack>
-                  </div>
-                </Card>
-              </Layout.Section>
-            </>
-          )}
-
+          {/* Recent Activity */}
           <Layout.Section>
             <Card>
               <div style={{ padding: '1rem' }}>
                 <Stack vertical spacing="loose">
-                  <Heading>Quick Actions</Heading>
-                  <Stack>
-                    <Button
-                      primary
-                      onClick={() => router.push(`/dashboard/settings?shop=${shop}`)}
-                    >
-                      Configure Game Settings
-                    </Button>
-                    <Button
-                      onClick={() => router.push(`/dashboard/analytics?shop=${shop}`)}
-                    >
-                      View Analytics
-                    </Button>
-                    <Button
-                      onClick={() => window.open(`/widget/game?shop=${shop}`, '_blank')}
-                    >
-                      Test Game
-                    </Button>
-                  </Stack>
+                  <Text variant="headingMd" as="h3">Recent Successful Games</Text>
+                  {sessionsLoading ? (
+                    <div style={{ textAlign: 'center', padding: '2rem' }}>
+                      <Spinner size="small" />
+                      <Text variant="bodyMd" as="p" color="subdued">
+                        Loading recent sessions...
+                      </Text>
+                    </div>
+                  ) : (
+                    <DataTable
+                      columnContentTypes={['text', 'numeric', 'text', 'text', 'text']}
+                      headings={['Customer', 'Score', 'Discount', 'Status', 'Date']}
+                      rows={recentSessionsRows}
+                      footerContent={`Showing ${recentSessions.length} recent sessions`}
+                    />
+                  )}
                 </Stack>
               </div>
             </Card>
           </Layout.Section>
         </Layout>
       </Page>
-    </Frame>
+    </DashboardLayout>
   );
 }

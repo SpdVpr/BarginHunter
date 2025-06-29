@@ -13,20 +13,11 @@ import {
   Heading,
   Banner,
   Spinner,
-  Frame,
-  TopBar,
-  Navigation,
   ColorPicker,
   RangeSlider,
   Toast,
 } from '@shopify/polaris';
-import {
-  HomeMinor,
-  SettingsMinor,
-  AnalyticsMinor,
-  CustomersMinor,
-  DiscountsMajor,
-} from '@shopify/polaris-icons';
+import { DashboardLayout } from '../../src/components/shared/DashboardLayout';
 
 interface GameSettings {
   isEnabled: boolean;
@@ -92,7 +83,6 @@ export default function Settings() {
   const [toastActive, setToastActive] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [reinstalling, setReinstalling] = useState(false);
-  const [mobileNavigationActive, setMobileNavigationActive] = useState(false);
 
   useEffect(() => {
     if (shop) {
@@ -170,10 +160,6 @@ export default function Settings() {
     }
   };
 
-  const toggleMobileNavigation = () => {
-    setMobileNavigationActive(!mobileNavigationActive);
-  };
-
   const forceReinstall = async () => {
     try {
       setReinstalling(true);
@@ -202,48 +188,6 @@ export default function Settings() {
     }
   };
 
-  const navigationMarkup = (
-    <Navigation location="/">
-      <Navigation.Section
-        items={[
-          {
-            url: `/dashboard?shop=${shop}`,
-            label: 'Dashboard',
-            icon: HomeMinor,
-          },
-          {
-            url: `/dashboard/analytics?shop=${shop}`,
-            label: 'Analytics',
-            icon: AnalyticsMinor,
-          },
-          {
-            url: `/dashboard/customers?shop=${shop}`,
-            label: 'Customers',
-            icon: CustomersMinor,
-          },
-          {
-            url: `/dashboard/discounts?shop=${shop}`,
-            label: 'Discounts',
-            icon: DiscountsMajor,
-          },
-          {
-            url: `/dashboard/settings?shop=${shop}`,
-            label: 'Settings',
-            icon: SettingsMinor,
-            selected: true,
-          },
-        ]}
-      />
-    </Navigation>
-  );
-
-  const topBarMarkup = (
-    <TopBar
-      showNavigationToggle
-      onNavigationToggle={toggleMobileNavigation}
-    />
-  );
-
   const toastMarkup = toastActive ? (
     <Toast
       content={toastMessage}
@@ -253,21 +197,16 @@ export default function Settings() {
 
   if (loading) {
     return (
-      <Frame>
+      <DashboardLayout shop={typeof shop === 'string' ? shop : ''} currentPage="settings">
         <div style={{ padding: '2rem', textAlign: 'center' }}>
           <Spinner size="large" />
         </div>
-      </Frame>
+      </DashboardLayout>
     );
   }
 
   return (
-    <Frame
-      topBar={topBarMarkup}
-      navigation={navigationMarkup}
-      showMobileNavigation={mobileNavigationActive}
-      onNavigationDismiss={toggleMobileNavigation}
-    >
+    <DashboardLayout shop={typeof shop === 'string' ? shop : ''} currentPage="settings">
       {toastMarkup}
       <Page
         title="Game Settings"
@@ -633,6 +572,6 @@ export default function Settings() {
           )}
         </Layout>
       </Page>
-    </Frame>
+    </DashboardLayout>
   );
 }
