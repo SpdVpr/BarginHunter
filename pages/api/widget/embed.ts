@@ -211,8 +211,13 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
   function checkPageTargeting() {
     const currentPath = window.location.pathname;
+    console.log('🎮 Bargain Hunter: Checking page targeting for path:', currentPath, 'showOn:', widgetConfig.showOn);
 
     switch (widgetConfig.showOn) {
+      case 'homepage':
+        const isHomepage = currentPath === '/' || currentPath === '';
+        console.log('🎮 Bargain Hunter: Homepage check:', isHomepage);
+        return isHomepage;
       case 'product_pages':
         return currentPath.includes('/products/');
       case 'collection_pages':

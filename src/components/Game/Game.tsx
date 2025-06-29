@@ -45,6 +45,7 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
           // Extract game settings from nested structure
           setGameConfig({
             discountTiers: config.gameSettings?.discountTiers || DEFAULT_DISCOUNT_TIERS,
+            gameType: config.gameSettings?.gameType || 'dino',
             gameSpeed: config.gameSettings?.gameSpeed || 1,
             difficulty: config.gameSettings?.difficulty || 'medium',
             minScoreForDiscount: config.gameSettings?.minScoreForDiscount || 150,
@@ -58,6 +59,7 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
           // Use default config
           setGameConfig({
             discountTiers: DEFAULT_DISCOUNT_TIERS,
+            gameType: 'dino',
             gameSpeed: 1,
             difficulty: 'medium',
             minScoreForDiscount: 150,
@@ -73,6 +75,7 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
         // Use default config
         setGameConfig({
           discountTiers: DEFAULT_DISCOUNT_TIERS,
+          gameType: 'dino',
           gameSpeed: 1,
           difficulty: 'medium',
           maxAttempts: 3,
