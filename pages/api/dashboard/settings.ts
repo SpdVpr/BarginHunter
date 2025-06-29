@@ -50,7 +50,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         typeof gameSettings.maxPlaysPerDay !== 'number' ||
         typeof gameSettings.gameSpeed !== 'number' ||
         !['easy', 'medium', 'hard'].includes(gameSettings.difficulty) ||
-        (gameSettings.gameType && !['dino', 'flappy_bird', 'tetris'].includes(gameSettings.gameType))) {
+        (gameSettings.gameType && !['dino', 'flappy_bird', 'tetris', 'snake'].includes(gameSettings.gameType))) {
       console.log('🔧 Settings API: Game settings validation failed:', {
         isEnabled: typeof gameSettings.isEnabled,
         minScoreForDiscount: typeof gameSettings.minScoreForDiscount,

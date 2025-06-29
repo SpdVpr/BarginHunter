@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import EnhancedGameEngine from './EnhancedGameEngine';
 import FlappyBirdEngine from './FlappyBirdEngine';
 import TetrisEngine from './TetrisEngine';
+import SnakeEngine from './SnakeEngine';
 import GameIntroScreen from './GameIntroScreen';
 import GameOverScreen from './GameOverScreen';
 
@@ -300,6 +301,13 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
         />
       ) : gameConfig.gameType === 'tetris' ? (
         <TetrisEngine
+          onGameEnd={handleGameEnd}
+          onScoreUpdate={setCurrentScore}
+          gameConfig={gameConfig}
+          onShowIntro={() => setGameState('intro')}
+        />
+      ) : gameConfig.gameType === 'snake' ? (
+        <SnakeEngine
           onGameEnd={handleGameEnd}
           onScoreUpdate={setCurrentScore}
           gameConfig={gameConfig}

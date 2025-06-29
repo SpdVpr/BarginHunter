@@ -10,7 +10,7 @@ interface GameConfig {
   minDiscount: number;
   maxDiscount: number;
   shopName?: string;
-  gameType?: 'dino' | 'flappy_bird';
+  gameType?: 'dino' | 'flappy_bird' | 'tetris' | 'snake';
 }
 
 interface GameIntroScreenProps {
@@ -31,6 +31,7 @@ export default function GameIntroScreen({
   const maxDiscount = gameConfig.maxDiscount || 20;
   const isFlappyBird = gameConfig.gameType === 'flappy_bird';
   const isTetris = gameConfig.gameType === 'tetris';
+  const isSnake = gameConfig.gameType === 'snake';
 
   // Get the lowest score requirement for any discount
   const lowestScoreForDiscount = gameConfig.discountTiers.length > 0
@@ -79,7 +80,7 @@ export default function GameIntroScreen({
           margin: '0 0 10px 0',
           textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
         }}>
-          {isFlappyBird ? '🐦 Flappy Hunter' : isTetris ? '🧩 Tetris Hunter' : '🦕 Bargain Hunter'}
+          {isFlappyBird ? '🐦 Flappy Hunter' : isTetris ? '🧩 Tetris Hunter' : isSnake ? '🐍 Snake Hunter' : '🦕 Bargain Hunter'}
         </h1>
         <p style={{
           fontSize: '18px',
@@ -90,6 +91,8 @@ export default function GameIntroScreen({
             ? 'Fly through pipes and earn amazing discounts!'
             : isTetris
             ? 'Stack blocks, clear lines, and earn amazing discounts!'
+            : isSnake
+            ? 'Eat food, grow longer, and earn amazing discounts!'
             : 'Jump, dodge, and earn amazing discounts!'
           }
         </p>
@@ -195,6 +198,77 @@ export default function GameIntroScreen({
                 <div /><div /><div /><div /><div /><div />
                 <div /><div /><div /><div /><div /><div />
               </div>
+            </>
+          ) : isSnake ? (
+            // Snake preview
+            <>
+              {/* Snake body */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                animation: 'wiggle 1.5s infinite'
+              }}>
+                {/* Snake head */}
+                <div style={{
+                  width: '20px',
+                  height: '20px',
+                  background: '#2E7D32',
+                  borderRadius: '4px',
+                  position: 'relative',
+                  marginRight: '2px'
+                }}>
+                  <div style={{
+                    width: '3px',
+                    height: '3px',
+                    background: '#fff',
+                    borderRadius: '50%',
+                    position: 'absolute',
+                    top: '5px',
+                    left: '5px'
+                  }} />
+                  <div style={{
+                    width: '3px',
+                    height: '3px',
+                    background: '#fff',
+                    borderRadius: '50%',
+                    position: 'absolute',
+                    top: '5px',
+                    right: '5px'
+                  }} />
+                </div>
+
+                {/* Snake body segments */}
+                <div style={{
+                  width: '18px',
+                  height: '18px',
+                  background: '#4CAF50',
+                  borderRadius: '3px',
+                  marginRight: '2px'
+                }} />
+                <div style={{
+                  width: '18px',
+                  height: '18px',
+                  background: '#4CAF50',
+                  borderRadius: '3px',
+                  marginRight: '2px'
+                }} />
+                <div style={{
+                  width: '18px',
+                  height: '18px',
+                  background: '#4CAF50',
+                  borderRadius: '3px',
+                  marginRight: '20px'
+                }} />
+              </div>
+
+              {/* Food */}
+              <div style={{
+                width: '16px',
+                height: '16px',
+                background: '#FF5722',
+                borderRadius: '50%',
+                animation: 'pulse 1s infinite'
+              }} />
             </>
           ) : (
             // Dino preview
@@ -312,12 +386,12 @@ export default function GameIntroScreen({
           fontSize: '14px'
         }}>
           <div>
-            <strong>🖱️ Click/Space</strong><br />
-            {isFlappyBird ? 'to flap' : isTetris ? 'to rotate' : 'to jump'}
+            <strong>{isSnake ? '⌨️ Arrow keys' : '🖱️ Click/Space'}</strong><br />
+            {isFlappyBird ? 'to flap' : isTetris ? 'to rotate' : isSnake ? 'to move' : 'to jump'}
           </div>
           <div>
-            <strong>{isFlappyBird ? '🟢 Fly through' : isTetris ? '🧩 Stack blocks' : '🚧 Avoid'}</strong><br />
-            {isFlappyBird ? 'pipe gaps' : isTetris ? 'clear lines' : 'obstacles'}
+            <strong>{isFlappyBird ? '🟢 Fly through' : isTetris ? '🧩 Stack blocks' : isSnake ? '🍎 Eat food' : '🚧 Avoid'}</strong><br />
+            {isFlappyBird ? 'pipe gaps' : isTetris ? 'clear lines' : isSnake ? 'to grow' : 'obstacles'}
           </div>
           <div>
             <strong>🏆 Score</strong><br />
@@ -448,6 +522,29 @@ export default function GameIntroScreen({
           }
           100% {
             transform: translateX(-100px);
+          }
+        }
+
+        @keyframes wiggle {
+          0%, 100% {
+            transform: translateX(0);
+          }
+          25% {
+            transform: translateX(-2px);
+          }
+          75% {
+            transform: translateX(2px);
+          }
+        }
+
+        @keyframes pulse {
+          0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+          }
+          50% {
+            transform: scale(1.1);
+            opacity: 0.8;
           }
         }
       `}</style>
