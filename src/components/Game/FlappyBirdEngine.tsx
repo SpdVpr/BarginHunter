@@ -1,5 +1,6 @@
 /** @jsxImportSource react */
 import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { GameScorer, DIFFICULTY_PROGRESSION, getDifficultyName, formatScore } from '../../utils/gameScoring';
 
 interface GameConfig {
   discountTiers: Array<{
@@ -39,11 +40,10 @@ const getCanvasSize = () => {
   }
 };
 
-// Easy Flappy Bird physics - much more playable
-const GRAVITY = 0.15; // Very light gravity for easy control
-const FLAP_FORCE = -3.5; // Gentle flap force
-const PIPE_SPEED = 1.5; // Moderate speed
-const PIPE_GAP = 150; // Large gap for easy passage
+// Balanced Flappy Bird physics with progressive difficulty
+const GRAVITY = 0.3; // Balanced gravity
+const FLAP_FORCE = -5.5; // Balanced flap force
+const BASE_PIPE_GAP = 120; // Base gap size (will adjust with difficulty)
 const PIPE_WIDTH = 50; // Standard pipe width
 
 // Bird constants - easy horizontal layout
@@ -79,6 +79,8 @@ export default function FlappyBirdEngine({
   const [score, setScore] = useState(0);
   const [lastPipeSpawn, setLastPipeSpawn] = useState(0);
   const [canvasSize, setCanvasSize] = useState(getCanvasSize());
+  const [gameScorer] = useState(() => new GameScorer());
+  const [difficultyLevel, setDifficultyLevel] = useState(0);
   
   const [bird, setBird] = useState<Bird>({
     x: BIRD_X,
@@ -195,33 +197,37 @@ export default function FlappyBirdEngine({
     }));
   }, [isRunning]);
 
-  // Spawn pipe - easy gameplay logic
+  // Spawn pipe with progressive difficulty
   const spawnPipe = useCallback(() => {
-    const minHeight = 40;
-    const maxHeight = canvasSize.height - PIPE_GAP - 40;
+    const currentDifficulty = gameScorer.getCurrentDifficultyLevel();
+    // Adjust gap size based on difficulty (easier at start, harder later)
+    const gapSize = Math.max(80, BASE_PIPE_GAP - (currentDifficulty.level * 5));
+
+    const minHeight = 50;
+    const maxHeight = canvasSize.height - gapSize - 50;
     const topHeight = Math.random() * (maxHeight - minHeight) + minHeight;
 
     const newPipe: Pipe = {
       x: canvasSize.width,
       topHeight,
-      bottomY: topHeight + PIPE_GAP,
+      bottomY: topHeight + gapSize,
       passed: false,
       id: Date.now()
     };
 
     setPipes(prev => [...prev, newPipe]);
-  }, [canvasSize]);
+  }, [canvasSize, gameScorer]);
 
-  // Check collision - forgiving for easy gameplay
+  // Check collision - balanced precision
   const checkCollision = useCallback((bird: Bird, pipes: Pipe[]) => {
-    const tolerance = 5; // 5px tolerance for easier gameplay
+    const tolerance = 2; // Small tolerance for fair gameplay
 
-    // Ground and ceiling collision with tolerance
-    if (bird.y + bird.size / 2 >= canvasSize.height - 20 || bird.y - bird.size / 2 <= 0) {
+    // Ground and ceiling collision
+    if (bird.y + bird.size / 2 >= canvasSize.height - 30 || bird.y - bird.size / 2 <= 0) {
       return true;
     }
 
-    // Pipe collision with tolerance
+    // Pipe collision with small tolerance
     for (const pipe of pipes) {
       if (bird.x + bird.size / 2 - tolerance > pipe.x &&
           bird.x - bird.size / 2 + tolerance < pipe.x + PIPE_WIDTH) {
@@ -261,39 +267,49 @@ export default function FlappyBirdEngine({
       };
     });
     
-    // Spawn pipes
+    // Update score using universal scoring system
+    const newScore = gameScorer.updateTimeScore();
+    setScore(newScore);
+    onScoreUpdate(newScore);
+
+    // Update difficulty based on score
+    const currentDifficulty = gameScorer.getCurrentDifficultyLevel();
+    if (currentDifficulty.level - 1 !== difficultyLevel) {
+      setDifficultyLevel(currentDifficulty.level - 1);
+    }
+
+    // Spawn pipes based on current difficulty
     const now = Date.now();
-    if (now - lastPipeSpawn > 3000) { // Every 3 seconds for easy gameplay
+    if (now - lastPipeSpawn > currentDifficulty.spawnRate) {
       spawnPipe();
       setLastPipeSpawn(now);
     }
-    
-    // Update pipes and score
+
+    // Update pipes and check for bonus points
     setPipes(prev => {
       const updated = prev.map(pipe => ({
         ...pipe,
-        x: pipe.x - PIPE_SPEED
-      })).filter(pipe => pipe.x > -PIPE_WIDTH);
-      
-      // Check for score
+        x: pipe.x - currentDifficulty.speed
+      }));
+
+      // Check for pipes passed (add bonus points)
       updated.forEach(pipe => {
         if (!pipe.passed && pipe.x + PIPE_WIDTH < bird.x) {
           pipe.passed = true;
-          const newScore = score + 1;
-          setScore(newScore);
-          onScoreUpdate(newScore);
+          const bonusScore = gameScorer.addObstaclePoints();
+          setScore(bonusScore);
+          onScoreUpdate(bonusScore);
         }
       });
-      
-      return updated;
+
+      return updated.filter(pipe => pipe.x > -PIPE_WIDTH);
     });
     
     // Check collisions
     if (checkCollision(bird, pipes)) {
       setIsRunning(false);
-      onGameEnd(score, {
-        duration: Date.now() - gameStartTime.current,
-        pipesCleared: score,
+      onGameEnd(gameScorer.getScore(), {
+        ...gameScorer.getGameStats(),
         gameType: 'flappy_bird'
       });
       return;
@@ -311,8 +327,10 @@ export default function FlappyBirdEngine({
 
   // Start game
   const startGame = useCallback(() => {
+    gameScorer.reset();
     setIsRunning(true);
     setScore(0);
+    setDifficultyLevel(0);
     setPipes([]);
     setLastPipeSpawn(0);
     setBird({
@@ -322,7 +340,7 @@ export default function FlappyBirdEngine({
       size: BIRD_SIZE,
     });
     gameStartTime.current = Date.now();
-  }, [canvasSize]);
+  }, [canvasSize, gameScorer]);
 
   // Auto-start game when component mounts
   useEffect(() => {
@@ -390,7 +408,13 @@ export default function FlappyBirdEngine({
       
       <div style={{ marginTop: '15px' }}>
         <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#333' }}>
-          Score: {score}
+          Score: {formatScore(score)}
+        </div>
+        <div style={{ fontSize: '14px', color: '#666', marginTop: '5px' }}>
+          {getDifficultyName(difficultyLevel)} | Speed: {gameScorer.getCurrentDifficultyLevel().speed}
+        </div>
+        <div style={{ fontSize: '12px', color: '#888', marginTop: '5px' }}>
+          Pipes: {gameScorer.getObstaclesCleared()} | Time: {Math.floor(gameScorer.getGameDuration())}s
         </div>
         <div style={{ fontSize: '14px', color: '#888', marginTop: '10px' }}>
           Click or SPACE to flap!

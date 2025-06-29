@@ -1,5 +1,6 @@
 /** @jsxImportSource react */
 import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { GameScorer, DIFFICULTY_PROGRESSION, getDifficultyName, formatScore } from '../../utils/gameScoring';
 
 interface GameConfig {
   discountTiers: Array<{
@@ -50,14 +51,7 @@ const PLAYER_WIDTH = 32;
 const PLAYER_HEIGHT = 32;
 const PLAYER_X = 80;
 
-// Difficulty progression - Chrome Dino style
-const DIFFICULTY_LEVELS = [
-  { speed: 4, spawnRate: 2500, obstacleSize: 0.8 }, // Easy start
-  { speed: 5, spawnRate: 2200, obstacleSize: 0.9 }, // Medium
-  { speed: 6, spawnRate: 2000, obstacleSize: 1.0 }, // Hard
-  { speed: 7, spawnRate: 1800, obstacleSize: 1.0 }, // Very Hard
-  { speed: 8, spawnRate: 1600, obstacleSize: 1.0 }, // Expert
-];
+// Use universal difficulty progression from gameScoring.ts
 
 // Obstacle types - Chrome Dino style (simpler, consistent)
 const OBSTACLE_TYPES = [
@@ -97,10 +91,10 @@ export default function EnhancedGameEngine({
 
   const [isRunning, setIsRunning] = useState(false);
   const [score, setScore] = useState(0);
-  const [gameSpeed, setGameSpeed] = useState(3);
   const [difficultyLevel, setDifficultyLevel] = useState(0);
   const [lastObstacleSpawn, setLastObstacleSpawn] = useState(0);
   const [canvasSize, setCanvasSize] = useState(getCanvasSize());
+  const [gameScorer] = useState(() => new GameScorer());
   
   const [player, setPlayer] = useState<Player>({
     x: canvasSize.width * 0.1, // 10% from left
@@ -225,23 +219,23 @@ export default function EnhancedGameEngine({
     });
   }, [isRunning]);
 
-  // Spawn obstacles - Chrome Dino style
+  // Spawn obstacles with universal difficulty
   const spawnObstacle = useCallback(() => {
-    const currentDifficulty = DIFFICULTY_LEVELS[Math.min(difficultyLevel, DIFFICULTY_LEVELS.length - 1)];
+    const currentDifficulty = gameScorer.getCurrentDifficultyLevel();
     const obstacleType = OBSTACLE_TYPES[Math.floor(Math.random() * OBSTACLE_TYPES.length)];
 
     const newObstacle: Obstacle = {
       x: canvasSize.width,
-      y: canvasSize.groundY - obstacleType.height,
-      width: obstacleType.width,
-      height: obstacleType.height,
+      y: canvasSize.groundY - (obstacleType.height * currentDifficulty.obstacleSize),
+      width: obstacleType.width * currentDifficulty.obstacleSize,
+      height: obstacleType.height * currentDifficulty.obstacleSize,
       type: obstacleType.name,
       speed: currentDifficulty.speed,
       id: Date.now()
     };
 
     setObstacles(prev => [...prev, newObstacle]);
-  }, [difficultyLevel, canvasSize]);
+  }, [gameScorer, canvasSize]);
 
   // Game loop
   const gameLoop = useCallback(() => {
@@ -278,19 +272,19 @@ export default function EnhancedGameEngine({
       };
     });
     
-    // Update score and difficulty - Chrome Dino style
-    const newScore = score + 0.5; // Slower score increment
+    // Update score using universal scoring system
+    const newScore = gameScorer.updateTimeScore();
     setScore(newScore);
-    onScoreUpdate(Math.floor(newScore));
+    onScoreUpdate(newScore);
 
-    // Update difficulty every 300 points (faster progression)
-    const newDifficultyLevel = Math.floor(newScore / 300);
-    if (newDifficultyLevel !== difficultyLevel) {
-      setDifficultyLevel(newDifficultyLevel);
+    // Update difficulty based on score
+    const currentDifficulty = gameScorer.getCurrentDifficultyLevel();
+    if (currentDifficulty.level - 1 !== difficultyLevel) {
+      setDifficultyLevel(currentDifficulty.level - 1);
     }
     
-    // Spawn obstacles
-    const currentDifficulty = DIFFICULTY_LEVELS[Math.min(difficultyLevel, DIFFICULTY_LEVELS.length - 1)];
+    // Spawn obstacles based on current difficulty
+    const currentDifficulty = gameScorer.getCurrentDifficultyLevel();
     const now = Date.now();
     if (now - lastObstacleSpawn > currentDifficulty.spawnRate) {
       spawnObstacle();
@@ -302,24 +296,32 @@ export default function EnhancedGameEngine({
       const updated = prev.map(obstacle => ({
         ...obstacle,
         x: obstacle.x - obstacle.speed
-      })).filter(obstacle => obstacle.x > -100);
-      
-      // Check collisions
+      }));
+
+      // Check for obstacles that have been passed (add bonus points)
       updated.forEach(obstacle => {
+        if (obstacle.x + obstacle.width < player.x && obstacle.x + obstacle.width >= player.x - obstacle.speed) {
+          const bonusScore = gameScorer.addObstaclePoints();
+          setScore(bonusScore);
+          onScoreUpdate(bonusScore);
+        }
+      });
+
+      // Filter out off-screen obstacles
+      const filtered = updated.filter(obstacle => obstacle.x > -100);
+
+      // Check collisions
+      filtered.forEach(obstacle => {
         if (player.x < obstacle.x + obstacle.width &&
             player.x + player.width > obstacle.x &&
             player.y < obstacle.y + obstacle.height &&
             player.y + player.height > obstacle.y) {
           setIsRunning(false);
-          onGameEnd(newScore, {
-            duration: Date.now() - gameStartTime.current,
-            difficultyReached: difficultyLevel,
-            obstaclesAvoided: Math.floor(newScore / 100)
-          });
+          onGameEnd(gameScorer.getScore(), gameScorer.getGameStats());
         }
       });
-      
-      return updated;
+
+      return filtered;
     });
     
     // Draw game objects
@@ -332,6 +334,7 @@ export default function EnhancedGameEngine({
 
   // Start game
   const startGame = useCallback(() => {
+    gameScorer.reset();
     setIsRunning(true);
     setScore(0);
     setDifficultyLevel(0);
@@ -346,7 +349,7 @@ export default function EnhancedGameEngine({
       height: PLAYER_HEIGHT,
     });
     gameStartTime.current = Date.now();
-  }, [canvasSize]);
+  }, [canvasSize, gameScorer]);
 
   // Auto-start game when component mounts
   useEffect(() => {
@@ -414,10 +417,13 @@ export default function EnhancedGameEngine({
       
       <div style={{ marginTop: '15px' }}>
         <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#333' }}>
-          Score: {Math.floor(score)}
+          Score: {formatScore(score)}
         </div>
         <div style={{ fontSize: '14px', color: '#666', marginTop: '5px' }}>
-          Level: {difficultyLevel + 1} | Speed: {DIFFICULTY_LEVELS[Math.min(difficultyLevel, DIFFICULTY_LEVELS.length - 1)]?.speed || 4}
+          {getDifficultyName(difficultyLevel)} | Speed: {gameScorer.getCurrentDifficultyLevel().speed}
+        </div>
+        <div style={{ fontSize: '12px', color: '#888', marginTop: '5px' }}>
+          Obstacles: {gameScorer.getObstaclesCleared()} | Time: {Math.floor(gameScorer.getGameDuration())}s
         </div>
         <div style={{ fontSize: '14px', color: '#888', marginTop: '10px' }}>
           Click or SPACE to jump!
