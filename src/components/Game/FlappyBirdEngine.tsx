@@ -21,34 +21,34 @@ interface FlappyBirdEngineProps {
 // Game constants - Flappy Bird style
 const getCanvasSize = () => {
   const isMobile = window.innerWidth <= 768;
-  
+
   if (isMobile) {
-    // Mobile: portrait orientation
-    const width = Math.min(window.innerWidth - 20, 350);
+    // Mobile: horizontal but compact
+    const width = Math.min(window.innerWidth - 20, 400);
     return {
       width,
-      height: 500,
+      height: 250,
     };
   } else {
-    // Desktop: wider but still vertical-ish
-    const width = Math.min(window.innerWidth - 40, 400);
+    // Desktop: wide horizontal like Chrome Dino
+    const width = Math.min(window.innerWidth - 40, 800);
     return {
       width,
-      height: 600,
+      height: 300,
     };
   }
 };
 
-// Flappy Bird physics - exact copy from flappybird.io
-const GRAVITY = 0.25; // Much lighter gravity like original
-const FLAP_FORCE = -4.6; // Precise flap force from original
-const PIPE_SPEED = 1; // Slow and steady like original
-const PIPE_GAP = 100; // Original gap size
-const PIPE_WIDTH = 52; // Original pipe width
+// Easy Flappy Bird physics - much more playable
+const GRAVITY = 0.15; // Very light gravity for easy control
+const FLAP_FORCE = -3.5; // Gentle flap force
+const PIPE_SPEED = 1.5; // Moderate speed
+const PIPE_GAP = 150; // Large gap for easy passage
+const PIPE_WIDTH = 50; // Standard pipe width
 
-// Bird constants - original Flappy Bird
-const BIRD_SIZE = 24;
-const BIRD_X = 57;
+// Bird constants - easy horizontal layout
+const BIRD_SIZE = 28;
+const BIRD_X = 100;
 
 interface Bird {
   x: number;
@@ -106,21 +106,14 @@ export default function FlappyBirdEngine({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Draw bird - original Flappy Bird style
+  // Draw simple bird - clean and easy to see
   const drawBird = useCallback((ctx: CanvasRenderingContext2D, bird: Bird) => {
-    const { x, y, size, velocityY } = bird;
+    const { x, y, size } = bird;
 
-    // Bird rotation based on velocity (like original)
-    const rotation = Math.min(Math.max(velocityY * 0.1, -0.5), 0.5);
-
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(rotation);
-
-    // Bird body (yellow like original)
-    ctx.fillStyle = '#FFDC00';
+    // Simple bird body
+    ctx.fillStyle = '#FFD700';
     ctx.beginPath();
-    ctx.arc(0, 0, size / 2, 0, Math.PI * 2);
+    ctx.arc(x, y, size / 2, 0, Math.PI * 2);
     ctx.fill();
 
     // Bird outline
@@ -128,110 +121,68 @@ export default function FlappyBirdEngine({
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Bird wing
-    ctx.fillStyle = '#FF8C00';
-    ctx.beginPath();
-    ctx.ellipse(-3, 0, size / 3, size / 4, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-
-    // Bird eye (white background)
-    ctx.fillStyle = '#FFF';
-    ctx.beginPath();
-    ctx.arc(3, -3, 4, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-
-    // Bird pupil
+    // Simple eye
     ctx.fillStyle = '#000';
     ctx.beginPath();
-    ctx.arc(4, -3, 2, 0, Math.PI * 2);
+    ctx.arc(x + 5, y - 3, 3, 0, Math.PI * 2);
     ctx.fill();
 
-    // Bird beak
+    // Simple beak
     ctx.fillStyle = '#FF8C00';
     ctx.beginPath();
-    ctx.moveTo(size / 2 - 2, 0);
-    ctx.lineTo(size / 2 + 6, -1);
-    ctx.lineTo(size / 2 + 6, 1);
+    ctx.moveTo(x + size / 2, y);
+    ctx.lineTo(x + size / 2 + 8, y - 2);
+    ctx.lineTo(x + size / 2 + 8, y + 2);
     ctx.fill();
-    ctx.stroke();
-
-    ctx.restore();
   }, []);
 
-  // Draw pipe - original Flappy Bird style
+  // Draw simple pipes - clean and visible
   const drawPipe = useCallback((ctx: CanvasRenderingContext2D, pipe: Pipe) => {
     const { x, topHeight, bottomY } = pipe;
-    const capHeight = 24;
-    const capWidth = PIPE_WIDTH + 6;
 
-    // Top pipe body
-    ctx.fillStyle = '#5CBF3B';
-    ctx.fillRect(x, 0, PIPE_WIDTH, topHeight - capHeight);
+    // Top pipe
+    ctx.fillStyle = '#228B22';
+    ctx.fillRect(x, 0, PIPE_WIDTH, topHeight);
 
     // Top pipe cap
-    ctx.fillStyle = '#5CBF3B';
-    ctx.fillRect(x - 3, topHeight - capHeight, capWidth, capHeight);
+    ctx.fillStyle = '#32CD32';
+    ctx.fillRect(x - 5, topHeight - 20, PIPE_WIDTH + 10, 20);
 
-    // Top pipe outline
-    ctx.strokeStyle = '#2F5F2F';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x, 0, PIPE_WIDTH, topHeight - capHeight);
-    ctx.strokeRect(x - 3, topHeight - capHeight, capWidth, capHeight);
-
-    // Bottom pipe body
-    ctx.fillStyle = '#5CBF3B';
-    ctx.fillRect(x, bottomY + capHeight, PIPE_WIDTH, canvasSize.height - bottomY - capHeight);
+    // Bottom pipe
+    ctx.fillStyle = '#228B22';
+    ctx.fillRect(x, bottomY, PIPE_WIDTH, canvasSize.height - bottomY);
 
     // Bottom pipe cap
-    ctx.fillStyle = '#5CBF3B';
-    ctx.fillRect(x - 3, bottomY, capWidth, capHeight);
+    ctx.fillStyle = '#32CD32';
+    ctx.fillRect(x - 5, bottomY, PIPE_WIDTH + 10, 20);
 
-    // Bottom pipe outline
-    ctx.strokeStyle = '#2F5F2F';
+    // Simple outlines
+    ctx.strokeStyle = '#000';
     ctx.lineWidth = 2;
-    ctx.strokeRect(x, bottomY + capHeight, PIPE_WIDTH, canvasSize.height - bottomY - capHeight);
-    ctx.strokeRect(x - 3, bottomY, capWidth, capHeight);
+    ctx.strokeRect(x, 0, PIPE_WIDTH, topHeight);
+    ctx.strokeRect(x, bottomY, PIPE_WIDTH, canvasSize.height - bottomY);
   }, [canvasSize.height]);
 
-  // Draw background - original Flappy Bird style
+  // Draw simple background - clean and minimal
   const drawBackground = useCallback((ctx: CanvasRenderingContext2D) => {
     const { width, height } = canvasSize;
 
-    // Sky gradient (day time like original)
-    const gradient = ctx.createLinearGradient(0, 0, 0, height);
-    gradient.addColorStop(0, '#4EC0CA');
-    gradient.addColorStop(1, '#4EC0CA');
-    ctx.fillStyle = gradient;
+    // Simple sky
+    ctx.fillStyle = '#87CEEB';
     ctx.fillRect(0, 0, width, height);
 
     // Ground
-    const groundHeight = 20;
-    ctx.fillStyle = '#DED895';
+    const groundHeight = 30;
+    ctx.fillStyle = '#8B4513';
     ctx.fillRect(0, height - groundHeight, width, groundHeight);
 
-    // Ground outline
-    ctx.strokeStyle = '#8B7355';
+    // Ground line
+    ctx.strokeStyle = '#654321';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(0, height - groundHeight);
     ctx.lineTo(width, height - groundHeight);
     ctx.stroke();
-
-    // Simple moving clouds
-    ctx.fillStyle = '#FFFFFF';
-    const cloudOffset = (Date.now() * 0.005) % (width + 60);
-    for (let i = 0; i < 2; i++) {
-      const cloudX = (i * 200 - cloudOffset) % (width + 60);
-      const cloudY = 60 + i * 50;
-      // Simple cloud shape
-      ctx.beginPath();
-      ctx.arc(cloudX, cloudY, 15, 0, Math.PI * 2);
-      ctx.arc(cloudX + 15, cloudY, 20, 0, Math.PI * 2);
-      ctx.arc(cloudX + 30, cloudY, 15, 0, Math.PI * 2);
-      ctx.fill();
-    }
   }, [canvasSize]);
 
   // Handle flap
@@ -244,10 +195,10 @@ export default function FlappyBirdEngine({
     }));
   }, [isRunning]);
 
-  // Spawn pipe - original Flappy Bird logic
+  // Spawn pipe - easy gameplay logic
   const spawnPipe = useCallback(() => {
-    const minHeight = 60;
-    const maxHeight = canvasSize.height - PIPE_GAP - 60;
+    const minHeight = 40;
+    const maxHeight = canvasSize.height - PIPE_GAP - 40;
     const topHeight = Math.random() * (maxHeight - minHeight) + minHeight;
 
     const newPipe: Pipe = {
@@ -261,19 +212,21 @@ export default function FlappyBirdEngine({
     setPipes(prev => [...prev, newPipe]);
   }, [canvasSize]);
 
-  // Check collision - original Flappy Bird precision
+  // Check collision - forgiving for easy gameplay
   const checkCollision = useCallback((bird: Bird, pipes: Pipe[]) => {
-    // Ground and ceiling collision
+    const tolerance = 5; // 5px tolerance for easier gameplay
+
+    // Ground and ceiling collision with tolerance
     if (bird.y + bird.size / 2 >= canvasSize.height - 20 || bird.y - bird.size / 2 <= 0) {
       return true;
     }
 
-    // Pipe collision - exact like original
+    // Pipe collision with tolerance
     for (const pipe of pipes) {
-      if (bird.x + bird.size / 2 > pipe.x &&
-          bird.x - bird.size / 2 < pipe.x + PIPE_WIDTH) {
-        if (bird.y - bird.size / 2 < pipe.topHeight ||
-            bird.y + bird.size / 2 > pipe.bottomY) {
+      if (bird.x + bird.size / 2 - tolerance > pipe.x &&
+          bird.x - bird.size / 2 + tolerance < pipe.x + PIPE_WIDTH) {
+        if (bird.y - bird.size / 2 + tolerance < pipe.topHeight ||
+            bird.y + bird.size / 2 - tolerance > pipe.bottomY) {
           return true;
         }
       }
@@ -310,7 +263,7 @@ export default function FlappyBirdEngine({
     
     // Spawn pipes
     const now = Date.now();
-    if (now - lastPipeSpawn > 1800) { // Every 1.8 seconds like original
+    if (now - lastPipeSpawn > 3000) { // Every 3 seconds for easy gameplay
       spawnPipe();
       setLastPipeSpawn(now);
     }
