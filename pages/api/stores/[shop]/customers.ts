@@ -16,12 +16,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Get customers for the shop
-    const customers = await CustomerService.getCustomersByShop(shop, 100);
-    
-    // Get recent sessions and discounts for context
-    const recentSessions = await GameSessionService.getSessionsByShop(shop, 50);
-    const recentDiscounts = await DiscountService.getDiscountsByShop(shop, 50);
+    // Get customers for the shop (with fallback for building indexes)
+    let customers: any[] = [];
+    let recentSessions: any[] = [];
+    let recentDiscounts: any[] = [];
+
+    try {
+      customers = await CustomerService.getCustomersByShop(shop, 100);
+      recentSessions = await GameSessionService.getSessionsByShop(shop, 50);
+      recentDiscounts = await DiscountService.getDiscountsByShop(shop, 50);
+    } catch (indexError: any) {
+      // If indexes are building, return empty arrays
+      if (indexError.code === 9 && indexError.details?.includes('index is currently building')) {
+        console.log('📊 Firebase indexes are building, returning empty customers data...');
+        customers = [];
+        recentSessions = [];
+        recentDiscounts = [];
+      } else {
+        throw indexError;
+      }
+    }
 
     // Enrich customer data with recent activity
     const enrichedCustomers = customers.map(customer => {

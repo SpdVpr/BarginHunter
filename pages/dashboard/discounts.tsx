@@ -16,6 +16,7 @@ import {
   Filters,
   ProgressBar,
 } from '@shopify/polaris';
+import { DashboardLayout } from '../../src/components/shared/DashboardLayout';
 
 interface DiscountData {
   id: string;
@@ -130,23 +131,23 @@ export default function DiscountAnalytics() {
 
   if (loading) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
-        <Spinner size="large" />
-        <Text variant="bodyMd" as="p" color="subdued">
-          Loading discount analytics...
-        </Text>
-      </div>
+      <DashboardLayout shop={typeof shop === 'string' ? shop : ''} currentPage="discounts">
+        <div style={{ padding: '2rem', textAlign: 'center' }}>
+          <Spinner size="large" />
+          <Text variant="bodyMd" as="p" color="subdued">
+            Loading discount analytics...
+          </Text>
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <Page
-      title="Discount Code Analytics"
-      backAction={{
-        content: 'Dashboard',
-        onAction: () => router.push(`/dashboard?shop=${shop}`)
-      }}
-    >
+    <DashboardLayout shop={typeof shop === 'string' ? shop : ''} currentPage="discounts">
+      <Page
+        title="Discount Code Analytics"
+        subtitle={`Discount performance for ${shop}`}
+      >
       <Layout>
         {summary && (
           <>
@@ -285,5 +286,6 @@ export default function DiscountAnalytics() {
         </Layout.Section>
       </Layout>
     </Page>
+    </DashboardLayout>
   );
 }

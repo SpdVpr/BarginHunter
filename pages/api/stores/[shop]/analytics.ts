@@ -66,7 +66,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     // Group data by time period
-    const timeSeriesData = generateTimeSeries(sessions, discounts, startDate, endDate, granularity as string);
+    let timeSeriesData = [];
+    try {
+      timeSeriesData = generateTimeSeries(sessions, discounts, startDate, endDate, granularity as string);
+    } catch (timeSeriesError) {
+      console.error('Time series generation error:', timeSeriesError);
+      // Fallback to empty array if time series fails
+      timeSeriesData = [];
+    }
 
     // Calculate summary metrics
     const completedSessions = sessions.filter(s => s.completed);
@@ -143,18 +150,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 }
 
 function generateTimeSeries(
-  sessions: any[], 
-  discounts: any[], 
-  startDate: Date, 
-  endDate: Date, 
+  sessions: any[],
+  discounts: any[],
+  startDate: Date,
+  endDate: Date,
   granularity: string
 ) {
   const data = [];
   const current = new Date(startDate);
-  
-  while (current <= endDate) {
+  let iterations = 0;
+  const maxIterations = 1000; // Prevent infinite loops
+
+  while (current <= endDate && iterations < maxIterations) {
     const nextPeriod = new Date(current);
-    
+
     switch (granularity) {
       case 'hour':
         nextPeriod.setHours(current.getHours() + 1);
@@ -172,14 +181,30 @@ function generateTimeSeries(
         nextPeriod.setDate(current.getDate() + 1);
     }
 
+    // Safety check to prevent infinite loops
+    if (nextPeriod.getTime() <= current.getTime()) {
+      console.error('Time series generation: nextPeriod is not advancing');
+      break;
+    }
+
     const periodSessions = sessions.filter(s => {
-      const sessionDate = s.startedAt.toDate();
-      return sessionDate >= current && sessionDate < nextPeriod;
+      try {
+        const sessionDate = s.startedAt?.toDate ? s.startedAt.toDate() : new Date(s.startedAt);
+        return sessionDate >= current && sessionDate < nextPeriod;
+      } catch (error) {
+        console.error('Error parsing session date:', error);
+        return false;
+      }
     });
 
     const periodDiscounts = discounts.filter(d => {
-      const discountDate = d.createdAt.toDate();
-      return discountDate >= current && discountDate < nextPeriod;
+      try {
+        const discountDate = d.createdAt?.toDate ? d.createdAt.toDate() : new Date(d.createdAt);
+        return discountDate >= current && discountDate < nextPeriod;
+      } catch (error) {
+        console.error('Error parsing discount date:', error);
+        return false;
+      }
     });
 
     data.push({
@@ -188,12 +213,13 @@ function generateTimeSeries(
       completedSessions: periodSessions.filter(s => s.completed).length,
       discounts: periodDiscounts.length,
       usedDiscounts: periodDiscounts.filter(d => d.isUsed).length,
-      averageScore: periodSessions.length > 0 
-        ? periodSessions.reduce((sum, s) => sum + (s.finalScore || 0), 0) / periodSessions.length 
+      averageScore: periodSessions.length > 0
+        ? periodSessions.reduce((sum, s) => sum + (s.finalScore || 0), 0) / periodSessions.length
         : 0,
     });
 
     current.setTime(nextPeriod.getTime());
+    iterations++;
   }
 
   return data;
