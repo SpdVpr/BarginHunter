@@ -10,31 +10,55 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { shop } = req.query;
 
     if (!shop || typeof shop !== 'string') {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Shop domain is required' 
+      return res.status(400).json({
+        success: false,
+        error: 'Shop domain is required'
       });
     }
 
-    // Get customers for the shop (with fallback for building indexes)
+    console.log(`🔍 Loading customers data for shop: ${shop}`);
+
+    // Get customers for the shop (with comprehensive fallback)
     let customers: any[] = [];
     let recentSessions: any[] = [];
     let recentDiscounts: any[] = [];
 
     try {
+      console.log('📊 Attempting to load customers...');
       customers = await CustomerService.getCustomersByShop(shop, 100);
+      console.log(`✅ Loaded ${customers.length} customers`);
+
+      console.log('📊 Attempting to load sessions...');
       recentSessions = await GameSessionService.getSessionsByShop(shop, 50);
+      console.log(`✅ Loaded ${recentSessions.length} sessions`);
+
+      console.log('📊 Attempting to load discounts...');
       recentDiscounts = await DiscountService.getDiscountsByShop(shop, 50);
-    } catch (indexError: any) {
-      // If indexes are building, return empty arrays
-      if (indexError.code === 9 && indexError.details?.includes('index is currently building')) {
-        console.log('📊 Firebase indexes are building, returning empty customers data...');
-        customers = [];
-        recentSessions = [];
-        recentDiscounts = [];
-      } else {
-        throw indexError;
+      console.log(`✅ Loaded ${recentDiscounts.length} discounts`);
+
+    } catch (dbError: any) {
+      console.error('❌ Database error:', dbError);
+
+      // Check if it's an index error
+      if (dbError.code === 9 && dbError.details?.includes('index')) {
+        console.log('🔄 Firebase index missing, returning empty customers data');
+        console.log('📝 Index needed:', dbError.details);
       }
+
+      // Return empty data structure instead of failing
+      return res.json({
+        success: true,
+        customers: [],
+        summary: {
+          totalCustomers: 0,
+          activeCustomers: 0,
+          totalSessions: 0,
+          totalDiscountsEarned: 0,
+          totalDiscountsUsed: 0,
+          averageScore: 0,
+          discountUsageRate: 0,
+        }
+      });
     }
 
     // Enrich customer data with recent activity

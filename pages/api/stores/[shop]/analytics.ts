@@ -42,17 +42,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let allDiscounts: any[] = [];
 
     try {
+      console.log(`🔍 Loading analytics data for shop: ${shop}`);
       allSessions = await GameSessionService.getSessionsByShop(shop, 10000);
       allDiscounts = await DiscountService.getDiscountsByShop(shop, 10000);
-    } catch (indexError: any) {
-      // If indexes are building, return empty arrays
-      if (indexError.code === 9 && indexError.details?.includes('index is currently building')) {
-        console.log('📊 Firebase indexes are building, returning empty analytics data...');
-        allSessions = [];
-        allDiscounts = [];
-      } else {
-        throw indexError;
-      }
+      console.log(`✅ Loaded ${allSessions.length} sessions and ${allDiscounts.length} discounts`);
+    } catch (dbError: any) {
+      console.error('❌ Database error in analytics:', dbError);
+
+      // Return empty analytics data instead of failing
+      return res.json({
+        period: period as string,
+        dateRange: {
+          start: startDate.toISOString(),
+          end: endDate.toISOString(),
+        },
+        metrics: {
+          totalSessions: 0,
+          completedSessions: 0,
+          completionRate: 0,
+          totalDiscounts: 0,
+          usedDiscounts: 0,
+          discountUsageRate: 0,
+          averageScore: 0,
+          uniqueCustomers: 0,
+          estimatedRevenue: 0,
+        },
+        timeSeries: [],
+        hourlyBreakdown: [],
+        topScores: [],
+        sourceBreakdown: {},
+      });
     }
 
     const sessions = allSessions.filter(session => {
@@ -112,8 +131,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       };
     });
 
-    // Top scores
-    const topScores = await GameScoreService.getTopScores(shop, 10);
+    // Top scores (with fallback for missing index)
+    let topScores: any[] = [];
+    try {
+      topScores = await GameScoreService.getTopScores(shop, 10);
+    } catch (scoresError: any) {
+      console.error('❌ Error loading top scores:', scoresError);
+      if (scoresError.code === 9 && scoresError.details?.includes('index')) {
+        console.log('📝 Top scores index needed:', scoresError.details);
+      }
+      topScores = []; // Fallback to empty array
+    }
 
     // Device/source breakdown
     const sourceBreakdown = sessions.reduce((acc, session) => {

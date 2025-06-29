@@ -209,7 +209,14 @@ export function useAnalyticsData(shop: string | string[] | undefined, period = '
     setError(null);
 
     try {
-      const response = await fetch(`/api/stores/${shopDomain}/analytics?period=${period}`);
+      // Try main analytics API first
+      let response = await fetch(`/api/stores/${shopDomain}/analytics?period=${period}`);
+
+      // If main API fails, try simple version
+      if (!response.ok) {
+        console.log('🔄 Main analytics API failed, trying simple version...');
+        response = await fetch(`/api/stores/${shopDomain}/analytics-simple?period=${period}`);
+      }
 
       if (!response.ok) {
         throw new Error(`Failed to load analytics: ${response.statusText}`);
@@ -298,7 +305,14 @@ export function useCustomersData(shop: string | string[] | undefined) {
     setError(null);
 
     try {
-      const response = await fetch(`/api/stores/${shopDomain}/customers`);
+      // Try main customers API first
+      let response = await fetch(`/api/stores/${shopDomain}/customers`);
+
+      // If main API fails, try simple version
+      if (!response.ok) {
+        console.log('🔄 Main customers API failed, trying simple version...');
+        response = await fetch(`/api/stores/${shopDomain}/customers-simple`);
+      }
 
       if (!response.ok) {
         throw new Error(`Failed to load customers: ${response.statusText}`);
