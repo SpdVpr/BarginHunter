@@ -18,10 +18,19 @@ interface EnhancedGameEngineProps {
   onShowIntro: () => void;
 }
 
-// Game constants
-const CANVAS_WIDTH = 800;
-const CANVAS_HEIGHT = 400;
-const GROUND_Y = 320;
+// Game constants - responsive
+const getCanvasSize = () => {
+  const isMobile = window.innerWidth <= 768;
+  const maxWidth = Math.min(window.innerWidth - 40, isMobile ? 350 : 800);
+  const aspectRatio = isMobile ? 1.2 : 2; // More square on mobile
+
+  return {
+    width: maxWidth,
+    height: Math.round(maxWidth / aspectRatio),
+    groundY: Math.round((maxWidth / aspectRatio) * 0.8), // 80% down from top
+  };
+};
+
 const GRAVITY = 0.8;
 const JUMP_FORCE = -15;
 
@@ -67,30 +76,49 @@ interface Obstacle {
   id: number;
 }
 
-export default function EnhancedGameEngine({ 
-  onGameEnd, 
-  onScoreUpdate, 
+export default function EnhancedGameEngine({
+  onGameEnd,
+  onScoreUpdate,
   gameConfig,
-  onShowIntro 
+  onShowIntro
 }: EnhancedGameEngineProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
   const gameStartTime = useRef<number>(0);
-  
+
   const [isRunning, setIsRunning] = useState(false);
   const [score, setScore] = useState(0);
   const [gameSpeed, setGameSpeed] = useState(3);
   const [difficultyLevel, setDifficultyLevel] = useState(0);
   const [lastObstacleSpawn, setLastObstacleSpawn] = useState(0);
+  const [canvasSize, setCanvasSize] = useState(getCanvasSize());
   
   const [player, setPlayer] = useState<Player>({
-    x: PLAYER_X,
-    y: GROUND_Y - PLAYER_HEIGHT,
+    x: canvasSize.width * 0.1, // 10% from left
+    y: canvasSize.groundY - PLAYER_HEIGHT,
     velocityY: 0,
     isJumping: false,
     width: PLAYER_WIDTH,
     height: PLAYER_HEIGHT,
   });
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      const newSize = getCanvasSize();
+      setCanvasSize(newSize);
+
+      // Update player position proportionally
+      setPlayer(prev => ({
+        ...prev,
+        x: newSize.width * 0.1,
+        y: newSize.groundY - prev.height,
+      }));
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   const [obstacles, setObstacles] = useState<Obstacle[]>([]);
 
@@ -196,36 +224,41 @@ export default function EnhancedGameEngine({
 
   // Draw background with parallax effect
   const drawBackground = useCallback((ctx: CanvasRenderingContext2D) => {
+    const { width, height, groundY } = canvasSize;
+
     // Sky gradient
-    const gradient = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
+    const gradient = ctx.createLinearGradient(0, 0, 0, height);
     gradient.addColorStop(0, '#87CEEB');
     gradient.addColorStop(1, '#E0F6FF');
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-    
-    // Clouds (simple pixel art)
+    ctx.fillRect(0, 0, width, height);
+
+    // Clouds (simple pixel art) - responsive
     ctx.fillStyle = '#FFFFFF';
-    const cloudOffset = (Date.now() * 0.02) % (CANVAS_WIDTH + 100);
+    const cloudOffset = (Date.now() * 0.02) % (width + 100);
+    const cloudSpacing = Math.max(200, width / 4);
     for (let i = 0; i < 3; i++) {
-      const cloudX = (i * 300 - cloudOffset) % (CANVAS_WIDTH + 100);
-      const cloudY = 50 + i * 30;
+      const cloudX = (i * cloudSpacing - cloudOffset) % (width + 100);
+      const cloudY = height * 0.1 + i * (height * 0.08);
+      const cloudSize = Math.max(40, width * 0.08);
       // Cloud pixels
-      ctx.fillRect(cloudX, cloudY, 60, 20);
-      ctx.fillRect(cloudX + 10, cloudY - 8, 40, 16);
-      ctx.fillRect(cloudX + 20, cloudY - 12, 20, 12);
+      ctx.fillRect(cloudX, cloudY, cloudSize, cloudSize * 0.33);
+      ctx.fillRect(cloudX + cloudSize * 0.17, cloudY - cloudSize * 0.13, cloudSize * 0.67, cloudSize * 0.27);
+      ctx.fillRect(cloudX + cloudSize * 0.33, cloudY - cloudSize * 0.2, cloudSize * 0.33, cloudSize * 0.2);
     }
-    
+
     // Ground
     ctx.fillStyle = '#8B4513';
-    ctx.fillRect(0, GROUND_Y, CANVAS_WIDTH, CANVAS_HEIGHT - GROUND_Y);
-    
-    // Ground texture
+    ctx.fillRect(0, groundY, width, height - groundY);
+
+    // Ground texture - responsive
     ctx.fillStyle = '#A0522D';
-    for (let x = 0; x < CANVAS_WIDTH; x += 20) {
-      ctx.fillRect(x, GROUND_Y + 4, 16, 4);
-      ctx.fillRect(x + 8, GROUND_Y + 12, 8, 4);
+    const textureSpacing = Math.max(15, width * 0.025);
+    for (let x = 0; x < width; x += textureSpacing) {
+      ctx.fillRect(x, groundY + 4, textureSpacing * 0.8, 4);
+      ctx.fillRect(x + textureSpacing * 0.4, groundY + 12, textureSpacing * 0.4, 4);
     }
-  }, []);
+  }, [canvasSize]);
 
   // Handle input
   const handleJump = useCallback(() => {
@@ -247,19 +280,22 @@ export default function EnhancedGameEngine({
   const spawnObstacle = useCallback(() => {
     const currentDifficulty = DIFFICULTY_LEVELS[Math.min(difficultyLevel, DIFFICULTY_LEVELS.length - 1)];
     const obstacleType = OBSTACLE_TYPES[Math.floor(Math.random() * OBSTACLE_TYPES.length)];
-    
+
+    // Scale obstacles based on canvas size
+    const scale = Math.min(1, canvasSize.width / 800);
+
     const newObstacle: Obstacle = {
-      x: CANVAS_WIDTH,
-      y: GROUND_Y - (obstacleType.height * currentDifficulty.obstacleSize),
-      width: obstacleType.width * currentDifficulty.obstacleSize,
-      height: obstacleType.height * currentDifficulty.obstacleSize,
+      x: canvasSize.width,
+      y: canvasSize.groundY - (obstacleType.height * currentDifficulty.obstacleSize * scale),
+      width: obstacleType.width * currentDifficulty.obstacleSize * scale,
+      height: obstacleType.height * currentDifficulty.obstacleSize * scale,
       type: obstacleType.name,
-      speed: currentDifficulty.speed,
+      speed: currentDifficulty.speed * scale,
       id: Date.now()
     };
-    
+
     setObstacles(prev => [...prev, newObstacle]);
-  }, [difficultyLevel]);
+  }, [difficultyLevel, canvasSize]);
 
   // Game loop
   const gameLoop = useCallback(() => {
@@ -270,7 +306,7 @@ export default function EnhancedGameEngine({
     if (!canvas || !ctx) return;
     
     // Clear canvas
-    ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    ctx.clearRect(0, 0, canvasSize.width, canvasSize.height);
     
     // Draw background
     drawBackground(ctx);
@@ -282,8 +318,8 @@ export default function EnhancedGameEngine({
       let newIsJumping = prev.isJumping;
       
       // Ground collision
-      if (newY >= GROUND_Y - prev.height) {
-        newY = GROUND_Y - prev.height;
+      if (newY >= canvasSize.groundY - prev.height) {
+        newY = canvasSize.groundY - prev.height;
         newVelocityY = 0;
         newIsJumping = false;
       }
@@ -356,15 +392,15 @@ export default function EnhancedGameEngine({
     setObstacles([]);
     setLastObstacleSpawn(0);
     setPlayer({
-      x: PLAYER_X,
-      y: GROUND_Y - PLAYER_HEIGHT,
+      x: canvasSize.width * 0.1,
+      y: canvasSize.groundY - PLAYER_HEIGHT,
       velocityY: 0,
       isJumping: false,
       width: PLAYER_WIDTH,
       height: PLAYER_HEIGHT,
     });
     gameStartTime.current = Date.now();
-  }, []);
+  }, [canvasSize]);
 
   // Auto-start game when component mounts
   useEffect(() => {
@@ -408,16 +444,25 @@ export default function EnhancedGameEngine({
   }, [isRunning, gameLoop]);
 
   return (
-    <div style={{ textAlign: 'center' }}>
+    <div style={{
+      textAlign: 'center',
+      padding: '10px',
+      maxWidth: '100%',
+      overflow: 'hidden'
+    }}>
       <canvas
         ref={canvasRef}
-        width={CANVAS_WIDTH}
-        height={CANVAS_HEIGHT}
+        width={canvasSize.width}
+        height={canvasSize.height}
         style={{
           border: '3px solid #4ECDC4',
           borderRadius: '12px',
           cursor: 'pointer',
-          background: '#87CEEB'
+          background: '#87CEEB',
+          maxWidth: '100%',
+          height: 'auto',
+          display: 'block',
+          margin: '0 auto'
         }}
       />
       

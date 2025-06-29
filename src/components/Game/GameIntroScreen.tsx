@@ -38,9 +38,9 @@ export default function GameIntroScreen({
     <div style={{
       background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       color: 'white',
-      padding: '40px',
+      padding: window.innerWidth <= 768 ? '20px' : '40px',
       borderRadius: '20px',
-      maxWidth: '600px',
+      maxWidth: window.innerWidth <= 768 ? '95%' : '600px',
       margin: '0 auto',
       textAlign: 'center',
       boxShadow: '0 20px 40px rgba(0,0,0,0.3)',

@@ -96,7 +96,17 @@ export default function Settings() {
       const response = await fetch(`/api/game/config/${shop}`);
       if (response.ok) {
         const config = await response.json();
-        setGameSettings(config.gameSettings);
+
+        // Ensure gameSettings have default discount tiers
+        const gameSettings = {
+          ...config.gameSettings,
+          discountTiers: config.gameSettings?.discountTiers || [
+            { minScore: 100, discount: 5, message: 'Great job! You earned 5% off!' },
+            { minScore: 300, discount: 10, message: 'Amazing! You earned 10% off!' },
+            { minScore: 500, discount: 15, message: 'Incredible! You earned 15% off!' }
+          ]
+        };
+        setGameSettings(gameSettings);
 
         // Ensure widget settings have all new properties with defaults
         const widgetSettings = {
@@ -325,6 +335,101 @@ export default function Settings() {
                     />
                   </div>
                 </FormLayout>
+              </Card>
+            </Layout.Section>
+          )}
+
+          {/* Discount Tiers Configuration */}
+          {gameSettings && (
+            <Layout.Section>
+              <Card sectioned>
+                <Heading>Discount Tiers</Heading>
+                <p style={{ marginBottom: '20px', color: '#666' }}>
+                  Configure what discount customers get for reaching certain scores. You can add multiple tiers.
+                </p>
+
+                {gameSettings.discountTiers?.map((tier, index) => (
+                  <div key={index} style={{
+                    border: '1px solid #e1e3e5',
+                    borderRadius: '8px',
+                    padding: '16px',
+                    marginBottom: '16px',
+                    background: '#fafbfb'
+                  }}>
+                    <Stack distribution="equalSpacing" alignment="center">
+                      <Stack.Item fill>
+                        <FormLayout>
+                          <Stack>
+                            <Stack.Item fill>
+                              <TextField
+                                label="Minimum Score"
+                                type="number"
+                                value={tier.minScore.toString()}
+                                onChange={(value) => {
+                                  const newTiers = [...gameSettings.discountTiers];
+                                  newTiers[index] = { ...tier, minScore: parseInt(value) || 0 };
+                                  setGameSettings({ ...gameSettings, discountTiers: newTiers });
+                                }}
+                                helpText="Points needed to earn this discount"
+                              />
+                            </Stack.Item>
+                            <Stack.Item fill>
+                              <TextField
+                                label="Discount %"
+                                type="number"
+                                value={tier.discount.toString()}
+                                onChange={(value) => {
+                                  const newTiers = [...gameSettings.discountTiers];
+                                  newTiers[index] = { ...tier, discount: parseInt(value) || 0 };
+                                  setGameSettings({ ...gameSettings, discountTiers: newTiers });
+                                }}
+                                helpText="Percentage discount (1-100)"
+                                suffix="%"
+                              />
+                            </Stack.Item>
+                          </Stack>
+                          <TextField
+                            label="Success Message"
+                            value={tier.message}
+                            onChange={(value) => {
+                              const newTiers = [...gameSettings.discountTiers];
+                              newTiers[index] = { ...tier, message: value };
+                              setGameSettings({ ...gameSettings, discountTiers: newTiers });
+                            }}
+                            helpText="Message shown when customer earns this discount"
+                            placeholder="Congratulations! You earned a discount!"
+                          />
+                        </FormLayout>
+                      </Stack.Item>
+                      <Button
+                        destructive
+                        onClick={() => {
+                          const newTiers = gameSettings.discountTiers.filter((_, i) => i !== index);
+                          setGameSettings({ ...gameSettings, discountTiers: newTiers });
+                        }}
+                        disabled={gameSettings.discountTiers.length <= 1}
+                      >
+                        Remove
+                      </Button>
+                    </Stack>
+                  </div>
+                ))}
+
+                <Button
+                  onClick={() => {
+                    const newTier = {
+                      minScore: 100,
+                      discount: 5,
+                      message: 'Congratulations! You earned a discount!'
+                    };
+                    setGameSettings({
+                      ...gameSettings,
+                      discountTiers: [...(gameSettings.discountTiers || []), newTier]
+                    });
+                  }}
+                >
+                  Add Discount Tier
+                </Button>
               </Card>
             </Layout.Section>
           )}
