@@ -282,9 +282,8 @@ export default function EnhancedGameEngine({
     if (currentDifficulty.level - 1 !== difficultyLevel) {
       setDifficultyLevel(currentDifficulty.level - 1);
     }
-    
+
     // Spawn obstacles based on current difficulty
-    const currentDifficulty = gameScorer.getCurrentDifficultyLevel();
     const now = Date.now();
     if (now - lastObstacleSpawn > currentDifficulty.spawnRate) {
       spawnObstacle();
