@@ -222,9 +222,10 @@ export default function WidgetGame() {
         alignItems: 'center',
         justifyContent: 'center',
         background: '#f8f9fa',
-        padding: '10px',
+        padding: '4px',
         margin: '0',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        overflow: 'hidden'
       }}>
         <Game
           shopDomain={shopDomain}
