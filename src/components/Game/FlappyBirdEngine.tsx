@@ -21,7 +21,10 @@ interface FlappyBirdEngineProps {
 
 // Standardized game canvas size for consistent iframe experience
 const getCanvasSize = () => {
-  const isMobile = window.innerWidth <= 768;
+  // More reliable mobile detection for iframe context
+  const isMobile = window.innerWidth <= 768 ||
+                   window.screen?.width <= 768 ||
+                   /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
   if (isMobile) {
     // Mobile: consistent size that fits well in iframe

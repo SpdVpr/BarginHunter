@@ -386,8 +386,12 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       border-radius: 12px;
     \`;
 
-    // Standardized sizing for consistent game experience
-    if (window.innerWidth < 768) {
+    // Standardized sizing for consistent game experience with reliable mobile detection
+    const isMobile = window.innerWidth < 768 ||
+                     window.screen?.width <= 768 ||
+                     /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    if (isMobile) {
       // Mobile: optimized for mobile games
       iframe.style.width = '370px'; // 350px game + 20px padding
       iframe.style.height = '600px'; // 500px game + 100px UI
@@ -448,7 +452,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         // Handle iframe resize with standardized game sizes
         const iframe = document.querySelector('#bargain-hunter-modal iframe');
         if (iframe && event.data.height) {
-          const isMobile = window.innerWidth < 768;
+          // More reliable mobile detection for iframe context
+          const isMobile = window.innerWidth < 768 ||
+                           window.screen?.width <= 768 ||
+                           /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
           // Use standardized sizes for consistent experience
           const newWidth = isMobile ? 370 : 540; // Matches initial sizing

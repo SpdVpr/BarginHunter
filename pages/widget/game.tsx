@@ -35,7 +35,10 @@ export default function WidgetGame() {
         clearTimeout(resizeTimeout);
 
         resizeTimeout = setTimeout(() => {
-          const isMobile = window.innerWidth <= 768;
+          // More reliable mobile detection for iframe context
+          const isMobile = window.innerWidth <= 768 ||
+                           window.screen?.width <= 768 ||
+                           /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
           // Use standardized heights based on game canvas sizes + UI elements
           const standardHeight = isMobile ?
@@ -69,7 +72,10 @@ export default function WidgetGame() {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (window.parent && window.parent !== window) {
-        const isMobile = window.innerWidth <= 768;
+        // More reliable mobile detection for iframe context
+        const isMobile = window.innerWidth <= 768 ||
+                         window.screen?.width <= 768 ||
+                         /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
         // Use standardized heights based on game canvas sizes + UI elements
         const standardHeight = isMobile ?
