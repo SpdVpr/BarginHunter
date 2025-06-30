@@ -362,26 +362,41 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       background: white;
       border-radius: 12px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-      max-width: 90vw;
-      max-height: 90vh;
-      overflow: hidden;
       position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      overflow: hidden;
     \`;
 
     // Create iframe for the game
     const iframe = document.createElement('iframe');
     iframe.src = API_BASE.replace('/api', '') + '/widget/game?shop=' + encodeURIComponent(SHOP_DOMAIN);
     iframe.style.cssText = \`
-      width: 600px;
-      height: 500px;
+      width: 100%;
+      height: 100%;
+      min-width: 300px;
+      min-height: 300px;
+      max-width: 600px;
+      max-height: 600px;
       border: none;
       display: block;
+      aspect-ratio: 1;
     \`;
 
-    // Make responsive
+    // Responsive sizing based on viewport
     if (window.innerWidth < 768) {
-      iframe.style.width = '95vw';
-      iframe.style.height = '70vh';
+      // Mobile: use most of viewport but maintain aspect ratio
+      const size = Math.min(window.innerWidth * 0.95, window.innerHeight * 0.8, 600);
+      iframe.style.width = size + 'px';
+      iframe.style.height = size + 'px';
+    } else {
+      // Desktop: 600x600 max, scale down if needed
+      const size = Math.min(600, window.innerWidth * 0.8, window.innerHeight * 0.8);
+      iframe.style.width = size + 'px';
+      iframe.style.height = size + 'px';
     }
 
     // Close button

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 import Game from '../../src/components/Game/Game';
 
 interface GameResult {
@@ -106,18 +107,44 @@ export default function WidgetGame() {
   }
 
   return (
-    <div style={{
-      padding: '20px',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      minHeight: '100vh',
-      background: '#f8f9fa'
-    }}>
-      <Game
-        shopDomain={shopDomain}
-        onGameComplete={handleGameComplete}
-        onClose={handleClose}
-      />
-    </div>
+    <>
+      <Head>
+        <style jsx global>{`
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+          }
+          #__next {
+            width: 100%;
+            height: 100%;
+          }
+        `}</style>
+      </Head>
+      <div style={{
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        width: '100vw',
+        height: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#f8f9fa',
+        padding: '0',
+        margin: '0',
+        overflow: 'hidden'
+      }}>
+        <Game
+          shopDomain={shopDomain}
+          onGameComplete={handleGameComplete}
+          onClose={handleClose}
+        />
+      </div>
+    </>
   );
 }
 
