@@ -19,28 +19,17 @@ interface EnhancedGameEngineProps {
   onShowIntro: () => void;
 }
 
-// Standardized game canvas size for consistent iframe experience
+// Fullscreen game canvas that fills entire iframe space
 const getCanvasSize = () => {
-  // More reliable mobile detection for iframe context
-  const isMobile = window.innerWidth <= 768 ||
-                   window.screen?.width <= 768 ||
-                   /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  // Use full viewport dimensions to eliminate white space
+  const width = window.innerWidth;
+  const height = window.innerHeight;
 
-  if (isMobile) {
-    // Mobile: consistent size that fits well in iframe
-    return {
-      width: 350,
-      height: 500,
-      groundY: 400, // Ground at 80% of height
-    };
-  } else {
-    // Desktop: larger consistent size for better visibility
-    return {
-      width: 500,
-      height: 600,
-      groundY: 480, // Ground at 80% of height
-    };
-  }
+  return {
+    width: width,
+    height: height,
+    groundY: height * 0.8, // Ground at 80% of height
+  };
 };
 
 // Chrome Dino physics
@@ -575,9 +564,17 @@ export default function EnhancedGameEngine({
         display: 'block',
         cursor: 'pointer',
         background: '#f7f7f7',
-        margin: '0 auto',
-        border: '2px solid #333',
-        borderRadius: '8px'
+        margin: 0,
+        padding: 0,
+        border: 'none',
+        borderRadius: 0,
+        boxShadow: 'none',
+        width: '100vw',
+        height: '100vh',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        zIndex: 1
       }}
     />
   );

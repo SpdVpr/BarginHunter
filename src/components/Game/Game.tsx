@@ -6,6 +6,8 @@ import SnakeEngine from './SnakeEngine';
 import SpaceInvadersEngine from './SpaceInvadersEngine';
 import GameIntroScreen from './GameIntroScreen';
 import GameOverScreen from './GameOverScreen';
+import '../../App.css';
+import '../../styles/globals.css';
 
 interface GameProps {
   shopDomain: string;
@@ -293,26 +295,34 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
 
   return (
     <div style={{
-      padding: '20px',
+      padding: 0,
+      margin: 0,
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+      justifyContent: 'center',
+      width: '100vw',
+      height: '100vh',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      overflow: 'hidden'
     }}>
       {/* Score display */}
       <div style={{
         position: 'absolute',
-        top: '10px',
+        top: '15px',
         left: '50%',
         transform: 'translateX(-50%)',
         background: 'rgba(255,255,255,0.9)',
-        padding: '8px 16px',
-        borderRadius: '20px',
+        padding: '10px 20px',
+        borderRadius: '25px',
         fontWeight: 'bold',
-        fontSize: '18px',
+        fontSize: '20px',
         color: '#333',
-        zIndex: 10
+        zIndex: 10,
+        boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
       }}>
         Score: {currentScore}
       </div>
