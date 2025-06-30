@@ -121,19 +121,21 @@ export default function GameIntroScreen({
     <div className="game-intro-container" style={{
       background: `linear-gradient(135deg, ${introSettings.backgroundColor} 0%, ${introSettings.backgroundColor}dd 100%)`,
       color: introSettings.textColor,
-      borderRadius: `${introSettings.borderRadius}px`,
+      borderRadius: 0, // Remove border radius to fill entire space
       textAlign: 'center',
-      boxShadow: '0 10px 20px rgba(0,0,0,0.2)',
-      position: 'relative',
-      width: '100%',
-      maxWidth: '600px',
-      margin: '0 auto',
-      padding: `${Math.max(4, introSettings.padding)}px`,
-      minHeight: 'auto',
-      height: 'auto',
+      position: 'fixed', // Fill entire iframe
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      width: '100vw',
+      height: '100vh',
+      margin: 0,
+      padding: '40px 20px', // Add padding for content spacing
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'center',
+      justifyContent: 'center', // Center vertically
+      alignItems: 'center', // Center horizontally
       overflow: 'hidden'
     }}>
       {/* Custom CSS */}
@@ -146,20 +148,21 @@ export default function GameIntroScreen({
         onClick={onClose}
         style={{
           position: 'absolute',
-          top: `${Math.max(8, introSettings.padding - 4)}px`,
-          right: `${Math.max(8, introSettings.padding - 4)}px`,
+          top: '20px',
+          right: '20px',
           background: 'rgba(255,255,255,0.2)',
           border: 'none',
           color: introSettings.textColor,
-          fontSize: '20px',
-          width: '32px',
-          height: '32px',
+          fontSize: '24px',
+          width: '40px',
+          height: '40px',
           borderRadius: '50%',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          transition: 'background 0.2s ease'
+          transition: 'background 0.2s ease',
+          zIndex: 10
         }}
         onMouseOver={(e) => {
           e.currentTarget.style.background = 'rgba(255,255,255,0.3)';
@@ -172,21 +175,26 @@ export default function GameIntroScreen({
       </button>
 
       {/* Game title - CUSTOMIZABLE */}
-      <div className="game-title" style={{ marginBottom: `${Math.max(4, introSettings.padding / 2)}px` }}>
+      <div className="game-title" style={{
+        marginBottom: '30px',
+        maxWidth: '400px',
+        width: '100%'
+      }}>
         <h1 className="game-title-text" style={{
-          margin: '0 0 4px 0',
-          textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
-          fontSize: 'clamp(18px, 5vw, 28px)',
+          margin: '0 0 15px 0',
+          textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+          fontSize: 'clamp(28px, 6vw, 42px)',
           lineHeight: '1.1',
-          color: introSettings.textColor
+          color: introSettings.textColor,
+          fontWeight: 'bold'
         }}>
           {getGameTitle()}
         </h1>
         <p className="game-subtitle" style={{
-          fontSize: 'clamp(12px, 3vw, 14px)',
+          fontSize: 'clamp(16px, 4vw, 20px)',
           margin: '0',
           opacity: 0.9,
-          lineHeight: '1.2',
+          lineHeight: '1.3',
           color: introSettings.textColor
         }}>
           {getGameSubtitle()}
@@ -199,17 +207,22 @@ export default function GameIntroScreen({
       {/* Discount information - CUSTOMIZABLE */}
       <div className="discount-section" style={{
         background: 'rgba(255,255,255,0.15)',
-        borderRadius: `${Math.max(4, introSettings.borderRadius / 2)}px`,
-        padding: `${Math.max(4, introSettings.padding / 2)}px`,
-        marginBottom: `${Math.max(4, introSettings.padding / 2)}px`,
-        border: '1px solid rgba(255,255,255,0.2)'
+        borderRadius: '15px',
+        padding: '20px',
+        marginBottom: '40px',
+        border: '2px solid rgba(255,255,255,0.2)',
+        maxWidth: '350px',
+        width: '100%',
+        boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
       }}>
         <h2 className="discount-title" style={{
-          fontSize: 'clamp(14px, 4vw, 18px)',
+          fontSize: 'clamp(18px, 5vw, 24px)',
           margin: '0',
           color: '#FFD700',
           textAlign: 'center',
-          lineHeight: '1.2'
+          lineHeight: '1.3',
+          fontWeight: 'bold',
+          textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
         }}>
           {introSettings.showEmojis ? '💰 ' : ''}{getDiscountText()}
         </h2>
@@ -220,10 +233,11 @@ export default function GameIntroScreen({
       <div className="action-buttons" style={{
         display: 'flex',
         flexDirection: 'row',
-        gap: `${Math.max(4, introSettings.padding / 2)}px`,
+        gap: '20px',
         justifyContent: 'center',
         alignItems: 'center',
-        width: '100%'
+        width: '100%',
+        maxWidth: '350px'
       }}>
         <button
           onClick={onStartGame}
@@ -232,21 +246,24 @@ export default function GameIntroScreen({
             background: `linear-gradient(45deg, ${introSettings.buttonColor}, ${introSettings.buttonColor}dd)`,
             color: introSettings.buttonTextColor,
             border: 'none',
-            padding: `${Math.max(8, introSettings.padding / 2)}px ${Math.max(12, introSettings.padding)}px`,
-            borderRadius: `${Math.max(4, introSettings.borderRadius / 2)}px`,
-            fontSize: 'clamp(14px, 3.5vw, 16px)',
+            padding: '15px 30px',
+            borderRadius: '12px',
+            fontSize: 'clamp(16px, 4vw, 20px)',
             fontWeight: 'bold',
             cursor: 'pointer',
-            boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-            transition: 'transform 0.2s ease',
+            boxShadow: '0 6px 15px rgba(0,0,0,0.2)',
+            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
             flex: '1',
-            maxWidth: '120px'
+            maxWidth: '150px',
+            textShadow: '1px 1px 2px rgba(0,0,0,0.2)'
           }}
           onMouseOver={(e) => {
-            e.currentTarget.style.transform = 'translateY(-1px)';
+            e.currentTarget.style.transform = 'translateY(-3px)';
+            e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.3)';
           }}
           onMouseOut={(e) => {
             e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 6px 15px rgba(0,0,0,0.2)';
           }}
         >
           {introSettings.showEmojis ? '🚀 ' : ''}Start
@@ -258,21 +275,24 @@ export default function GameIntroScreen({
           style={{
             background: 'rgba(255,255,255,0.2)',
             color: introSettings.textColor,
-            border: '1px solid rgba(255,255,255,0.3)',
-            padding: `${Math.max(8, introSettings.padding / 2)}px ${Math.max(12, introSettings.padding)}px`,
-            borderRadius: `${Math.max(4, introSettings.borderRadius / 2)}px`,
-            fontSize: 'clamp(14px, 3.5vw, 16px)',
+            border: '2px solid rgba(255,255,255,0.3)',
+            padding: '15px 30px',
+            borderRadius: '12px',
+            fontSize: 'clamp(16px, 4vw, 20px)',
             fontWeight: 'bold',
             cursor: 'pointer',
-            transition: 'background 0.2s ease',
+            transition: 'background 0.2s ease, transform 0.2s ease',
             flex: '1',
-            maxWidth: '120px'
+            maxWidth: '150px',
+            textShadow: '1px 1px 2px rgba(0,0,0,0.2)'
           }}
           onMouseOver={(e) => {
             e.currentTarget.style.background = 'rgba(255,255,255,0.3)';
+            e.currentTarget.style.transform = 'translateY(-2px)';
           }}
           onMouseOut={(e) => {
             e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
+            e.currentTarget.style.transform = 'translateY(0)';
           }}
         >
           {introSettings.showEmojis ? '❌ ' : ''}Close
@@ -367,50 +387,51 @@ export default function GameIntroScreen({
           }
         }
 
-        /* Responsive design for mobile devices - COMPACT */
+        /* Responsive design for mobile devices */
         @media (max-width: 480px) {
           .game-intro-container {
-            padding: 8px !important;
-            border-radius: 8px !important;
-            max-width: 95vw !important;
+            padding: 20px 15px !important;
           }
 
           .game-title {
-            margin-bottom: 6px !important;
+            margin-bottom: 20px !important;
           }
 
           .discount-section {
-            padding: 6px !important;
-            margin-bottom: 6px !important;
+            padding: 15px !important;
+            margin-bottom: 30px !important;
+            max-width: 300px !important;
           }
 
           .action-buttons {
-            gap: 6px !important;
+            gap: 15px !important;
+            max-width: 300px !important;
           }
         }
 
-        /* Extra small screens - MINIMAL */
+        /* Extra small screens */
         @media (max-width: 320px) {
           .game-intro-container {
-            padding: 6px !important;
-            max-width: 98vw !important;
+            padding: 15px 10px !important;
           }
 
           .discount-section {
-            padding: 4px !important;
-            margin-bottom: 4px !important;
+            padding: 12px !important;
+            margin-bottom: 25px !important;
+            max-width: 280px !important;
           }
 
           .action-buttons {
-            gap: 4px !important;
+            gap: 12px !important;
+            max-width: 280px !important;
           }
         }
 
-        /* Ensure compact layout */
+        /* Ensure fullscreen layout */
         .game-intro-container {
-          height: auto !important;
-          min-height: auto !important;
-          max-height: none !important;
+          height: 100vh !important;
+          min-height: 100vh !important;
+          max-height: 100vh !important;
         }
       `}</style>
     </div>

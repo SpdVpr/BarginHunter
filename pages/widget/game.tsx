@@ -39,8 +39,8 @@ export default function WidgetGame() {
 
           // Use standardized heights based on game canvas sizes + UI elements
           const standardHeight = isMobile ?
-            500 + 100 : // Mobile: 500px canvas + 100px for UI/padding
-            600 + 120;  // Desktop: 600px canvas + 120px for UI/padding
+            600 : // Mobile: fullscreen intro/game
+            720;  // Desktop: fullscreen intro/game
 
           // Send resize message to parent with standardized height
           window.parent.postMessage({
@@ -73,8 +73,8 @@ export default function WidgetGame() {
 
         // Use standardized heights based on game canvas sizes + UI elements
         const standardHeight = isMobile ?
-          500 + 100 : // Mobile: 500px canvas + 100px for UI/padding
-          600 + 120;  // Desktop: 600px canvas + 120px for UI/padding
+          600 : // Mobile: fullscreen intro/game
+          720;  // Desktop: fullscreen intro/game
 
         window.parent.postMessage({
           type: 'IFRAME_RESIZE',
