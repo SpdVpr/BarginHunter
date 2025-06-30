@@ -113,30 +113,33 @@ export default function GameIntroScreen({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          height: '80px',
+          minHeight: '100px',
+          height: 'auto',
           position: 'relative',
-          overflow: 'hidden'
+          overflow: 'visible',
+          padding: '10px'
         }}>
           {isFlappyBird ? (
-            // Flappy Bird preview
+            // Flappy Bird preview - larger and better visible
             <>
               {/* Flying bird */}
               <div style={{
-                width: '30px',
-                height: '30px',
+                width: '35px',
+                height: '35px',
                 background: '#FFD700',
                 borderRadius: '50%',
                 position: 'relative',
                 animation: 'flap 0.8s infinite',
-                marginRight: '40px'
+                marginRight: '50px'
               }}>
                 <div style={{
-                  width: '8px',
-                  height: '6px',
+                  width: '10px',
+                  height: '8px',
                   background: '#FF4500',
                   position: 'absolute',
-                  right: '-8px',
-                  top: '12px'
+                  right: '-10px',
+                  top: '14px',
+                  borderRadius: '2px'
                 }} />
               </div>
 
@@ -144,32 +147,32 @@ export default function GameIntroScreen({
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '30px',
+                gap: '35px',
                 animation: 'slideLeft 2s infinite linear'
               }}>
                 <div style={{
-                  width: '20px',
-                  height: '25px',
+                  width: '25px',
+                  height: '30px',
                   background: '#228B22',
                   borderRadius: '0 0 4px 4px'
                 }} />
                 <div style={{
-                  width: '20px',
-                  height: '25px',
+                  width: '25px',
+                  height: '30px',
                   background: '#228B22',
                   borderRadius: '4px 4px 0 0'
                 }} />
               </div>
             </>
           ) : isTetris ? (
-            // Tetris preview
+            // Tetris preview - larger and better visible
             <>
               {/* Tetris grid */}
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(6, 12px)',
-                gridTemplateRows: 'repeat(6, 12px)',
-                gap: '1px',
+                gridTemplateColumns: 'repeat(6, 16px)',
+                gridTemplateRows: 'repeat(6, 16px)',
+                gap: '2px',
                 animation: 'pulse 1.5s infinite'
               }}>
                 {/* Bottom row - filled */}
@@ -203,164 +206,168 @@ export default function GameIntroScreen({
               </div>
             </>
           ) : isSnake ? (
-            // Snake preview
+            // Snake preview - larger and better visible
             <>
               {/* Snake body */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                animation: 'wiggle 1.5s infinite'
+                animation: 'wiggle 1.5s infinite',
+                marginRight: '30px'
               }}>
                 {/* Snake head */}
                 <div style={{
-                  width: '20px',
-                  height: '20px',
+                  width: '25px',
+                  height: '25px',
                   background: '#2E7D32',
                   borderRadius: '4px',
                   position: 'relative',
-                  marginRight: '2px'
+                  marginRight: '3px'
                 }}>
                   <div style={{
-                    width: '3px',
-                    height: '3px',
+                    width: '4px',
+                    height: '4px',
                     background: '#fff',
                     borderRadius: '50%',
                     position: 'absolute',
-                    top: '5px',
-                    left: '5px'
+                    top: '6px',
+                    left: '6px'
                   }} />
                   <div style={{
-                    width: '3px',
-                    height: '3px',
+                    width: '4px',
+                    height: '4px',
                     background: '#fff',
                     borderRadius: '50%',
                     position: 'absolute',
-                    top: '5px',
-                    right: '5px'
+                    top: '6px',
+                    right: '6px'
                   }} />
                 </div>
 
                 {/* Snake body segments */}
                 <div style={{
-                  width: '18px',
-                  height: '18px',
+                  width: '22px',
+                  height: '22px',
                   background: '#4CAF50',
                   borderRadius: '3px',
-                  marginRight: '2px'
+                  marginRight: '3px'
                 }} />
                 <div style={{
-                  width: '18px',
-                  height: '18px',
+                  width: '22px',
+                  height: '22px',
                   background: '#4CAF50',
                   borderRadius: '3px',
-                  marginRight: '2px'
+                  marginRight: '3px'
                 }} />
                 <div style={{
-                  width: '18px',
-                  height: '18px',
+                  width: '22px',
+                  height: '22px',
                   background: '#4CAF50',
-                  borderRadius: '3px',
-                  marginRight: '20px'
+                  borderRadius: '3px'
                 }} />
               </div>
 
               {/* Food */}
               <div style={{
-                width: '16px',
-                height: '16px',
+                width: '20px',
+                height: '20px',
                 background: '#FF5722',
                 borderRadius: '50%',
                 animation: 'pulse 1s infinite'
               }} />
             </>
           ) : isSpaceInvaders ? (
-            // Space Invaders preview
+            // Space Invaders preview - larger and better visible
             <>
               {/* Player ship */}
               <div style={{
-                width: '30px',
-                height: '15px',
+                width: '40px',
+                height: '20px',
                 background: '#00ff00',
                 position: 'relative',
                 animation: 'hover 2s infinite',
-                marginRight: '40px'
+                marginRight: '50px',
+                borderRadius: '2px'
               }}>
                 <div style={{
-                  width: '6px',
-                  height: '4px',
+                  width: '8px',
+                  height: '6px',
                   background: '#44ff44',
                   position: 'absolute',
-                  top: '-4px',
-                  left: '12px'
+                  top: '-6px',
+                  left: '16px',
+                  borderRadius: '1px'
                 }} />
               </div>
 
               {/* Invaders formation */}
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(3, 16px)',
-                gridTemplateRows: 'repeat(2, 12px)',
-                gap: '4px',
+                gridTemplateColumns: 'repeat(3, 20px)',
+                gridTemplateRows: 'repeat(2, 16px)',
+                gap: '6px',
                 animation: 'invaderMove 3s infinite linear'
               }}>
-                <div style={{ background: '#ff4444', width: '16px', height: '12px' }} />
-                <div style={{ background: '#ff4444', width: '16px', height: '12px' }} />
-                <div style={{ background: '#ff4444', width: '16px', height: '12px' }} />
-                <div style={{ background: '#ffaa00', width: '16px', height: '12px' }} />
-                <div style={{ background: '#ffaa00', width: '16px', height: '12px' }} />
-                <div style={{ background: '#ffaa00', width: '16px', height: '12px' }} />
+                <div style={{ background: '#ff4444', width: '20px', height: '16px', borderRadius: '2px' }} />
+                <div style={{ background: '#ff4444', width: '20px', height: '16px', borderRadius: '2px' }} />
+                <div style={{ background: '#ff4444', width: '20px', height: '16px', borderRadius: '2px' }} />
+                <div style={{ background: '#ffaa00', width: '20px', height: '16px', borderRadius: '2px' }} />
+                <div style={{ background: '#ffaa00', width: '20px', height: '16px', borderRadius: '2px' }} />
+                <div style={{ background: '#ffaa00', width: '20px', height: '16px', borderRadius: '2px' }} />
               </div>
 
               {/* Laser beam */}
               <div style={{
-                width: '2px',
-                height: '20px',
+                width: '3px',
+                height: '30px',
                 background: '#00ff00',
                 position: 'absolute',
-                left: '30%',
-                animation: 'laser 1.5s infinite'
+                left: '35%',
+                animation: 'laser 1.5s infinite',
+                borderRadius: '1px'
               }} />
             </>
           ) : (
-            // Dino preview
+            // Dino preview - larger and better visible
             <>
               {/* Running dino */}
               <div style={{
-                width: '40px',
-                height: '40px',
+                width: '45px',
+                height: '45px',
                 background: '#535353',
                 borderRadius: '8px',
                 position: 'relative',
                 animation: 'bounce 1s infinite',
-                marginRight: '60px'
+                marginRight: '70px'
               }}>
                 <div style={{
-                  width: '6px',
-                  height: '4px',
+                  width: '8px',
+                  height: '6px',
                   background: '#fff',
                   borderRadius: '2px',
                   position: 'absolute',
-                  top: '8px',
-                  right: '8px'
+                  top: '10px',
+                  right: '10px'
                 }} />
               </div>
 
               {/* Cactus */}
               <div style={{
-                width: '20px',
-                height: '40px',
+                width: '25px',
+                height: '45px',
                 background: '#228B22',
                 borderRadius: '4px',
                 position: 'relative',
                 animation: 'slideLeft 2s infinite linear'
               }}>
                 <div style={{
-                  width: '6px',
-                  height: '15px',
+                  width: '8px',
+                  height: '18px',
                   background: '#228B22',
                   position: 'absolute',
-                  left: '-6px',
-                  top: '12px'
+                  left: '-8px',
+                  top: '14px',
+                  borderRadius: '2px'
                 }} />
               </div>
             </>
