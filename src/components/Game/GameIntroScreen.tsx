@@ -377,45 +377,22 @@ export default function GameIntroScreen({
         border: '2px solid rgba(255,255,255,0.2)'
       }}>
         <h2 style={{
-          fontSize: '22px',
-          margin: '0 0 10px 0',
-          color: '#FFD700'
+          fontSize: '24px',
+          margin: '0 0 15px 0',
+          color: '#FFD700',
+          textAlign: 'center'
         }}>
           💰 Win {minDiscount}% - {maxDiscount}% OFF!
         </h2>
         <p style={{
-          fontSize: '15px',
+          fontSize: '16px',
           margin: '0',
-          lineHeight: '1.4'
+          lineHeight: '1.4',
+          textAlign: 'center',
+          color: '#fff'
         }}>
-          Score <strong>{lowestScoreForDiscount}+ points</strong> to earn your discount!
+          Play the game and earn amazing discounts!
         </p>
-
-        {gameConfig.discountTiers.length > 0 && (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
-            gap: '8px',
-            marginTop: '15px'
-          }}>
-            {gameConfig.discountTiers.map((tier, index) => (
-              <div key={index} style={{
-                background: 'rgba(255,255,255,0.1)',
-                padding: '8px',
-                borderRadius: '6px',
-                border: '1px solid rgba(255,255,255,0.2)',
-                textAlign: 'center'
-              }}>
-                <div style={{ fontSize: '12px', fontWeight: 'bold' }}>
-                  {tier.minScore}+ pts
-                </div>
-                <div style={{ fontSize: '14px', color: '#FFD700' }}>
-                  {tier.discount}% OFF
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* How to play */}
@@ -451,73 +428,34 @@ export default function GameIntroScreen({
         </div>
       </div>
 
-      {/* Attempts remaining */}
-      <div style={{
-        background: remainingAttempts > 0 ? 'rgba(40, 167, 69, 0.2)' : 'rgba(220, 53, 69, 0.2)',
-        borderRadius: '10px',
-        padding: '15px',
-        marginBottom: '30px',
-        border: `2px solid ${remainingAttempts > 0 ? 'rgba(40, 167, 69, 0.5)' : 'rgba(220, 53, 69, 0.5)'}`
-      }}>
-        <h3 style={{ fontSize: '18px', margin: '0 0 5px 0' }}>
-          🎲 Attempts Remaining:
-        </h3>
-        <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
-          {remainingAttempts} / {gameConfig.maxAttempts}
-        </div>
-        {remainingAttempts === 0 && (
-          <p style={{ fontSize: '14px', margin: '10px 0 0 0', opacity: 0.9 }}>
-            You've used all your attempts. Come back later for more chances!
-          </p>
-        )}
-      </div>
+
 
       {/* Action buttons */}
       <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
-        {remainingAttempts > 0 ? (
-          <button
-            onClick={onStartGame}
-            style={{
-              background: 'linear-gradient(45deg, #28a745, #20c997)',
-              color: 'white',
-              border: 'none',
-              padding: '18px 40px',
-              borderRadius: '12px',
-              fontSize: '20px',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              boxShadow: '0 8px 16px rgba(0,0,0,0.2)',
-              transition: 'transform 0.2s ease',
-              minWidth: '160px'
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}
-          >
-            🚀 Start Game
-          </button>
-        ) : (
-          <button
-            disabled
-            style={{
-              background: '#6c757d',
-              color: 'white',
-              border: 'none',
-              padding: '18px 40px',
-              borderRadius: '12px',
-              fontSize: '20px',
-              fontWeight: 'bold',
-              cursor: 'not-allowed',
-              opacity: 0.6,
-              minWidth: '160px'
-            }}
-          >
-            No Attempts Left
-          </button>
-        )}
+        <button
+          onClick={onStartGame}
+          style={{
+            background: 'linear-gradient(45deg, #28a745, #20c997)',
+            color: 'white',
+            border: 'none',
+            padding: '18px 40px',
+            borderRadius: '12px',
+            fontSize: '20px',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            boxShadow: '0 8px 16px rgba(0,0,0,0.2)',
+            transition: 'transform 0.2s ease',
+            minWidth: '160px'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+          }}
+        >
+          🚀 Start Game
+        </button>
         
         <button
           onClick={onClose}

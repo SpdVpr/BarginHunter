@@ -262,9 +262,9 @@ export default function SpaceInvadersEngine({
       return { ...prev, x: newX };
     });
 
-    // Auto-fire
+    // Auto-fire (slower for better control)
     fireCounterRef.current++;
-    if (fireCounterRef.current >= 15) {
+    if (fireCounterRef.current >= 25) {
       setBullets(prev => [...prev, {
         x: player.x + player.width / 2 - 2,
         y: player.y,
@@ -305,15 +305,15 @@ export default function SpaceInvadersEngine({
 
         if (hitEdge) {
           invaderDirectionRef.current *= -1;
-          return { ...invader, y: invader.y + 20 };
+          return { ...invader, y: invader.y + 15 };
         } else {
-          return { ...invader, x: invader.x + invaderDirectionRef.current * (1 + difficultyLevel * 0.5) };
+          return { ...invader, x: invader.x + invaderDirectionRef.current * (0.3 + difficultyLevel * 0.2) };
         }
       });
     });
 
-    // Random invader shooting
-    if (Math.random() < 0.004 + difficultyLevel * 0.001) {
+    // Random invader shooting (much less frequent)
+    if (Math.random() < 0.001 + difficultyLevel * 0.0005) {
       const aliveInvaders = invaders.filter(inv => inv.alive);
       if (aliveInvaders.length > 0) {
         const shooter = aliveInvaders[Math.floor(Math.random() * aliveInvaders.length)];
@@ -322,7 +322,7 @@ export default function SpaceInvadersEngine({
           y: shooter.y + shooter.height,
           width: 6,
           height: 8,
-          speed: 3 + difficultyLevel * 0.5
+          speed: 2 + difficultyLevel * 0.3
         }]);
       }
     }
