@@ -265,7 +265,7 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
   if (gameState === 'intro') {
     return (
       <GameIntroScreen
-        gameConfig={gameConfig}
+        gameConfig={{...gameConfig, shopName: shopDomain}}
         onStartGame={() => {
           setGameState('playing');
           // Start game session immediately

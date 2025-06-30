@@ -221,8 +221,8 @@ export default function WidgetGame() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#f8f9fa',
-        padding: '4px',
+        background: 'transparent',
+        padding: '0',
         margin: '0',
         boxSizing: 'border-box',
         overflow: 'hidden'

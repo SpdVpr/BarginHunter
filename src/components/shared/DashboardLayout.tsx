@@ -7,12 +7,13 @@ import {
   AnalyticsMinor,
   CustomersMinor,
   DiscountsMajor,
+  ViewMinor,
 } from '@shopify/polaris-icons';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
   shop: string;
-  currentPage: 'dashboard' | 'analytics' | 'customers' | 'discounts' | 'settings';
+  currentPage: 'dashboard' | 'analytics' | 'customers' | 'discounts' | 'settings' | 'intro-settings';
 }
 
 export function DashboardLayout({ children, shop, currentPage }: DashboardLayoutProps) {
@@ -49,6 +50,12 @@ export function DashboardLayout({ children, shop, currentPage }: DashboardLayout
             label: 'Discounts',
             icon: DiscountsMajor,
             selected: currentPage === 'discounts',
+          },
+          {
+            url: `/dashboard/intro-settings?shop=${shop}`,
+            label: 'Intro Screen',
+            icon: ViewMinor,
+            selected: currentPage === 'intro-settings',
           },
           {
             url: `/dashboard/settings?shop=${shop}`,
