@@ -413,11 +413,7 @@ export default function SnakeEngine({
       ctx.fillText(`Level: ${difficultyLevel + 1}`, 10, 65);
     }
 
-    // Instructions
-    ctx.font = '12px Arial';
-    ctx.fillStyle = '#666';
-    ctx.textAlign = 'right';
-    ctx.fillText('Arrow keys, WASD, or click/tap to move', canvasSize.width - 10, canvasSize.height - 10);
+
   }, [canvasSize, snake, food, score, difficultyLevel]);
 
   // Game loop
@@ -486,50 +482,18 @@ export default function SnakeEngine({
   }, [isRunning, gameLoop]);
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      padding: '20px',
-      backgroundColor: '#f8f9fa',
-      minHeight: '100vh'
-    }}>
-      <div style={{ marginBottom: '10px', textAlign: 'center' }}>
-        <h2 style={{ margin: '0 0 10px 0', color: '#333' }}>🐍 Snake Game</h2>
-        <p style={{ margin: 0, color: '#666', fontSize: '14px' }}>
-          Eat food to grow and earn points! Avoid walls and yourself.
-        </p>
-      </div>
-
-      <canvas
-        ref={canvasRef}
-        width={canvasSize.width}
-        height={canvasSize.height}
-        onClick={handleCanvasClick}
-        onTouchStart={handleTouchStart}
-        style={{
-          border: '2px solid #333',
-          borderRadius: '8px',
-          backgroundColor: BACKGROUND_COLOR,
-          cursor: 'pointer',
-          touchAction: 'none'
-        }}
-      />
-
-      <div style={{
-        marginTop: '15px',
-        textAlign: 'center',
-        maxWidth: canvasSize.width,
-        fontSize: '12px',
-        color: '#666'
-      }}>
-        <p style={{ margin: '5px 0' }}>
-          <strong>Controls:</strong> Arrow keys, WASD, or click/tap to change direction
-        </p>
-        <p style={{ margin: '5px 0' }}>
-          Press ESC or Space to pause
-        </p>
-      </div>
-    </div>
+    <canvas
+      ref={canvasRef}
+      width={canvasSize.width}
+      height={canvasSize.height}
+      onClick={handleCanvasClick}
+      onTouchStart={handleTouchStart}
+      style={{
+        display: 'block',
+        backgroundColor: BACKGROUND_COLOR,
+        cursor: 'pointer',
+        touchAction: 'none'
+      }}
+    />
   );
 }

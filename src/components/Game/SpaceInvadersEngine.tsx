@@ -501,13 +501,7 @@ export default function SpaceInvadersEngine({
       ctx.fillText(`Level: ${difficultyLevel + 1}`, canvasSize.width - 100, 25);
     }
 
-    // Draw touch controls indicator on mobile
-    if (window.innerWidth <= 768) {
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-      ctx.font = '12px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('Touch to move', canvasSize.width / 2, canvasSize.height - 10);
-    }
+
   }, [canvasSize, player, invaders, bullets, invaderBullets, particles, score, lives, difficultyLevel]);
 
   // Game loop
@@ -567,51 +561,19 @@ export default function SpaceInvadersEngine({
   }, [isRunning, gameLoop]);
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      padding: '20px',
-      backgroundColor: '#f8f9fa',
-      minHeight: '100vh'
-    }}>
-      <div style={{ marginBottom: '10px', textAlign: 'center' }}>
-        <h2 style={{ margin: '0 0 10px 0', color: '#333' }}>🚀 Space Invaders Hunter</h2>
-        <p style={{ margin: 0, color: '#666', fontSize: '14px' }}>
-          Destroy invaders and earn amazing discounts! Auto-firing enabled.
-        </p>
-      </div>
-
-      <canvas
-        ref={canvasRef}
-        width={canvasSize.width}
-        height={canvasSize.height}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        style={{
-          border: '2px solid #333',
-          borderRadius: '8px',
-          backgroundColor: '#000',
-          cursor: 'pointer',
-          touchAction: 'none'
-        }}
-      />
-
-      <div style={{
-        marginTop: '15px',
-        textAlign: 'center',
-        maxWidth: canvasSize.width,
-        fontSize: '12px',
-        color: '#666'
-      }}>
-        <p style={{ margin: '5px 0' }}>
-          <strong>Controls:</strong> {window.innerWidth <= 768 ? 'Touch screen to move' : 'Arrow keys ← → to move'}
-        </p>
-        <p style={{ margin: '5px 0' }}>
-          Auto-firing enabled • Press ESC to pause
-        </p>
-      </div>
-    </div>
+    <canvas
+      ref={canvasRef}
+      width={canvasSize.width}
+      height={canvasSize.height}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      style={{
+        display: 'block',
+        backgroundColor: '#000',
+        cursor: 'pointer',
+        touchAction: 'none'
+      }}
+    />
   );
 }

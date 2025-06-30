@@ -320,7 +320,18 @@ export default function FlappyBirdEngine({
     
     // Draw bird
     drawBird(ctx, bird);
-    
+
+    // Draw score overlay
+    ctx.fillStyle = '#333';
+    ctx.font = 'bold 20px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(`Score: ${formatScore(score)}`, 10, 30);
+
+    if (difficultyLevel > 0) {
+      ctx.font = 'bold 16px Arial';
+      ctx.fillText(`Level: ${difficultyLevel + 1}`, 10, 55);
+    }
+
     // Continue game loop
     animationRef.current = requestAnimationFrame(gameLoop);
   }, [isRunning, bird, pipes, score, lastPipeSpawn, canvasSize, onScoreUpdate, onGameEnd, drawBackground, drawPipe, drawBird, spawnPipe, checkCollision]);
@@ -384,42 +395,15 @@ export default function FlappyBirdEngine({
   }, [isRunning, gameLoop]);
 
   return (
-    <div style={{ 
-      textAlign: 'center',
-      padding: '10px',
-      maxWidth: '100%',
-      overflow: 'hidden'
-    }}>
-      <canvas
-        ref={canvasRef}
-        width={canvasSize.width}
-        height={canvasSize.height}
-        style={{
-          border: '2px solid #228B22',
-          borderRadius: '8px',
-          cursor: 'pointer',
-          background: '#87CEEB',
-          maxWidth: '100%',
-          height: 'auto',
-          display: 'block',
-          margin: '0 auto'
-        }}
-      />
-      
-      <div style={{ marginTop: '15px' }}>
-        <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#333' }}>
-          Score: {formatScore(score)}
-        </div>
-        <div style={{ fontSize: '14px', color: '#666', marginTop: '5px' }}>
-          {getDifficultyName(difficultyLevel)} | Speed: {gameScorer.getCurrentDifficultyLevel().speed}
-        </div>
-        <div style={{ fontSize: '12px', color: '#888', marginTop: '5px' }}>
-          Pipes: {gameScorer.getObstaclesCleared()} | Time: {Math.floor(gameScorer.getGameDuration())}s
-        </div>
-        <div style={{ fontSize: '14px', color: '#888', marginTop: '10px' }}>
-          Click or SPACE to flap!
-        </div>
-      </div>
-    </div>
+    <canvas
+      ref={canvasRef}
+      width={canvasSize.width}
+      height={canvasSize.height}
+      style={{
+        display: 'block',
+        cursor: 'pointer',
+        background: '#87CEEB'
+      }}
+    />
   );
 }

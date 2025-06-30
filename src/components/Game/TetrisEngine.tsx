@@ -272,7 +272,19 @@ export default function TetrisEngine({
         }
       }
     }
-  }, [canvasSize, board, currentPiece]);
+
+    // Draw score overlay
+    ctx.fillStyle = '#FFF';
+    ctx.font = 'bold 20px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(`Score: ${formatScore(score)}`, 10, 30);
+    ctx.fillText(`Lines: ${linesCleared}`, 10, 55);
+
+    if (difficultyLevel > 0) {
+      ctx.font = 'bold 16px Arial';
+      ctx.fillText(`Level: ${difficultyLevel + 1}`, 10, 80);
+    }
+  }, [canvasSize, board, currentPiece, score, linesCleared, difficultyLevel]);
 
   // Game loop
   const gameLoop = useCallback(() => {
@@ -390,42 +402,15 @@ export default function TetrisEngine({
   }, [isRunning, gameLoop]);
 
   return (
-    <div style={{ 
-      textAlign: 'center',
-      padding: '10px',
-      maxWidth: '100%',
-      overflow: 'hidden'
-    }}>
-      <canvas
-        ref={canvasRef}
-        width={canvasSize.width}
-        height={canvasSize.height}
-        style={{
-          border: '2px solid #FFF',
-          borderRadius: '8px',
-          cursor: 'pointer',
-          background: '#000',
-          maxWidth: '100%',
-          height: 'auto',
-          display: 'block',
-          margin: '0 auto'
-        }}
-      />
-      
-      <div style={{ marginTop: '15px' }}>
-        <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#333' }}>
-          Score: {formatScore(score)}
-        </div>
-        <div style={{ fontSize: '14px', color: '#666', marginTop: '5px' }}>
-          {getDifficultyName(difficultyLevel)} | Speed: {gameScorer.getCurrentDifficultyLevel().speed}
-        </div>
-        <div style={{ fontSize: '12px', color: '#888', marginTop: '5px' }}>
-          Lines: {linesCleared} | Time: {Math.floor(gameScorer.getGameDuration())}s
-        </div>
-        <div style={{ fontSize: '14px', color: '#888', marginTop: '10px' }}>
-          Click or SPACE to rotate pieces!
-        </div>
-      </div>
-    </div>
+    <canvas
+      ref={canvasRef}
+      width={canvasSize.width}
+      height={canvasSize.height}
+      style={{
+        display: 'block',
+        cursor: 'pointer',
+        background: '#000'
+      }}
+    />
   );
 }

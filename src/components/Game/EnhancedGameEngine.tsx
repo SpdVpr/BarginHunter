@@ -326,7 +326,18 @@ export default function EnhancedGameEngine({
     // Draw game objects
     obstacles.forEach(obstacle => drawObstacle(ctx, obstacle));
     drawPlayer(ctx, player);
-    
+
+    // Draw score overlay
+    ctx.fillStyle = '#333';
+    ctx.font = 'bold 20px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(`Score: ${formatScore(score)}`, 10, 30);
+
+    if (difficultyLevel > 0) {
+      ctx.font = 'bold 16px Arial';
+      ctx.fillText(`Level: ${difficultyLevel + 1}`, 10, 55);
+    }
+
     // Continue game loop
     animationRef.current = requestAnimationFrame(gameLoop);
   }, [isRunning, score, difficultyLevel, lastObstacleSpawn, player, obstacles, onScoreUpdate, onGameEnd, drawBackground, drawObstacle, drawPlayer, spawnObstacle]);
@@ -392,44 +403,15 @@ export default function EnhancedGameEngine({
   }, [isRunning, gameLoop]);
 
   return (
-    <div style={{
-      textAlign: 'center',
-      padding: '10px',
-      maxWidth: '100%',
-      overflow: 'hidden'
-    }}>
-      <canvas
-        ref={canvasRef}
-        width={canvasSize.width}
-        height={canvasSize.height}
-        style={{
-          border: '2px solid #535353',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          background: '#f7f7f7',
-          maxWidth: '100%',
-          height: 'auto',
-          display: 'block',
-          margin: '0 auto'
-        }}
-      />
-      
-      <div style={{ marginTop: '15px' }}>
-        <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#333' }}>
-          Score: {formatScore(score)}
-        </div>
-        <div style={{ fontSize: '14px', color: '#666', marginTop: '5px' }}>
-          {getDifficultyName(difficultyLevel)} | Speed: {gameScorer.getCurrentDifficultyLevel().speed}
-        </div>
-        <div style={{ fontSize: '12px', color: '#888', marginTop: '5px' }}>
-          Obstacles: {gameScorer.getObstaclesCleared()} | Time: {Math.floor(gameScorer.getGameDuration())}s
-        </div>
-        <div style={{ fontSize: '14px', color: '#888', marginTop: '10px' }}>
-          Click or SPACE to jump!
-        </div>
-      </div>
-      
-
-    </div>
+    <canvas
+      ref={canvasRef}
+      width={canvasSize.width}
+      height={canvasSize.height}
+      style={{
+        display: 'block',
+        cursor: 'pointer',
+        background: '#f7f7f7'
+      }}
+    />
   );
 }
