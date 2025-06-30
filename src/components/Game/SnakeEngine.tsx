@@ -199,8 +199,7 @@ export default function SnakeEngine({
       // Check if food eaten
       if (newHead.x === food.x && newHead.y === food.y) {
         // Food eaten - don't remove tail, add score
-        const points = 100 + (difficultyLevel * 20);
-        gameScorer.addObstacleCleared(points);
+        gameScorer.addObstaclePoints();
         const newScore = gameScorer.getScore();
         setScore(newScore);
         onScoreUpdate(newScore);
