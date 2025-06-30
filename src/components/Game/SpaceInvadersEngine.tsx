@@ -19,27 +19,21 @@ interface SpaceInvadersEngineProps {
   onShowIntro: () => void;
 }
 
-// Game constants - fullscreen 600x600 default
+// Standardized game canvas size for consistent iframe experience
 const getCanvasSize = () => {
   const isMobile = window.innerWidth <= 768;
 
   if (isMobile) {
-    // Mobile: use full available space, minimum 300x300
-    const availableWidth = window.innerWidth - 10;
-    const availableHeight = window.innerHeight - 10;
-    const size = Math.min(availableWidth, availableHeight, 600);
+    // Mobile: consistent size that fits well in iframe
     return {
-      width: Math.max(size, 300),
-      height: Math.max(size, 300),
+      width: 350,
+      height: 500,
     };
   } else {
-    // Desktop: 600x600 default, scale down if needed
-    const availableWidth = window.innerWidth - 20;
-    const availableHeight = window.innerHeight - 20;
-    const maxSize = Math.min(availableWidth, availableHeight, 600);
+    // Desktop: larger consistent size for better visibility
     return {
-      width: Math.max(maxSize, 400),
-      height: Math.max(maxSize, 400),
+      width: 500,
+      height: 600,
     };
   }
 };
@@ -590,11 +584,9 @@ export default function SpaceInvadersEngine({
         backgroundColor: '#000',
         cursor: 'pointer',
         touchAction: 'none',
-        width: '100%',
-        height: '100%',
-        maxWidth: '600px',
-        maxHeight: '600px',
-        objectFit: 'contain'
+        margin: '0 auto',
+        border: '2px solid #333',
+        borderRadius: '8px'
       }}
     />
   );

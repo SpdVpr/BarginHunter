@@ -19,27 +19,21 @@ interface SnakeEngineProps {
   onShowIntro: () => void;
 }
 
-// Game constants - smaller field for better gameplay
+// Standardized game canvas size for consistent iframe experience
 const getCanvasSize = () => {
   const isMobile = window.innerWidth <= 768;
 
   if (isMobile) {
-    // Mobile: smaller field for easier control
-    const availableWidth = window.innerWidth - 10;
-    const availableHeight = window.innerHeight - 10;
-    const size = Math.min(availableWidth, availableHeight, 400);
+    // Mobile: consistent size that fits well in iframe
     return {
-      width: Math.max(size, 280),
-      height: Math.max(size, 280),
+      width: 350,
+      height: 500,
     };
   } else {
-    // Desktop: 400x400 for better gameplay
-    const availableWidth = window.innerWidth - 20;
-    const availableHeight = window.innerHeight - 20;
-    const maxSize = Math.min(availableWidth, availableHeight, 400);
+    // Desktop: larger consistent size for better visibility
     return {
-      width: Math.max(maxSize, 320),
-      height: Math.max(maxSize, 320),
+      width: 500,
+      height: 600,
     };
   }
 };
@@ -497,11 +491,9 @@ export default function SnakeEngine({
         backgroundColor: BACKGROUND_COLOR,
         cursor: 'pointer',
         touchAction: 'none',
-        width: '100%',
-        height: '100%',
-        maxWidth: '600px',
-        maxHeight: '600px',
-        objectFit: 'contain'
+        margin: '0 auto',
+        border: '2px solid #333',
+        borderRadius: '8px'
       }}
     />
   );

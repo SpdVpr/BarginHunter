@@ -19,30 +19,23 @@ interface EnhancedGameEngineProps {
   onShowIntro: () => void;
 }
 
-// Game constants - fullscreen 600x600 default
+// Standardized game canvas size for consistent iframe experience
 const getCanvasSize = () => {
   const isMobile = window.innerWidth <= 768;
 
   if (isMobile) {
-    // Mobile: use full available space, minimum 300x300
-    const availableWidth = window.innerWidth - 10;
-    const availableHeight = window.innerHeight - 10;
-    const size = Math.min(availableWidth, availableHeight, 600);
+    // Mobile: consistent size that fits well in iframe
     return {
-      width: Math.max(size, 300),
-      height: Math.max(size, 300),
-      groundY: Math.max(size, 300) * 0.8, // Ground at 80% of height
+      width: 350,
+      height: 500,
+      groundY: 400, // Ground at 80% of height
     };
   } else {
-    // Desktop: 600x600 default, scale down if needed
-    const availableWidth = window.innerWidth - 20;
-    const availableHeight = window.innerHeight - 20;
-    const maxSize = Math.min(availableWidth, availableHeight, 600);
-    const size = Math.max(maxSize, 400);
+    // Desktop: larger consistent size for better visibility
     return {
-      width: size,
-      height: size,
-      groundY: size * 0.8, // Ground at 80% of height
+      width: 500,
+      height: 600,
+      groundY: 480, // Ground at 80% of height
     };
   }
 };
@@ -579,11 +572,9 @@ export default function EnhancedGameEngine({
         display: 'block',
         cursor: 'pointer',
         background: '#f7f7f7',
-        width: '100%',
-        height: '100%',
-        maxWidth: '600px',
-        maxHeight: '600px',
-        objectFit: 'contain'
+        margin: '0 auto',
+        border: '2px solid #333',
+        borderRadius: '8px'
       }}
     />
   );

@@ -386,17 +386,15 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       border-radius: 12px;
     \`;
 
-    // Responsive sizing based on viewport - start with minimal defaults
+    // Standardized sizing for consistent game experience
     if (window.innerWidth < 768) {
-      // Mobile: use most of viewport width, auto height
-      iframe.style.width = Math.min(window.innerWidth * 0.95, 600) + 'px';
-      iframe.style.height = 'auto';
-      iframe.style.minHeight = '300px'; // Reduced minimum height
+      // Mobile: optimized for mobile games
+      iframe.style.width = '370px'; // 350px game + 20px padding
+      iframe.style.height = '600px'; // 500px game + 100px UI
     } else {
-      // Desktop: 600px max width, auto height
-      iframe.style.width = Math.min(600, window.innerWidth * 0.8) + 'px';
-      iframe.style.height = 'auto';
-      iframe.style.minHeight = '300px'; // Reduced minimum height
+      // Desktop: optimized for desktop games
+      iframe.style.width = '540px'; // 500px game + 40px padding
+      iframe.style.height = '720px'; // 600px game + 120px UI
     }
 
     // Close button
@@ -447,20 +445,22 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
           detail: event.data.discount
         }));
       } else if (event.data.type === 'IFRAME_RESIZE') {
-        // Handle iframe resize for responsive content
+        // Handle iframe resize with standardized game sizes
         const iframe = document.querySelector('#bargain-hunter-modal iframe');
         if (iframe && event.data.height) {
-          // Use exact height from iframe content to eliminate white space
-          const newHeight = event.data.height;
-          const newWidth = Math.min(600, window.innerWidth * 0.95);
+          const isMobile = window.innerWidth < 768;
 
-          // Update iframe size with exact dimensions
+          // Use standardized sizes for consistent experience
+          const newWidth = isMobile ? 370 : 540; // Matches initial sizing
+          const newHeight = event.data.height;
+
+          // Update iframe size with standardized dimensions
           iframe.style.height = newHeight + 'px';
           iframe.style.width = newWidth + 'px';
 
-          // Remove height restrictions to prevent white space
-          iframe.style.maxHeight = 'none';
-          iframe.style.maxWidth = window.innerWidth * 0.95 + 'px';
+          // Ensure iframe fits on screen
+          iframe.style.maxHeight = (window.innerHeight * 0.9) + 'px';
+          iframe.style.maxWidth = (window.innerWidth * 0.95) + 'px';
 
           // Remove fixed aspect ratio for responsive content
           iframe.style.aspectRatio = 'unset';

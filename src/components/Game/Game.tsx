@@ -292,7 +292,31 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
   }
 
   return (
-    <div>
+    <div style={{
+      padding: '20px',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+    }}>
+      {/* Score display */}
+      <div style={{
+        position: 'absolute',
+        top: '10px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        background: 'rgba(255,255,255,0.9)',
+        padding: '8px 16px',
+        borderRadius: '20px',
+        fontWeight: 'bold',
+        fontSize: '18px',
+        color: '#333',
+        zIndex: 10
+      }}>
+        Score: {currentScore}
+      </div>
+
       {gameConfig.gameType === 'flappy_bird' ? (
         <FlappyBirdEngine
           onGameEnd={handleGameEnd}
@@ -329,8 +353,6 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
           onShowIntro={() => setGameState('intro')}
         />
       )}
-
-
     </div>
   );
 }

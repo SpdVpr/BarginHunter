@@ -25,7 +25,7 @@ export default function WidgetGame() {
     }
   }, [router.query]);
 
-  // Auto-resize iframe functionality
+  // Auto-resize iframe functionality with standardized game sizes
   useEffect(() => {
     let resizeTimeout: NodeJS.Timeout;
 
@@ -35,23 +35,17 @@ export default function WidgetGame() {
         clearTimeout(resizeTimeout);
 
         resizeTimeout = setTimeout(() => {
-          const body = document.body;
-          const html = document.documentElement;
+          const isMobile = window.innerWidth <= 768;
 
-          // Get the actual content height without caps to eliminate white space
-          const contentHeight = Math.max(
-            body.scrollHeight,
-            body.offsetHeight,
-            html.scrollHeight,
-            html.offsetHeight,
-            body.clientHeight,
-            html.clientHeight
-          );
+          // Use standardized heights based on game canvas sizes + UI elements
+          const standardHeight = isMobile ?
+            500 + 100 : // Mobile: 500px canvas + 100px for UI/padding
+            600 + 120;  // Desktop: 600px canvas + 120px for UI/padding
 
-          // Send resize message to parent with exact content height
+          // Send resize message to parent with standardized height
           window.parent.postMessage({
             type: 'IFRAME_RESIZE',
-            height: contentHeight,
+            height: standardHeight,
             width: '100%'
           }, '*');
         }, 50); // 50ms debounce
@@ -64,44 +58,31 @@ export default function WidgetGame() {
     // Resize on window resize
     window.addEventListener('resize', resizeIframe);
 
-    // Resize when content changes (using MutationObserver)
-    const observer = new MutationObserver(resizeIframe);
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['style', 'class']
-    });
-
     // Cleanup
     return () => {
       clearTimeout(resizeTimeout);
       window.removeEventListener('resize', resizeIframe);
-      observer.disconnect();
     };
   }, []);
 
-  // Resize when loading state changes
+  // Resize when loading state changes with standardized sizes
   useEffect(() => {
     const timer = setTimeout(() => {
       if (window.parent && window.parent !== window) {
-        const body = document.body;
-        const html = document.documentElement;
-        const height = Math.max(
-          body.scrollHeight,
-          body.offsetHeight,
-          html.clientHeight,
-          html.scrollHeight,
-          html.offsetHeight
-        );
+        const isMobile = window.innerWidth <= 768;
+
+        // Use standardized heights based on game canvas sizes + UI elements
+        const standardHeight = isMobile ?
+          500 + 100 : // Mobile: 500px canvas + 100px for UI/padding
+          600 + 120;  // Desktop: 600px canvas + 120px for UI/padding
 
         window.parent.postMessage({
           type: 'IFRAME_RESIZE',
-          height: height,
+          height: standardHeight,
           width: '100%'
         }, '*');
       }
-    }, 100);
+    }, 200);
 
     return () => clearTimeout(timer);
   }, [isLoading, shopDomain]);
