@@ -81,13 +81,12 @@ export default function IntroSettingsPage() {
   const saveSettings = async () => {
     try {
       setSaving(true);
-      const response = await fetch('/api/intro-settings', {
+      const response = await fetch(`/api/intro-settings?shop=${encodeURIComponent(shop)}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          shop,
           settings,
         }),
       });
@@ -96,11 +95,12 @@ export default function IntroSettingsPage() {
         setToastMessage('Intro screen settings saved successfully!');
         setToastActive(true);
       } else {
-        throw new Error('Failed to save settings');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to save settings');
       }
     } catch (error) {
       console.error('Failed to save intro settings:', error);
-      setToastMessage('Failed to save settings. Please try again.');
+      setToastMessage(`Failed to save settings: ${error instanceof Error ? error.message : 'Please try again.'}`);
       setToastActive(true);
     } finally {
       setSaving(false);

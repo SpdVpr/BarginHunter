@@ -27,33 +27,39 @@ export default function WidgetGame() {
 
   // Auto-resize iframe functionality
   useEffect(() => {
+    let resizeTimeout: NodeJS.Timeout;
+
     const resizeIframe = () => {
       if (window.parent && window.parent !== window) {
-        const body = document.body;
-        const html = document.documentElement;
+        // Clear previous timeout to debounce
+        clearTimeout(resizeTimeout);
 
-        // Get the actual content height - use the smallest reasonable height
-        const contentHeight = Math.min(
-          Math.max(
+        resizeTimeout = setTimeout(() => {
+          const body = document.body;
+          const html = document.documentElement;
+
+          // Get the actual content height without caps to eliminate white space
+          const contentHeight = Math.max(
             body.scrollHeight,
             body.offsetHeight,
             html.scrollHeight,
-            html.offsetHeight
-          ),
-          window.innerHeight || 800 // Cap at window height or 800px max
-        );
+            html.offsetHeight,
+            body.clientHeight,
+            html.clientHeight
+          );
 
-        // Send resize message to parent
-        window.parent.postMessage({
-          type: 'IFRAME_RESIZE',
-          height: Math.max(contentHeight, 300), // Minimum 300px, no extra padding
-          width: '100%'
-        }, '*');
+          // Send resize message to parent with exact content height
+          window.parent.postMessage({
+            type: 'IFRAME_RESIZE',
+            height: contentHeight,
+            width: '100%'
+          }, '*');
+        }, 50); // 50ms debounce
       }
     };
 
-    // Initial resize
-    resizeIframe();
+    // Initial resize with delay to ensure DOM is ready
+    setTimeout(resizeIframe, 100);
 
     // Resize on window resize
     window.addEventListener('resize', resizeIframe);
@@ -69,6 +75,7 @@ export default function WidgetGame() {
 
     // Cleanup
     return () => {
+      clearTimeout(resizeTimeout);
       window.removeEventListener('resize', resizeIframe);
       observer.disconnect();
     };
@@ -90,7 +97,7 @@ export default function WidgetGame() {
 
         window.parent.postMessage({
           type: 'IFRAME_RESIZE',
-          height: height + 20,
+          height: height,
           width: '100%'
         }, '*');
       }

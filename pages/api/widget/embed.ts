@@ -386,17 +386,17 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       border-radius: 12px;
     \`;
 
-    // Responsive sizing based on viewport - start with reasonable defaults
+    // Responsive sizing based on viewport - start with minimal defaults
     if (window.innerWidth < 768) {
       // Mobile: use most of viewport width, auto height
       iframe.style.width = Math.min(window.innerWidth * 0.95, 600) + 'px';
       iframe.style.height = 'auto';
-      iframe.style.minHeight = '500px';
+      iframe.style.minHeight = '300px'; // Reduced minimum height
     } else {
       // Desktop: 600px max width, auto height
       iframe.style.width = Math.min(600, window.innerWidth * 0.8) + 'px';
       iframe.style.height = 'auto';
-      iframe.style.minHeight = '600px';
+      iframe.style.minHeight = '300px'; // Reduced minimum height
     }
 
     // Close button
@@ -450,13 +450,16 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         // Handle iframe resize for responsive content
         const iframe = document.querySelector('#bargain-hunter-modal iframe');
         if (iframe && event.data.height) {
-          const newHeight = Math.min(event.data.height, window.innerHeight * 0.9);
+          // Use exact height from iframe content to eliminate white space
+          const newHeight = event.data.height;
           const newWidth = Math.min(600, window.innerWidth * 0.95);
 
-          // Update iframe size
+          // Update iframe size with exact dimensions
           iframe.style.height = newHeight + 'px';
           iframe.style.width = newWidth + 'px';
-          iframe.style.maxHeight = window.innerHeight * 0.9 + 'px';
+
+          // Remove height restrictions to prevent white space
+          iframe.style.maxHeight = 'none';
           iframe.style.maxWidth = window.innerWidth * 0.95 + 'px';
 
           // Remove fixed aspect ratio for responsive content
