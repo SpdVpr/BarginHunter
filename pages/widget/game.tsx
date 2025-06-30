@@ -25,6 +25,78 @@ export default function WidgetGame() {
     }
   }, [router.query]);
 
+  // Auto-resize iframe functionality
+  useEffect(() => {
+    const resizeIframe = () => {
+      if (window.parent && window.parent !== window) {
+        const body = document.body;
+        const html = document.documentElement;
+
+        // Get the actual content height
+        const height = Math.max(
+          body.scrollHeight,
+          body.offsetHeight,
+          html.clientHeight,
+          html.scrollHeight,
+          html.offsetHeight
+        );
+
+        // Send resize message to parent
+        window.parent.postMessage({
+          type: 'IFRAME_RESIZE',
+          height: height + 20, // Add some padding
+          width: '100%'
+        }, '*');
+      }
+    };
+
+    // Initial resize
+    resizeIframe();
+
+    // Resize on window resize
+    window.addEventListener('resize', resizeIframe);
+
+    // Resize when content changes (using MutationObserver)
+    const observer = new MutationObserver(resizeIframe);
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['style', 'class']
+    });
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', resizeIframe);
+      observer.disconnect();
+    };
+  }, []);
+
+  // Resize when loading state changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (window.parent && window.parent !== window) {
+        const body = document.body;
+        const html = document.documentElement;
+        const height = Math.max(
+          body.scrollHeight,
+          body.offsetHeight,
+          html.clientHeight,
+          html.scrollHeight,
+          html.offsetHeight
+        );
+
+        window.parent.postMessage({
+          type: 'IFRAME_RESIZE',
+          height: height + 20,
+          width: '100%'
+        }, '*');
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [isLoading, shopDomain]);
+
   const checkInstallation = async (shop: string) => {
     try {
       // Check if app is properly installed with correct scopes
@@ -117,26 +189,42 @@ export default function WidgetGame() {
           }
           html, body {
             width: 100%;
-            height: 100%;
-            overflow: hidden;
+            min-height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
           }
           #__next {
             width: 100%;
-            height: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+          }
+
+          /* Ensure iframe content is always visible */
+          @media (max-width: 768px) {
+            html, body {
+              font-size: 14px;
+            }
+          }
+
+          @media (max-width: 480px) {
+            html, body {
+              font-size: 13px;
+            }
           }
         `}</style>
       </Head>
       <div style={{
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-        width: '100vw',
-        height: '100vh',
+        width: '100%',
+        minHeight: '100vh',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         background: '#f8f9fa',
-        padding: '0',
+        padding: '10px',
         margin: '0',
-        overflow: 'hidden'
+        boxSizing: 'border-box'
       }}>
         <Game
           shopDomain={shopDomain}

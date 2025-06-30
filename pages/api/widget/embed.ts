@@ -376,27 +376,27 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     iframe.src = API_BASE.replace('/api', '') + '/widget/game?shop=' + encodeURIComponent(SHOP_DOMAIN);
     iframe.style.cssText = \`
       width: 100%;
-      height: 100%;
+      height: auto;
       min-width: 300px;
-      min-height: 300px;
+      min-height: 400px;
       max-width: 600px;
-      max-height: 600px;
+      max-height: 90vh;
       border: none;
       display: block;
-      aspect-ratio: 1;
+      border-radius: 12px;
     \`;
 
-    // Responsive sizing based on viewport
+    // Responsive sizing based on viewport - start with reasonable defaults
     if (window.innerWidth < 768) {
-      // Mobile: use most of viewport but maintain aspect ratio
-      const size = Math.min(window.innerWidth * 0.95, window.innerHeight * 0.8, 600);
-      iframe.style.width = size + 'px';
-      iframe.style.height = size + 'px';
+      // Mobile: use most of viewport width, auto height
+      iframe.style.width = Math.min(window.innerWidth * 0.95, 600) + 'px';
+      iframe.style.height = 'auto';
+      iframe.style.minHeight = '500px';
     } else {
-      // Desktop: 600x600 max, scale down if needed
-      const size = Math.min(600, window.innerWidth * 0.8, window.innerHeight * 0.8);
-      iframe.style.width = size + 'px';
-      iframe.style.height = size + 'px';
+      // Desktop: 600px max width, auto height
+      iframe.style.width = Math.min(600, window.innerWidth * 0.8) + 'px';
+      iframe.style.height = 'auto';
+      iframe.style.minHeight = '600px';
     }
 
     // Close button
@@ -436,7 +436,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     // Listen for messages from iframe
     window.addEventListener('message', function(event) {
       if (event.origin !== WIDGET_BASE.replace('/widget', '')) return;
-      
+
       if (event.data.type === 'BARGAIN_HUNTER_CLOSE') {
         closeModal();
       } else if (event.data.type === 'BARGAIN_HUNTER_DISCOUNT_EARNED') {
@@ -446,6 +446,24 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         window.dispatchEvent(new CustomEvent('bargainHunterDiscountEarned', {
           detail: event.data.discount
         }));
+      } else if (event.data.type === 'IFRAME_RESIZE') {
+        // Handle iframe resize for responsive content
+        const iframe = document.querySelector('#bargain-hunter-modal iframe');
+        if (iframe && event.data.height) {
+          const newHeight = Math.min(event.data.height, window.innerHeight * 0.9);
+          const newWidth = Math.min(600, window.innerWidth * 0.95);
+
+          // Update iframe size
+          iframe.style.height = newHeight + 'px';
+          iframe.style.width = newWidth + 'px';
+          iframe.style.maxHeight = window.innerHeight * 0.9 + 'px';
+          iframe.style.maxWidth = window.innerWidth * 0.95 + 'px';
+
+          // Remove fixed aspect ratio for responsive content
+          iframe.style.aspectRatio = 'unset';
+
+          console.log('🔄 Iframe resized to:', newWidth + 'x' + newHeight);
+        }
       }
     });
 

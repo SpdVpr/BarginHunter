@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Responsive Iframe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        
+        .iframe-container {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+            background: white;
+        }
+        
+        #game-iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+            display: block;
+            transition: height 0.3s ease;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        .info {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            #game-iframe {
+                height: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Responsive Iframe Test</h1>
+        
+        <div class="info">
+            <strong>Test Instructions:</strong>
+            <ul>
+                <li>The iframe should automatically resize based on its content</li>
+                <li>Try different viewport sizes using browser dev tools</li>
+                <li>Check that all content is visible without scrollbars</li>
+                <li>Monitor the console for resize messages</li>
+            </ul>
+        </div>
+        
+        <div class="controls">
+            <button onclick="reloadIframe()">🔄 Reload Iframe</button>
+            <button onclick="toggleSize()">📱 Toggle Mobile View</button>
+            <button onclick="clearLog()">🗑️ Clear Log</button>
+        </div>
+        
+        <div class="iframe-container">
+            <iframe 
+                id="game-iframe"
+                src="http://localhost:3000/widget/game?shop=test-shop.myshopify.com"
+                title="Bargain Hunter Game">
+            </iframe>
+        </div>
+        
+        <div class="info">
+            <strong>Current iframe dimensions:</strong>
+            <div id="dimensions">Loading...</div>
+        </div>
+        
+        <div class="info">
+            <strong>Resize Log:</strong>
+            <div id="log" class="log">Waiting for resize messages...</div>
+        </div>
+    </div>
+
+    <script>
+        let isMobileView = false;
+        
+        // Listen for iframe resize messages
+        window.addEventListener('message', function(event) {
+            if (event.origin !== 'http://localhost:3000') return;
+            
+            if (event.data.type === 'IFRAME_RESIZE') {
+                const iframe = document.getElementById('game-iframe');
+                const newHeight = Math.min(event.data.height, window.innerHeight * 0.9);
+                
+                // Update iframe height
+                iframe.style.height = newHeight + 'px';
+                
+                // Log the resize
+                logResize(event.data.width, newHeight, event.data.height);
+                updateDimensions();
+            }
+        });
+        
+        function logResize(width, appliedHeight, requestedHeight) {
+            const log = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const message = `[${timestamp}] Resize: ${width} x ${requestedHeight}px (applied: ${appliedHeight}px)`;
+            
+            log.innerHTML += message + '\n';
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        function updateDimensions() {
+            const iframe = document.getElementById('game-iframe');
+            const rect = iframe.getBoundingClientRect();
+            document.getElementById('dimensions').innerHTML = 
+                `Width: ${Math.round(rect.width)}px, Height: ${Math.round(rect.height)}px`;
+        }
+        
+        function reloadIframe() {
+            const iframe = document.getElementById('game-iframe');
+            iframe.src = iframe.src;
+            clearLog();
+        }
+        
+        function toggleSize() {
+            const container = document.querySelector('.container');
+            if (isMobileView) {
+                container.style.maxWidth = '800px';
+                container.style.width = 'auto';
+                isMobileView = false;
+            } else {
+                container.style.maxWidth = '375px';
+                container.style.width = '375px';
+                isMobileView = true;
+            }
+            
+            setTimeout(updateDimensions, 100);
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = 'Log cleared...\n';
+        }
+        
+        // Initial dimension update
+        setTimeout(updateDimensions, 1000);
+        
+        // Update dimensions on window resize
+        window.addEventListener('resize', updateDimensions);
+    </script>
+</body>
+</html>

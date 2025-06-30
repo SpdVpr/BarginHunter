@@ -40,16 +40,21 @@ export default function GameIntroScreen({
     : 100;
 
   return (
-    <div style={{
+    <div className="game-intro-container" style={{
       background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       color: 'white',
-      padding: window.innerWidth <= 768 ? '20px' : '40px',
       borderRadius: '20px',
-      maxWidth: window.innerWidth <= 768 ? '95%' : '600px',
-      margin: '0 auto',
       textAlign: 'center',
       boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
-      position: 'relative'
+      position: 'relative',
+      width: '100%',
+      maxWidth: '100%',
+      margin: '0',
+      padding: '20px',
+      minHeight: 'fit-content',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center'
     }}>
       {/* Close button */}
       <button
@@ -75,18 +80,20 @@ export default function GameIntroScreen({
       </button>
 
       {/* Game title */}
-      <div style={{ marginBottom: '30px' }}>
-        <h1 style={{
-          fontSize: '48px',
+      <div className="game-title" style={{ marginBottom: '20px' }}>
+        <h1 className="game-title-text" style={{
           margin: '0 0 10px 0',
-          textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
+          textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+          fontSize: 'clamp(24px, 8vw, 48px)',
+          lineHeight: '1.2'
         }}>
           {isFlappyBird ? '🐦 Flappy Hunter' : isTetris ? '🧩 Tetris Hunter' : isSnake ? '🐍 Snake Hunter' : isSpaceInvaders ? '🚀 Space Hunter' : '🦕 Bargain Hunter'}
         </h1>
-        <p style={{
-          fontSize: '18px',
+        <p className="game-subtitle" style={{
+          fontSize: 'clamp(14px, 4vw, 18px)',
           margin: '0',
-          opacity: 0.9
+          opacity: 0.9,
+          lineHeight: '1.4'
         }}>
           {isFlappyBird
             ? 'Fly through pipes and earn amazing discounts!'
@@ -376,23 +383,24 @@ export default function GameIntroScreen({
       </div>
 
       {/* Discount information */}
-      <div style={{
+      <div className="discount-section" style={{
         background: 'rgba(255,255,255,0.15)',
         borderRadius: '15px',
-        padding: '20px',
-        marginBottom: '25px',
+        padding: 'clamp(15px, 4vw, 20px)',
+        marginBottom: '20px',
         border: '2px solid rgba(255,255,255,0.2)'
       }}>
-        <h2 style={{
-          fontSize: '24px',
-          margin: '0 0 15px 0',
+        <h2 className="discount-title" style={{
+          fontSize: 'clamp(18px, 5vw, 24px)',
+          margin: '0 0 10px 0',
           color: '#FFD700',
-          textAlign: 'center'
+          textAlign: 'center',
+          lineHeight: '1.3'
         }}>
           💰 Win {minDiscount}% - {maxDiscount}% OFF!
         </h2>
-        <p style={{
-          fontSize: '16px',
+        <p className="discount-subtitle" style={{
+          fontSize: 'clamp(14px, 3.5vw, 16px)',
           margin: '0',
           lineHeight: '1.4',
           textAlign: 'center',
@@ -403,32 +411,36 @@ export default function GameIntroScreen({
       </div>
 
       {/* How to play */}
-      <div style={{
+      <div className="how-to-play" style={{
         background: 'rgba(255,255,255,0.1)',
         borderRadius: '15px',
-        padding: '15px',
-        marginBottom: '25px',
+        padding: 'clamp(12px, 3vw, 15px)',
+        marginBottom: '20px',
         border: '2px solid rgba(255,255,255,0.2)'
       }}>
-        <h3 style={{ fontSize: '18px', margin: '0 0 10px 0' }}>
+        <h3 className="how-to-play-title" style={{
+          fontSize: 'clamp(16px, 4vw, 18px)',
+          margin: '0 0 10px 0',
+          textAlign: 'center'
+        }}>
           🎯 How to Play:
         </h3>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-          gap: '10px',
+        <div className="controls-grid" style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px',
           textAlign: 'center',
-          fontSize: '14px'
+          fontSize: 'clamp(12px, 3vw, 14px)'
         }}>
-          <div>
+          <div className="control-item">
             <strong>{isSnake ? '⌨️ Arrow keys' : isSpaceInvaders ? '⌨️ Arrow keys' : '🖱️ Click/Space'}</strong><br />
             {isFlappyBird ? 'to flap' : isTetris ? 'to rotate' : isSnake ? 'to move' : isSpaceInvaders ? 'to move' : 'to jump'}
           </div>
-          <div>
+          <div className="control-item">
             <strong>{isFlappyBird ? '🟢 Fly through' : isTetris ? '🧩 Stack blocks' : isSnake ? '🍎 Eat food' : isSpaceInvaders ? '👾 Destroy' : '🚧 Avoid'}</strong><br />
             {isFlappyBird ? 'pipe gaps' : isTetris ? 'clear lines' : isSnake ? 'to grow' : isSpaceInvaders ? 'invaders' : 'obstacles'}
           </div>
-          <div>
+          <div className="control-item">
             <strong>🏆 Score</strong><br />
             for points
           </div>
@@ -438,21 +450,30 @@ export default function GameIntroScreen({
 
 
       {/* Action buttons */}
-      <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
+      <div className="action-buttons" style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '12px',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%'
+      }}>
         <button
           onClick={onStartGame}
+          className="start-button"
           style={{
             background: 'linear-gradient(45deg, #28a745, #20c997)',
             color: 'white',
             border: 'none',
-            padding: '18px 40px',
+            padding: 'clamp(12px, 3vw, 18px) clamp(20px, 6vw, 40px)',
             borderRadius: '12px',
-            fontSize: '20px',
+            fontSize: 'clamp(16px, 4vw, 20px)',
             fontWeight: 'bold',
             cursor: 'pointer',
             boxShadow: '0 8px 16px rgba(0,0,0,0.2)',
             transition: 'transform 0.2s ease',
-            minWidth: '160px'
+            width: '100%',
+            maxWidth: '280px'
           }}
           onMouseOver={(e) => {
             e.currentTarget.style.transform = 'translateY(-2px)';
@@ -463,20 +484,22 @@ export default function GameIntroScreen({
         >
           🚀 Start Game
         </button>
-        
+
         <button
           onClick={onClose}
+          className="close-button"
           style={{
             background: 'rgba(255,255,255,0.2)',
             color: 'white',
             border: '2px solid rgba(255,255,255,0.3)',
-            padding: '18px 40px',
+            padding: 'clamp(12px, 3vw, 18px) clamp(20px, 6vw, 40px)',
             borderRadius: '12px',
-            fontSize: '20px',
+            fontSize: 'clamp(16px, 4vw, 20px)',
             fontWeight: 'bold',
             cursor: 'pointer',
             transition: 'background 0.2s ease',
-            minWidth: '160px'
+            width: '100%',
+            maxWidth: '280px'
           }}
           onMouseOver={(e) => {
             e.currentTarget.style.background = 'rgba(255,255,255,0.3)';
@@ -574,6 +597,51 @@ export default function GameIntroScreen({
           100% {
             opacity: 0;
             transform: translateY(-40px);
+          }
+        }
+
+        /* Responsive design for mobile devices */
+        @media (max-width: 480px) {
+          .game-intro-container {
+            padding: 15px !important;
+            border-radius: 15px !important;
+          }
+
+          .game-title {
+            margin-bottom: 15px !important;
+          }
+
+          .discount-section {
+            padding: 12px !important;
+            margin-bottom: 15px !important;
+          }
+
+          .how-to-play {
+            padding: 10px !important;
+            margin-bottom: 15px !important;
+          }
+
+          .action-buttons {
+            gap: 10px !important;
+          }
+
+          .controls-grid {
+            gap: 6px !important;
+          }
+
+          .control-item {
+            padding: 4px 0;
+          }
+        }
+
+        /* Extra small screens */
+        @media (max-width: 320px) {
+          .game-intro-container {
+            padding: 10px !important;
+          }
+
+          .discount-section, .how-to-play {
+            padding: 8px !important;
           }
         }
       `}</style>
