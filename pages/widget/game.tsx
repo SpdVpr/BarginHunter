@@ -32,19 +32,21 @@ export default function WidgetGame() {
         const body = document.body;
         const html = document.documentElement;
 
-        // Get the actual content height
-        const height = Math.max(
-          body.scrollHeight,
-          body.offsetHeight,
-          html.clientHeight,
-          html.scrollHeight,
-          html.offsetHeight
+        // Get the actual content height - use the smallest reasonable height
+        const contentHeight = Math.min(
+          Math.max(
+            body.scrollHeight,
+            body.offsetHeight,
+            html.scrollHeight,
+            html.offsetHeight
+          ),
+          window.innerHeight || 800 // Cap at window height or 800px max
         );
 
         // Send resize message to parent
         window.parent.postMessage({
           type: 'IFRAME_RESIZE',
-          height: height + 20, // Add some padding
+          height: Math.max(contentHeight, 300), // Minimum 300px, no extra padding
           width: '100%'
         }, '*');
       }
@@ -189,14 +191,18 @@ export default function WidgetGame() {
           }
           html, body {
             width: 100%;
-            min-height: 100vh;
+            height: auto;
+            min-height: auto;
             overflow-x: hidden;
-            overflow-y: auto;
+            overflow-y: hidden;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
           }
           #__next {
             width: 100%;
-            min-height: 100vh;
+            height: auto;
+            min-height: auto;
             display: flex;
             flex-direction: column;
           }
@@ -217,7 +223,8 @@ export default function WidgetGame() {
       </Head>
       <div style={{
         width: '100%',
-        minHeight: '100vh',
+        height: 'auto',
+        minHeight: 'auto',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

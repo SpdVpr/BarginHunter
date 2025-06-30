@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { db } from '../../src/lib/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 interface IntroSettings {
   title: string;
@@ -40,10 +39,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     if (req.method === 'GET') {
       // Get intro settings
-      const settingsRef = doc(db, 'introSettings', shop);
-      const settingsDoc = await getDoc(settingsRef);
-      
-      if (settingsDoc.exists()) {
+      const settingsRef = db.collection('introSettings').doc(shop);
+      const settingsDoc = await settingsRef.get();
+
+      if (settingsDoc.exists) {
         const settings = settingsDoc.data() as IntroSettings;
         res.status(200).json(settings);
       } else {
@@ -53,7 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     } else if (req.method === 'POST') {
       // Save intro settings
       const { settings } = req.body;
-      
+
       if (!settings) {
         return res.status(400).json({ error: 'Settings data is required' });
       }
@@ -73,17 +72,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         customCSS: settings.customCSS || DEFAULT_INTRO_SETTINGS.customCSS,
       };
 
-      const settingsRef = doc(db, 'introSettings', shop);
-      await setDoc(settingsRef, {
+      const settingsRef = db.collection('introSettings').doc(shop);
+      await settingsRef.set({
         ...validatedSettings,
         updatedAt: new Date().toISOString(),
         shop: shop,
       });
 
-      res.status(200).json({ 
-        success: true, 
+      res.status(200).json({
+        success: true,
         message: 'Intro settings saved successfully',
-        settings: validatedSettings 
+        settings: validatedSettings
       });
     } else {
       res.setHeader('Allow', ['GET', 'POST']);

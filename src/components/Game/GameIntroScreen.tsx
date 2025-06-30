@@ -126,14 +126,14 @@ export default function GameIntroScreen({
       boxShadow: '0 10px 20px rgba(0,0,0,0.2)',
       position: 'relative',
       width: '100%',
-      maxWidth: '100%',
-      margin: '0',
+      maxWidth: '600px',
+      margin: '0 auto',
       padding: `${Math.max(4, introSettings.padding)}px`,
-      minHeight: 'fit-content',
+      minHeight: 'auto',
+      height: 'auto',
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'center',
-      maxHeight: '95vh',
       overflow: 'hidden'
     }}>
       {/* Custom CSS */}
@@ -367,12 +367,12 @@ export default function GameIntroScreen({
           }
         }
 
-        /* Responsive design for mobile devices - ULTRA COMPACT */
+        /* Responsive design for mobile devices - COMPACT */
         @media (max-width: 480px) {
           .game-intro-container {
             padding: 8px !important;
             border-radius: 8px !important;
-            max-height: 85vh !important;
+            max-width: 95vw !important;
           }
 
           .game-title {
@@ -393,7 +393,7 @@ export default function GameIntroScreen({
         @media (max-width: 320px) {
           .game-intro-container {
             padding: 6px !important;
-            max-height: 80vh !important;
+            max-width: 98vw !important;
           }
 
           .discount-section {
@@ -406,21 +406,11 @@ export default function GameIntroScreen({
           }
         }
 
-        /* Ensure no scrolling on any device */
-        @media (max-height: 600px) {
-          .game-intro-container {
-            max-height: 95vh !important;
-            padding: 6px !important;
-          }
-
-          .game-title {
-            margin-bottom: 4px !important;
-          }
-
-          .discount-section {
-            margin-bottom: 4px !important;
-            padding: 4px !important;
-          }
+        /* Ensure compact layout */
+        .game-intro-container {
+          height: auto !important;
+          min-height: auto !important;
+          max-height: none !important;
         }
       `}</style>
     </div>
