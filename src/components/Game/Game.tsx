@@ -3,6 +3,7 @@ import EnhancedGameEngine from './EnhancedGameEngine';
 import FlappyBirdEngine from './FlappyBirdEngine';
 import TetrisEngine from './TetrisEngine';
 import SnakeEngine from './SnakeEngine';
+import SpaceInvadersEngine from './SpaceInvadersEngine';
 import GameIntroScreen from './GameIntroScreen';
 import GameOverScreen from './GameOverScreen';
 
@@ -308,6 +309,13 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
         />
       ) : gameConfig.gameType === 'snake' ? (
         <SnakeEngine
+          onGameEnd={handleGameEnd}
+          onScoreUpdate={setCurrentScore}
+          gameConfig={gameConfig}
+          onShowIntro={() => setGameState('intro')}
+        />
+      ) : gameConfig.gameType === 'space_invaders' ? (
+        <SpaceInvadersEngine
           onGameEnd={handleGameEnd}
           onScoreUpdate={setCurrentScore}
           gameConfig={gameConfig}

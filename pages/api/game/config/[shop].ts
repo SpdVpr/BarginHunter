@@ -6,7 +6,7 @@ import { Timestamp } from 'firebase-admin/firestore';
 const defaultConfig = {
   isEnabled: true,
   gameSettings: {
-    gameType: 'dino' as 'dino' | 'flappy_bird' | 'tetris' | 'snake',
+    gameType: 'dino' as 'dino' | 'flappy_bird' | 'tetris' | 'snake' | 'space_invaders',
     minScoreForDiscount: 150,
     maxPlaysPerCustomer: 3,
     maxPlaysPerDay: 10,

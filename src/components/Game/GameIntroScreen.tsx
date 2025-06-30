@@ -10,7 +10,7 @@ interface GameConfig {
   minDiscount: number;
   maxDiscount: number;
   shopName?: string;
-  gameType?: 'dino' | 'flappy_bird' | 'tetris' | 'snake';
+  gameType?: 'dino' | 'flappy_bird' | 'tetris' | 'snake' | 'space_invaders';
 }
 
 interface GameIntroScreenProps {
@@ -32,6 +32,7 @@ export default function GameIntroScreen({
   const isFlappyBird = gameConfig.gameType === 'flappy_bird';
   const isTetris = gameConfig.gameType === 'tetris';
   const isSnake = gameConfig.gameType === 'snake';
+  const isSpaceInvaders = gameConfig.gameType === 'space_invaders';
 
   // Get the lowest score requirement for any discount
   const lowestScoreForDiscount = gameConfig.discountTiers.length > 0
@@ -80,7 +81,7 @@ export default function GameIntroScreen({
           margin: '0 0 10px 0',
           textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
         }}>
-          {isFlappyBird ? '🐦 Flappy Hunter' : isTetris ? '🧩 Tetris Hunter' : isSnake ? '🐍 Snake Hunter' : '🦕 Bargain Hunter'}
+          {isFlappyBird ? '🐦 Flappy Hunter' : isTetris ? '🧩 Tetris Hunter' : isSnake ? '🐍 Snake Hunter' : isSpaceInvaders ? '🚀 Space Hunter' : '🦕 Bargain Hunter'}
         </h1>
         <p style={{
           fontSize: '18px',
@@ -93,6 +94,8 @@ export default function GameIntroScreen({
             ? 'Stack blocks, clear lines, and earn amazing discounts!'
             : isSnake
             ? 'Eat food, grow longer, and earn amazing discounts!'
+            : isSpaceInvaders
+            ? 'Destroy alien invaders and earn amazing discounts!'
             : 'Jump, dodge, and earn amazing discounts!'
           }
         </p>
@@ -270,6 +273,54 @@ export default function GameIntroScreen({
                 animation: 'pulse 1s infinite'
               }} />
             </>
+          ) : isSpaceInvaders ? (
+            // Space Invaders preview
+            <>
+              {/* Player ship */}
+              <div style={{
+                width: '30px',
+                height: '15px',
+                background: '#00ff00',
+                position: 'relative',
+                animation: 'hover 2s infinite',
+                marginRight: '40px'
+              }}>
+                <div style={{
+                  width: '6px',
+                  height: '4px',
+                  background: '#44ff44',
+                  position: 'absolute',
+                  top: '-4px',
+                  left: '12px'
+                }} />
+              </div>
+
+              {/* Invaders formation */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 16px)',
+                gridTemplateRows: 'repeat(2, 12px)',
+                gap: '4px',
+                animation: 'invaderMove 3s infinite linear'
+              }}>
+                <div style={{ background: '#ff4444', width: '16px', height: '12px' }} />
+                <div style={{ background: '#ff4444', width: '16px', height: '12px' }} />
+                <div style={{ background: '#ff4444', width: '16px', height: '12px' }} />
+                <div style={{ background: '#ffaa00', width: '16px', height: '12px' }} />
+                <div style={{ background: '#ffaa00', width: '16px', height: '12px' }} />
+                <div style={{ background: '#ffaa00', width: '16px', height: '12px' }} />
+              </div>
+
+              {/* Laser beam */}
+              <div style={{
+                width: '2px',
+                height: '20px',
+                background: '#00ff00',
+                position: 'absolute',
+                left: '30%',
+                animation: 'laser 1.5s infinite'
+              }} />
+            </>
           ) : (
             // Dino preview
             <>
@@ -386,12 +437,12 @@ export default function GameIntroScreen({
           fontSize: '14px'
         }}>
           <div>
-            <strong>{isSnake ? '⌨️ Arrow keys' : '🖱️ Click/Space'}</strong><br />
-            {isFlappyBird ? 'to flap' : isTetris ? 'to rotate' : isSnake ? 'to move' : 'to jump'}
+            <strong>{isSnake ? '⌨️ Arrow keys' : isSpaceInvaders ? '⌨️ Arrow keys' : '🖱️ Click/Space'}</strong><br />
+            {isFlappyBird ? 'to flap' : isTetris ? 'to rotate' : isSnake ? 'to move' : isSpaceInvaders ? 'to move' : 'to jump'}
           </div>
           <div>
-            <strong>{isFlappyBird ? '🟢 Fly through' : isTetris ? '🧩 Stack blocks' : isSnake ? '🍎 Eat food' : '🚧 Avoid'}</strong><br />
-            {isFlappyBird ? 'pipe gaps' : isTetris ? 'clear lines' : isSnake ? 'to grow' : 'obstacles'}
+            <strong>{isFlappyBird ? '🟢 Fly through' : isTetris ? '🧩 Stack blocks' : isSnake ? '🍎 Eat food' : isSpaceInvaders ? '👾 Destroy' : '🚧 Avoid'}</strong><br />
+            {isFlappyBird ? 'pipe gaps' : isTetris ? 'clear lines' : isSnake ? 'to grow' : isSpaceInvaders ? 'invaders' : 'obstacles'}
           </div>
           <div>
             <strong>🏆 Score</strong><br />
@@ -545,6 +596,39 @@ export default function GameIntroScreen({
           50% {
             transform: scale(1.1);
             opacity: 0.8;
+          }
+        }
+
+        @keyframes hover {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-3px);
+          }
+        }
+
+        @keyframes invaderMove {
+          0%, 100% {
+            transform: translateX(0);
+          }
+          50% {
+            transform: translateX(10px);
+          }
+        }
+
+        @keyframes laser {
+          0% {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          50% {
+            opacity: 1;
+            transform: translateY(-10px);
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(-40px);
           }
         }
       `}</style>
