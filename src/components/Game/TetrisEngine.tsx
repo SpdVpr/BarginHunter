@@ -214,13 +214,44 @@ export default function TetrisEngine({
     });
   }, [gameScorer, onScoreUpdate]);
 
+  // Handle left movement
+  const handleMoveLeft = useCallback(() => {
+    if (!isRunning || !currentPiece) return;
+
+    if (canPlacePiece(currentPiece, -1, 0)) {
+      setCurrentPiece(prev => prev ? { ...prev, x: prev.x - 1 } : null);
+    }
+  }, [isRunning, currentPiece, canPlacePiece]);
+
+  // Handle right movement
+  const handleMoveRight = useCallback(() => {
+    if (!isRunning || !currentPiece) return;
+
+    if (canPlacePiece(currentPiece, 1, 0)) {
+      setCurrentPiece(prev => prev ? { ...prev, x: prev.x + 1 } : null);
+    }
+  }, [isRunning, currentPiece, canPlacePiece]);
+
+  // Handle down movement (soft drop)
+  const handleMoveDown = useCallback(() => {
+    if (!isRunning || !currentPiece) return;
+
+    if (canPlacePiece(currentPiece, 0, 1)) {
+      setCurrentPiece(prev => prev ? { ...prev, y: prev.y + 1 } : null);
+      // Add small bonus for soft drop
+      const bonusScore = gameScorer.addObstaclePoints() / 10;
+      setScore(bonusScore);
+      onScoreUpdate(bonusScore);
+    }
+  }, [isRunning, currentPiece, canPlacePiece, gameScorer, onScoreUpdate]);
+
   // Handle rotation (main control)
   const handleRotate = useCallback(() => {
     if (!isRunning || !currentPiece) return;
-    
+
     const rotatedShape = rotatePiece(currentPiece);
     const rotatedPiece = { ...currentPiece, shape: rotatedShape };
-    
+
     if (canPlacePiece(rotatedPiece)) {
       setCurrentPiece(rotatedPiece);
     }
@@ -372,9 +403,24 @@ export default function TetrisEngine({
   // Event listeners
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.code === 'Space') {
-        e.preventDefault();
-        handleRotate();
+      e.preventDefault();
+
+      switch (e.code) {
+        case 'Space':
+          handleRotate();
+          break;
+        case 'ArrowLeft':
+          handleMoveLeft();
+          break;
+        case 'ArrowRight':
+          handleMoveRight();
+          break;
+        case 'ArrowDown':
+          handleMoveDown();
+          break;
+        case 'ArrowUp':
+          handleRotate();
+          break;
       }
     };
     
@@ -390,7 +436,7 @@ export default function TetrisEngine({
       window.removeEventListener('keydown', handleKeyPress);
       canvas?.removeEventListener('click', handleClick);
     };
-  }, [handleRotate]);
+  }, [handleRotate, handleMoveLeft, handleMoveRight, handleMoveDown]);
 
   // Game loop effect
   useEffect(() => {

@@ -58,11 +58,22 @@ const PLAYER_X = 80;
 
 // Use universal difficulty progression from gameScoring.ts
 
-// Obstacle types - Chrome Dino style (simpler, consistent)
+// Enhanced obstacle types with progressive difficulty
 const OBSTACLE_TYPES = [
-  { name: 'cactus', width: 20, height: 40, color: '#228B22' },
-  { name: 'rock', width: 24, height: 20, color: '#696969' },
-  { name: 'cactus2', width: 16, height: 35, color: '#228B22' }, // Smaller cactus
+  // Basic obstacles (early game)
+  { name: 'cactus', width: 20, height: 40, color: '#228B22', difficulty: 1 },
+  { name: 'rock', width: 24, height: 20, color: '#696969', difficulty: 1 },
+  { name: 'cactus2', width: 16, height: 35, color: '#228B22', difficulty: 1 },
+
+  // Medium obstacles (mid game)
+  { name: 'tall_cactus', width: 22, height: 55, color: '#1F5F1F', difficulty: 2 },
+  { name: 'wide_rock', width: 35, height: 25, color: '#555555', difficulty: 2 },
+  { name: 'spiky_cactus', width: 28, height: 45, color: '#2F7D32', difficulty: 2 },
+
+  // Hard obstacles (late game)
+  { name: 'giant_cactus', width: 30, height: 70, color: '#1B5E20', difficulty: 3 },
+  { name: 'boulder', width: 40, height: 35, color: '#424242', difficulty: 3 },
+  { name: 'cactus_cluster', width: 45, height: 50, color: '#2E7D32', difficulty: 3 },
 ];
 
 interface Player {
@@ -163,28 +174,151 @@ export default function EnhancedGameEngine({
 
     switch (type) {
       case 'cactus':
-        // Simple cactus
-        ctx.fillStyle = '#228B22';
+        // Enhanced cactus with gradient
+        const cactusGradient = ctx.createLinearGradient(x, y, x + width, y);
+        cactusGradient.addColorStop(0, '#2E7D32');
+        cactusGradient.addColorStop(1, '#1B5E20');
+        ctx.fillStyle = cactusGradient;
         ctx.fillRect(x + 4, y, width - 8, height);
-        // Cactus arms
+        // Enhanced cactus arms with shadows
+        ctx.fillStyle = '#1F5F1F';
         ctx.fillRect(x, y + height * 0.3, 6, height * 0.4);
         ctx.fillRect(x + width - 6, y + height * 0.5, 6, height * 0.3);
+        // Add spikes
+        ctx.fillStyle = '#0F2F0F';
+        for (let i = 0; i < 3; i++) {
+          const spikeX = x + 4 + ((width - 8) / 4) * (i + 1);
+          ctx.fillRect(spikeX - 1, y + height * 0.2, 2, 6);
+        }
         break;
 
       case 'cactus2':
-        // Smaller simple cactus
-        ctx.fillStyle = '#228B22';
+        // Enhanced smaller cactus
+        const cactus2Gradient = ctx.createLinearGradient(x, y, x, y + height);
+        cactus2Gradient.addColorStop(0, '#2E7D32');
+        cactus2Gradient.addColorStop(1, '#1B5E20');
+        ctx.fillStyle = cactus2Gradient;
         ctx.fillRect(x + 2, y, width - 4, height);
         ctx.fillRect(x + width - 4, y + height * 0.4, 4, height * 0.3);
+        // Add texture
+        ctx.fillStyle = '#1F5F1F';
+        ctx.fillRect(x + width/2 - 1, y + height * 0.3, 2, height * 0.4);
         break;
 
       case 'rock':
-        // Simple rock
-        ctx.fillStyle = '#696969';
+        // Enhanced rock with texture
+        const rockGradient = ctx.createRadialGradient(x + width/2, y + height/2, 0, x + width/2, y + height/2, width/2);
+        rockGradient.addColorStop(0, '#808080');
+        rockGradient.addColorStop(1, '#404040');
+        ctx.fillStyle = rockGradient;
         ctx.fillRect(x, y, width, height);
+        // Rock highlights
         ctx.fillStyle = '#A9A9A9';
         ctx.fillRect(x + 2, y + 2, width - 6, 4);
+        ctx.fillRect(x + 3, y + height - 6, width - 8, 3);
         break;
+
+      // New enhanced obstacles
+      case 'tall_cactus':
+        const tallGradient = ctx.createLinearGradient(x, y, x, y + height);
+        tallGradient.addColorStop(0, '#2E7D32');
+        tallGradient.addColorStop(1, '#1B5E20');
+        ctx.fillStyle = tallGradient;
+        ctx.fillRect(x + 3, y, width - 6, height);
+        // Segments
+        ctx.fillStyle = '#1F5F1F';
+        for (let i = 0; i < 4; i++) {
+          ctx.fillRect(x + 1, y + (height/4) * i, width - 2, 2);
+        }
+        // Arms
+        ctx.fillRect(x - 2, y + height * 0.3, 5, height * 0.2);
+        ctx.fillRect(x + width - 3, y + height * 0.5, 5, height * 0.2);
+        break;
+
+      case 'wide_rock':
+        const wideGradient = ctx.createLinearGradient(x, y, x + width, y + height);
+        wideGradient.addColorStop(0, '#696969');
+        wideGradient.addColorStop(1, '#2F2F2F');
+        ctx.fillStyle = wideGradient;
+        ctx.fillRect(x, y, width, height);
+        // Multiple rock pieces
+        ctx.fillStyle = '#555555';
+        ctx.fillRect(x + 3, y + 2, width/3, height - 4);
+        ctx.fillRect(x + width/2, y + 1, width/3, height - 2);
+        break;
+
+      case 'spiky_cactus':
+        ctx.fillStyle = '#2F7D32';
+        ctx.fillRect(x + 4, y, width - 8, height);
+        // Many spikes
+        ctx.fillStyle = '#1F5F1F';
+        for (let i = 0; i < 6; i++) {
+          const spikeX = x + 4 + ((width - 8) / 7) * (i + 1);
+          const spikeHeight = 4 + (i % 2) * 3;
+          ctx.fillRect(spikeX - 1, y + height * 0.1 + i * 2, 2, spikeHeight);
+        }
+        break;
+
+      case 'giant_cactus':
+        const giantGradient = ctx.createRadialGradient(x + width/2, y + height/2, 0, x + width/2, y + height/2, width);
+        giantGradient.addColorStop(0, '#388E3C');
+        giantGradient.addColorStop(1, '#1B5E20');
+        ctx.fillStyle = giantGradient;
+        ctx.fillRect(x + 5, y, width - 10, height);
+        // Giant arms
+        ctx.fillRect(x - 3, y + height * 0.3, 8, height * 0.3);
+        ctx.fillRect(x + width - 5, y + height * 0.4, 8, height * 0.3);
+        // Multiple spike rows
+        ctx.fillStyle = '#0D4F0D';
+        for (let row = 0; row < 3; row++) {
+          for (let i = 0; i < 4; i++) {
+            const spikeX = x + 5 + ((width - 10) / 5) * (i + 1);
+            ctx.fillRect(spikeX - 1, y + height * (0.1 + row * 0.2), 2, 6);
+          }
+        }
+        break;
+
+      case 'boulder':
+        const boulderGradient = ctx.createRadialGradient(x + width/2, y + height/2, 0, x + width/2, y + height/2, width/2);
+        boulderGradient.addColorStop(0, '#757575');
+        boulderGradient.addColorStop(1, '#212121');
+        ctx.fillStyle = boulderGradient;
+        ctx.fillRect(x, y, width, height);
+        // Cracks
+        ctx.strokeStyle = '#1A1A1A';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x + width * 0.2, y + height * 0.1);
+        ctx.lineTo(x + width * 0.8, y + height * 0.9);
+        ctx.moveTo(x + width * 0.7, y + height * 0.2);
+        ctx.lineTo(x + width * 0.3, y + height * 0.8);
+        ctx.stroke();
+        break;
+
+      case 'cactus_cluster':
+        // Cluster of small cacti
+        const positions = [
+          { x: x, w: width * 0.3, h: height * 0.8, y: y + height * 0.2 },
+          { x: x + width * 0.35, w: width * 0.3, h: height, y: y },
+          { x: x + width * 0.7, w: width * 0.3, h: height * 0.7, y: y + height * 0.3 }
+        ];
+
+        positions.forEach(pos => {
+          ctx.fillStyle = '#2E7D32';
+          ctx.fillRect(pos.x, pos.y, pos.w, pos.h);
+          // Small spikes
+          ctx.fillStyle = '#1F5F1F';
+          ctx.fillRect(pos.x + pos.w/2 - 1, pos.y + pos.h * 0.2, 2, 4);
+        });
+        break;
+
+      default:
+        // Fallback with gradient
+        const fallbackGradient = ctx.createLinearGradient(x, y, x + width, y + height);
+        fallbackGradient.addColorStop(0, '#8B4513');
+        fallbackGradient.addColorStop(1, '#5D2F0A');
+        ctx.fillStyle = fallbackGradient;
+        ctx.fillRect(x, y, width, height);
     }
   }, []);
 
@@ -224,22 +358,51 @@ export default function EnhancedGameEngine({
     });
   }, [isRunning]);
 
-  // Spawn obstacles with universal difficulty
+  // Spawn obstacles with progressive difficulty
   const spawnObstacle = useCallback(() => {
     const currentDifficulty = gameScorer.getCurrentDifficultyLevel();
-    const obstacleType = OBSTACLE_TYPES[Math.floor(Math.random() * OBSTACLE_TYPES.length)];
+    const difficultyLevel = currentDifficulty.level;
+
+    // Filter obstacles by difficulty level
+    const availableObstacles = OBSTACLE_TYPES.filter(obstacle => {
+      if (difficultyLevel <= 2) return obstacle.difficulty === 1; // Easy obstacles
+      if (difficultyLevel <= 4) return obstacle.difficulty <= 2; // Easy + Medium
+      return true; // All obstacles for high difficulty
+    });
+
+    const obstacleType = availableObstacles[Math.floor(Math.random() * availableObstacles.length)];
+
+    // Progressive size scaling
+    const sizeMultiplier = Math.min(1 + (difficultyLevel - 1) * 0.1, 1.5);
 
     const newObstacle: Obstacle = {
       x: canvasSize.width,
-      y: canvasSize.groundY - (obstacleType.height * currentDifficulty.obstacleSize),
-      width: obstacleType.width * currentDifficulty.obstacleSize,
-      height: obstacleType.height * currentDifficulty.obstacleSize,
+      y: canvasSize.groundY - (obstacleType.height * sizeMultiplier),
+      width: obstacleType.width * sizeMultiplier,
+      height: obstacleType.height * sizeMultiplier,
       type: obstacleType.name,
       speed: currentDifficulty.speed,
       id: Date.now()
     };
 
     setObstacles(prev => [...prev, newObstacle]);
+
+    // Chance for double obstacles at higher difficulty
+    if (difficultyLevel >= 3 && Math.random() < 0.3) {
+      setTimeout(() => {
+        const secondObstacleType = availableObstacles[Math.floor(Math.random() * availableObstacles.length)];
+        const secondObstacle: Obstacle = {
+          x: canvasSize.width + 80 + Math.random() * 40, // 80-120px gap
+          y: canvasSize.groundY - (secondObstacleType.height * sizeMultiplier),
+          width: secondObstacleType.width * sizeMultiplier,
+          height: secondObstacleType.height * sizeMultiplier,
+          type: secondObstacleType.name,
+          speed: currentDifficulty.speed,
+          id: Date.now() + 1
+        };
+        setObstacles(prev => [...prev, secondObstacle]);
+      }, 100);
+    }
   }, [gameScorer, canvasSize]);
 
   // Game loop

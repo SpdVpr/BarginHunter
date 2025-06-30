@@ -19,33 +19,33 @@ interface SnakeEngineProps {
   onShowIntro: () => void;
 }
 
-// Game constants - fullscreen 600x600 default
+// Game constants - smaller field for better gameplay
 const getCanvasSize = () => {
   const isMobile = window.innerWidth <= 768;
 
   if (isMobile) {
-    // Mobile: use full available space, minimum 300x300
+    // Mobile: smaller field for easier control
     const availableWidth = window.innerWidth - 10;
     const availableHeight = window.innerHeight - 10;
-    const size = Math.min(availableWidth, availableHeight, 600);
+    const size = Math.min(availableWidth, availableHeight, 400);
     return {
-      width: Math.max(size, 300),
-      height: Math.max(size, 300),
+      width: Math.max(size, 280),
+      height: Math.max(size, 280),
     };
   } else {
-    // Desktop: 600x600 default, scale down if needed
+    // Desktop: 400x400 for better gameplay
     const availableWidth = window.innerWidth - 20;
     const availableHeight = window.innerHeight - 20;
-    const maxSize = Math.min(availableWidth, availableHeight, 600);
+    const maxSize = Math.min(availableWidth, availableHeight, 400);
     return {
-      width: Math.max(maxSize, 400),
-      height: Math.max(maxSize, 400),
+      width: Math.max(maxSize, 320),
+      height: Math.max(maxSize, 320),
     };
   }
 };
 
-// Snake game constants
-const GRID_SIZE = 20; // Size of each grid cell
+// Snake game constants - smaller grid for more manageable gameplay
+const GRID_SIZE = 16; // Smaller grid cells for more precise control
 const INITIAL_SNAKE_LENGTH = 3;
 const INITIAL_SPEED = 150; // milliseconds between moves
 const SPEED_INCREASE = 10; // speed increase per food eaten

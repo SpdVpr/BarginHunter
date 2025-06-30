@@ -470,7 +470,7 @@ export default function SimpleGameEngine({
         }}
       />
 
-      {/* Score Display */}
+      {/* Score Display with Next Reward */}
       <div style={{
         position: 'absolute',
         top: '15px',
@@ -480,11 +480,23 @@ export default function SimpleGameEngine({
         padding: '12px 20px',
         borderRadius: '25px',
         fontWeight: 'bold',
-        fontSize: '18px',
+        fontSize: '16px',
         boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
-        border: '2px solid rgba(255, 255, 255, 0.2)'
+        border: '2px solid rgba(255, 255, 255, 0.2)',
+        textAlign: 'center',
+        minWidth: '120px'
       }}>
-        🏆 {Math.floor(score)}
+        <div>🏆 {Math.floor(score)}</div>
+        {nextTier && (
+          <div style={{
+            fontSize: '12px',
+            opacity: 0.8,
+            marginTop: '4px',
+            color: '#feca57'
+          }}>
+            Next: {nextTier.discount}% OFF
+          </div>
+        )}
       </div>
 
       {/* Discount Display */}

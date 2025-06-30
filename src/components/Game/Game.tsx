@@ -330,19 +330,7 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
         />
       )}
 
-      <div style={{ 
-        marginTop: '15px', 
-        padding: '10px',
-        background: '#f8f9fa',
-        borderRadius: '6px',
-        fontSize: '12px',
-        color: '#666'
-      }}>
-        <strong>Current Score:</strong> {currentScore} | 
-        <strong> Next Reward:</strong> {
-          gameConfig.discountTiers.find((tier: any) => currentScore < tier.minScore)?.discount || 'Max'
-        }% OFF
-      </div>
+
     </div>
   );
 }

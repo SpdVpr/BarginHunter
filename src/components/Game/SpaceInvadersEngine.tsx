@@ -114,6 +114,7 @@ export default function SpaceInvadersEngine({
   
   const fireCounterRef = useRef(0);
   const invaderDirectionRef = useRef(1);
+  const invaderMoveTimerRef = useRef(0);
   const keysRef = useRef<{[key: string]: boolean}>({});
 
   // Handle window resize
@@ -294,31 +295,39 @@ export default function SpaceInvadersEngine({
       return bullet.y < canvasSize.height + 10;
     }));
 
-    // Update invaders
-    setInvaders(prev => {
-      let hitEdge = false;
-      const aliveInvaders = prev.filter(inv => inv.alive);
+    // Update invaders with timing control
+    const now = Date.now();
+    const invaderMoveDelay = Math.max(100 - difficultyLevel * 10, 30); // Slower movement, min 30ms
 
-      // Check edge collision
-      aliveInvaders.forEach(invader => {
-        if ((invader.x <= 0 && invaderDirectionRef.current < 0) ||
-            (invader.x >= canvasSize.width - invader.width && invaderDirectionRef.current > 0)) {
-          hitEdge = true;
-        }
+    if (now - invaderMoveTimerRef.current > invaderMoveDelay) {
+      invaderMoveTimerRef.current = now;
+
+      setInvaders(prev => {
+        let hitEdge = false;
+        const aliveInvaders = prev.filter(inv => inv.alive);
+
+        // Check edge collision
+        aliveInvaders.forEach(invader => {
+          if ((invader.x <= 5 && invaderDirectionRef.current < 0) ||
+              (invader.x >= canvasSize.width - invader.width - 5 && invaderDirectionRef.current > 0)) {
+            hitEdge = true;
+          }
+        });
+
+        // Move invaders with controlled descent
+        return prev.map(invader => {
+          if (!invader.alive) return invader;
+
+          if (hitEdge) {
+            invaderDirectionRef.current *= -1;
+            // Controlled descent - much smaller steps
+            return { ...invader, y: invader.y + (3 + Math.min(difficultyLevel, 3)) };
+          } else {
+            return { ...invader, x: invader.x + invaderDirectionRef.current * (8 + difficultyLevel * 2) };
+          }
+        });
       });
-
-      // Move invaders
-      return prev.map(invader => {
-        if (!invader.alive) return invader;
-
-        if (hitEdge) {
-          invaderDirectionRef.current *= -1;
-          return { ...invader, y: invader.y + 15 };
-        } else {
-          return { ...invader, x: invader.x + invaderDirectionRef.current * (0.3 + difficultyLevel * 0.2) };
-        }
-      });
-    });
+    }
 
     // Random invader shooting (much less frequent)
     if (Math.random() < 0.001 + difficultyLevel * 0.0005) {
@@ -403,9 +412,9 @@ export default function SpaceInvadersEngine({
       return prevBullets;
     });
 
-    // Check game over conditions
+    // Check game over conditions - more forgiving
     const aliveInvaders = invaders.filter(inv => inv.alive);
-    const invaderReachedBottom = aliveInvaders.some(inv => inv.y + inv.height >= player.y);
+    const invaderReachedBottom = aliveInvaders.some(inv => inv.y + inv.height >= canvasSize.height - 50); // Give more space before game over
 
     if (lives <= 0 || invaderReachedBottom) {
       setIsRunning(false);
