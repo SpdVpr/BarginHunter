@@ -19,23 +19,27 @@ interface TetrisEngineProps {
   onShowIntro: () => void;
 }
 
-// Game constants - horizontal Tetris
+// Game constants - fullscreen 600x600 default
 const getCanvasSize = () => {
   const isMobile = window.innerWidth <= 768;
-  
+
   if (isMobile) {
-    // Mobile: compact
-    const width = Math.min(window.innerWidth - 20, 350);
+    // Mobile: use full available space, minimum 300x300
+    const availableWidth = window.innerWidth - 10;
+    const availableHeight = window.innerHeight - 10;
+    const size = Math.min(availableWidth, availableHeight, 600);
     return {
-      width,
-      height: 400,
+      width: Math.max(size, 300),
+      height: Math.max(size, 300),
     };
   } else {
-    // Desktop: wide but not too tall
-    const width = Math.min(window.innerWidth - 40, 600);
+    // Desktop: 600x600 default, scale down if needed
+    const availableWidth = window.innerWidth - 20;
+    const availableHeight = window.innerHeight - 20;
+    const maxSize = Math.min(availableWidth, availableHeight, 600);
     return {
-      width,
-      height: 450,
+      width: Math.max(maxSize, 400),
+      height: Math.max(maxSize, 400),
     };
   }
 };
@@ -409,7 +413,12 @@ export default function TetrisEngine({
       style={{
         display: 'block',
         cursor: 'pointer',
-        background: '#000'
+        background: '#000',
+        width: '100%',
+        height: '100%',
+        maxWidth: '600px',
+        maxHeight: '600px',
+        objectFit: 'contain'
       }}
     />
   );

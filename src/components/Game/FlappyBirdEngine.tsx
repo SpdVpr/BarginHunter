@@ -19,23 +19,27 @@ interface FlappyBirdEngineProps {
   onShowIntro: () => void;
 }
 
-// Game constants - Flappy Bird style
+// Game constants - fullscreen 600x600 default
 const getCanvasSize = () => {
   const isMobile = window.innerWidth <= 768;
 
   if (isMobile) {
-    // Mobile: horizontal but compact
-    const width = Math.min(window.innerWidth - 20, 400);
+    // Mobile: use full available space, minimum 300x300
+    const availableWidth = window.innerWidth - 10;
+    const availableHeight = window.innerHeight - 10;
+    const size = Math.min(availableWidth, availableHeight, 600);
     return {
-      width,
-      height: 250,
+      width: Math.max(size, 300),
+      height: Math.max(size, 300),
     };
   } else {
-    // Desktop: wide horizontal like Chrome Dino
-    const width = Math.min(window.innerWidth - 40, 800);
+    // Desktop: 600x600 default, scale down if needed
+    const availableWidth = window.innerWidth - 20;
+    const availableHeight = window.innerHeight - 20;
+    const maxSize = Math.min(availableWidth, availableHeight, 600);
     return {
-      width,
-      height: 300,
+      width: Math.max(maxSize, 400),
+      height: Math.max(maxSize, 400),
     };
   }
 };
@@ -402,7 +406,12 @@ export default function FlappyBirdEngine({
       style={{
         display: 'block',
         cursor: 'pointer',
-        background: '#87CEEB'
+        background: '#87CEEB',
+        width: '100%',
+        height: '100%',
+        maxWidth: '600px',
+        maxHeight: '600px',
+        objectFit: 'contain'
       }}
     />
   );

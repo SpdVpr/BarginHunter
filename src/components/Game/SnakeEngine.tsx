@@ -19,23 +19,27 @@ interface SnakeEngineProps {
   onShowIntro: () => void;
 }
 
-// Game constants - Snake style
+// Game constants - fullscreen 600x600 default
 const getCanvasSize = () => {
   const isMobile = window.innerWidth <= 768;
 
   if (isMobile) {
-    // Mobile: square format for better Snake gameplay
-    const size = Math.min(window.innerWidth - 20, 350);
+    // Mobile: use full available space, minimum 300x300
+    const availableWidth = window.innerWidth - 10;
+    const availableHeight = window.innerHeight - 10;
+    const size = Math.min(availableWidth, availableHeight, 600);
     return {
-      width: size,
-      height: size,
+      width: Math.max(size, 300),
+      height: Math.max(size, 300),
     };
   } else {
-    // Desktop: wider but still square-ish for Snake
-    const size = Math.min(window.innerWidth - 40, 500);
+    // Desktop: 600x600 default, scale down if needed
+    const availableWidth = window.innerWidth - 20;
+    const availableHeight = window.innerHeight - 20;
+    const maxSize = Math.min(availableWidth, availableHeight, 600);
     return {
-      width: size,
-      height: size,
+      width: Math.max(maxSize, 400),
+      height: Math.max(maxSize, 400),
     };
   }
 };
@@ -492,7 +496,12 @@ export default function SnakeEngine({
         display: 'block',
         backgroundColor: BACKGROUND_COLOR,
         cursor: 'pointer',
-        touchAction: 'none'
+        touchAction: 'none',
+        width: '100%',
+        height: '100%',
+        maxWidth: '600px',
+        maxHeight: '600px',
+        objectFit: 'contain'
       }}
     />
   );

@@ -19,25 +19,30 @@ interface EnhancedGameEngineProps {
   onShowIntro: () => void;
 }
 
-// Game constants - Chrome Dino style
+// Game constants - fullscreen 600x600 default
 const getCanvasSize = () => {
   const isMobile = window.innerWidth <= 768;
 
   if (isMobile) {
-    // Mobile: more compact, square-ish
-    const width = Math.min(window.innerWidth - 20, 400);
+    // Mobile: use full available space, minimum 300x300
+    const availableWidth = window.innerWidth - 10;
+    const availableHeight = window.innerHeight - 10;
+    const size = Math.min(availableWidth, availableHeight, 600);
     return {
-      width,
-      height: 250,
-      groundY: 200,
+      width: Math.max(size, 300),
+      height: Math.max(size, 300),
+      groundY: Math.max(size, 300) * 0.8, // Ground at 80% of height
     };
   } else {
-    // Desktop: wide like Chrome Dino, use available width
-    const width = Math.min(window.innerWidth - 40, 1000);
+    // Desktop: 600x600 default, scale down if needed
+    const availableWidth = window.innerWidth - 20;
+    const availableHeight = window.innerHeight - 20;
+    const maxSize = Math.min(availableWidth, availableHeight, 600);
+    const size = Math.max(maxSize, 400);
     return {
-      width,
-      height: 200, // Fixed height like Chrome Dino
-      groundY: 160, // Ground at 80% of height
+      width: size,
+      height: size,
+      groundY: size * 0.8, // Ground at 80% of height
     };
   }
 };
@@ -410,7 +415,12 @@ export default function EnhancedGameEngine({
       style={{
         display: 'block',
         cursor: 'pointer',
-        background: '#f7f7f7'
+        background: '#f7f7f7',
+        width: '100%',
+        height: '100%',
+        maxWidth: '600px',
+        maxHeight: '600px',
+        objectFit: 'contain'
       }}
     />
   );

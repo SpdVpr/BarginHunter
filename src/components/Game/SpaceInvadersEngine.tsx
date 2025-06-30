@@ -19,19 +19,27 @@ interface SpaceInvadersEngineProps {
   onShowIntro: () => void;
 }
 
-// Game constants
+// Game constants - fullscreen 600x600 default
 const getCanvasSize = () => {
   const isMobile = window.innerWidth <= 768;
-  
+
   if (isMobile) {
+    // Mobile: use full available space, minimum 300x300
+    const availableWidth = window.innerWidth - 10;
+    const availableHeight = window.innerHeight - 10;
+    const size = Math.min(availableWidth, availableHeight, 600);
     return {
-      width: Math.min(window.innerWidth - 20, 400),
-      height: 500,
+      width: Math.max(size, 300),
+      height: Math.max(size, 300),
     };
   } else {
+    // Desktop: 600x600 default, scale down if needed
+    const availableWidth = window.innerWidth - 20;
+    const availableHeight = window.innerHeight - 20;
+    const maxSize = Math.min(availableWidth, availableHeight, 600);
     return {
-      width: Math.min(window.innerWidth - 40, 800),
-      height: 600,
+      width: Math.max(maxSize, 400),
+      height: Math.max(maxSize, 400),
     };
   }
 };
@@ -572,7 +580,12 @@ export default function SpaceInvadersEngine({
         display: 'block',
         backgroundColor: '#000',
         cursor: 'pointer',
-        touchAction: 'none'
+        touchAction: 'none',
+        width: '100%',
+        height: '100%',
+        maxWidth: '600px',
+        maxHeight: '600px',
+        objectFit: 'contain'
       }}
     />
   );
