@@ -6,8 +6,6 @@ import SnakeEngine from './SnakeEngine';
 import SpaceInvadersEngine from './SpaceInvadersEngine';
 import GameIntroScreen from './GameIntroScreen';
 import GameOverScreen from './GameOverScreen';
-import '../../App.css';
-import '../../styles/globals.css';
 
 interface GameProps {
   shopDomain: string;
@@ -307,7 +305,8 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
       position: 'fixed',
       top: 0,
       left: 0,
-      overflow: 'hidden'
+      overflow: 'hidden',
+      boxSizing: 'border-box'
     }}>
       {/* Score display */}
       <div style={{
