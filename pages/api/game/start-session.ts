@@ -55,13 +55,17 @@ async function validatePlayEligibility(
     console.log('🎮 Checking IP-based play limits for:', ipAddress);
     const allSessions = await GameSessionService.getSessionsByShop(shopDomain, 1000);
 
-    // Filter sessions by IP address
+    // Filter sessions by IP address - count ALL sessions, not just completed ones
     const ipSessions = allSessions.filter(session => session.ipAddress === ipAddress);
-    console.log('🎮 Found', ipSessions.length, 'sessions for IP:', ipAddress);
+    console.log('🎮 Found', ipSessions.length, 'total sessions for IP:', ipAddress);
 
-    // Check per-IP limit (using maxPlaysPerCustomer setting)
-    if (ipSessions.length >= maxPlaysPerCustomer) {
-      console.log('🎮 IP limit reached:', ipSessions.length, '>=', maxPlaysPerCustomer);
+    // Also check completed sessions specifically
+    const completedIpSessions = ipSessions.filter(session => session.completed);
+    console.log('🎮 Found', completedIpSessions.length, 'completed sessions for IP:', ipAddress);
+
+    // Check per-IP limit (using maxPlaysPerCustomer setting) - count completed sessions only
+    if (completedIpSessions.length >= maxPlaysPerCustomer) {
+      console.log('🎮 IP limit reached:', completedIpSessions.length, '>=', maxPlaysPerCustomer);
       return {
         canPlay: false,
         reason: 'ip_limit',
@@ -86,8 +90,10 @@ async function validatePlayEligibility(
       };
     }
 
-    const ipPlaysRemaining = maxPlaysPerCustomer - ipSessions.length;
+    const ipPlaysRemaining = maxPlaysPerCustomer - completedIpSessions.length;
     const dailyPlaysRemaining = maxPlaysPerDay - todaySessions.length;
+
+    console.log('🎮 IP plays remaining:', ipPlaysRemaining, 'Daily plays remaining:', dailyPlaysRemaining);
 
     return {
       canPlay: true,
