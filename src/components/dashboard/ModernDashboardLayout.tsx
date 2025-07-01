@@ -59,13 +59,13 @@ export function ModernDashboardLayout({ children, shop }: ModernDashboardLayoutP
   ) : null;
 
   return (
-    <Frame
-      topBar={topBarMarkup}
-      showMobileNavigation={mobileNavigationActive}
-      onNavigationDismiss={toggleMobileNavigation}
-    >
+    <div style={{
+      minHeight: '100vh',
+      overflow: 'auto',
+      position: 'relative',
+    }}>
       {toastMarkup}
       {children}
-    </Frame>
+    </div>
   );
 }

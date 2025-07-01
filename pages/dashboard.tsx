@@ -87,9 +87,17 @@ export default function Dashboard() {
     }
   };
 
+  // Add admin-dashboard class to body when component mounts
+  React.useEffect(() => {
+    document.body.classList.add('admin-dashboard');
+    return () => {
+      document.body.classList.remove('admin-dashboard');
+    };
+  }, []);
+
   return (
     <ModernDashboardLayout shop={typeof shop === 'string' ? shop : ''}>
-      <div className={styles.modernDashboard}>
+      <div className={`${styles.modernDashboard} admin-dashboard`}>
         {/* Modern Header */}
         <div className={styles.modernHeader}>
           <div className={styles.modernHeaderContent}>
