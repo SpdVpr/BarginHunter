@@ -96,6 +96,7 @@ export function SettingsTab({ shop }: SettingsTabProps) {
   const [businessRules, setBusinessRules] = useState<BusinessRules | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const [toastActive, setToastActive] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
@@ -292,6 +293,82 @@ export function SettingsTab({ shop }: SettingsTabProps) {
     }
   };
 
+  const handleResetPlayLimits = async () => {
+    if (!confirm('Are you sure you want to reset ALL play limits for this shop? This will allow all users to play again immediately.')) {
+      return;
+    }
+
+    setResetting(true);
+    try {
+      const response = await fetch('/api/admin/reset-play-limits', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          shop: shop
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setToastMessage(`✅ Reset successful! Deleted ${data.deletedSessions} sessions.`);
+        setToastActive(true);
+      } else {
+        setToastMessage(`❌ Reset failed: ${data.error}`);
+        setToastActive(true);
+      }
+    } catch (error) {
+      console.error('Error resetting play limits:', error);
+      setToastMessage('❌ Failed to reset play limits');
+      setToastActive(true);
+    } finally {
+      setResetting(false);
+    }
+  };
+
+  const handleResetMyPlayLimits = async () => {
+    if (!confirm('Reset play limits for your current IP address? This will allow you to test the game again.')) {
+      return;
+    }
+
+    setResetting(true);
+    try {
+      // Get current IP address
+      const ipResponse = await fetch('https://api.ipify.org?format=json');
+      const ipData = await ipResponse.json();
+      const currentIP = ipData.ip;
+
+      const response = await fetch('/api/admin/reset-play-limits', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          shop: shop,
+          ipAddress: currentIP
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setToastMessage(`✅ Reset successful for IP ${currentIP}! Deleted ${data.deletedSessions} sessions.`);
+        setToastActive(true);
+      } else {
+        setToastMessage(`❌ Reset failed: ${data.error}`);
+        setToastActive(true);
+      }
+    } catch (error) {
+      console.error('Error resetting play limits:', error);
+      setToastMessage('❌ Failed to reset play limits');
+      setToastActive(true);
+    } finally {
+      setResetting(false);
+    }
+  };
+
   const renderGameSettings = () => {
     if (!gameSettings) return null;
 
@@ -351,6 +428,30 @@ export function SettingsTab({ shop }: SettingsTabProps) {
                   onChange={(value) => setGameSettings({...gameSettings, playLimitResetHours: parseInt(value) || 24})}
                   helpText="Hours after which play limit resets (default: 24 hours)"
                 />
+
+                <div style={{ marginTop: '1rem' }}>
+                  <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem' }}>
+                    <Button
+                      onClick={handleResetMyPlayLimits}
+                      loading={resetting}
+                      size="medium"
+                    >
+                      {resetting ? 'Resetting...' : 'Reset My Play Limits'}
+                    </Button>
+                    <Button
+                      onClick={handleResetPlayLimits}
+                      loading={resetting}
+                      destructive
+                      size="medium"
+                    >
+                      {resetting ? 'Resetting...' : 'Reset All Play Limits'}
+                    </Button>
+                  </div>
+                  <Text variant="bodySm" color="subdued" as="p">
+                    💡 <strong>Reset My Play Limits:</strong> Reset only for your IP (for testing)<br/>
+                    ⚠️ <strong>Reset All Play Limits:</strong> Delete all play history for everyone (use carefully)
+                  </Text>
+                </div>
 
                 <Select
                   label="Difficulty Level"

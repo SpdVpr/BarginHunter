@@ -166,7 +166,7 @@ export class GameSessionService {
         .limit(limit)
         .get();
 
-      return snapshot.docs.map(doc => doc.data() as GameSessionDocument);
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as GameSessionDocument));
     } catch (error: any) {
       if (error.code === 9) {
         // Fallback without orderBy if index missing
@@ -175,7 +175,7 @@ export class GameSessionService {
           .limit(limit)
           .get();
 
-        const sessions = snapshot.docs.map(doc => doc.data() as GameSessionDocument);
+        const sessions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as GameSessionDocument));
         return sessions.sort((a, b) => {
           const dateA = a.startedAt.toDate();
           const dateB = b.startedAt.toDate();
@@ -193,12 +193,16 @@ export class GameSessionService {
       .where('customerId', '==', customerId)
       .get();
 
-    const sessions = snapshot.docs.map(doc => doc.data() as GameSessionDocument);
+    const sessions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as GameSessionDocument));
     return sessions.sort((a, b) => {
       const dateA = a.startedAt.toDate();
       const dateB = b.startedAt.toDate();
       return dateB.getTime() - dateA.getTime();
     });
+  }
+
+  static async deleteSession(sessionId: string): Promise<void> {
+    await db.collection(collections.gameSessions).doc(sessionId).delete();
   }
 }
 
