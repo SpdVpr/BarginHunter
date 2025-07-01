@@ -36,7 +36,15 @@ function getBrowserType(userAgent: string): string {
 async function validatePlayEligibility(
   shopDomain: string,
   ipAddress: string
-): Promise<{ canPlay: boolean; reason?: string; playsRemaining: number }> {
+): Promise<{
+  canPlay: boolean;
+  reason?: string;
+  playsRemaining: number;
+  playsUsed?: number;
+  maxPlays?: number;
+  nextResetTime?: string;
+  resetHours?: number;
+}> {
   try {
     // Get game configuration
     console.log('🎮 Getting game config for shop:', shopDomain);
@@ -45,7 +53,7 @@ async function validatePlayEligibility(
 
     if (!gameConfig || !gameConfig.isEnabled) {
       console.log('🎮 Shop inactive or config not found');
-      return { canPlay: false, reason: 'shop_inactive', playsRemaining: 0 };
+      return { canPlay: false, reason: 'shop_inactive', playsRemaining: 0, playsUsed: 0, maxPlays: 0 };
     }
 
     const maxPlaysPerCustomer = gameConfig.gameSettings.maxPlaysPerCustomer;
@@ -132,7 +140,9 @@ async function validatePlayEligibility(
       return {
         canPlay: false,
         reason: 'daily_limit',
-        playsRemaining: 0
+        playsRemaining: 0,
+        playsUsed: todaySessions.length,
+        maxPlays: maxPlaysPerDay
       };
     }
 
@@ -150,7 +160,7 @@ async function validatePlayEligibility(
     };
   } catch (error) {
     console.error('Error validating play eligibility:', error);
-    return { canPlay: false, reason: 'validation_error', playsRemaining: 0 };
+    return { canPlay: false, reason: 'validation_error', playsRemaining: 0, playsUsed: 0, maxPlays: 0 };
   }
 }
 
@@ -211,14 +221,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('🎮 Eligibility result:', eligibility);
 
     if (!eligibility.canPlay) {
-      const response: StartGameResponse = {
+      const response = {
         success: false,
         sessionId: '',
         gameConfig: null,
         canPlay: false,
         playsRemaining: eligibility.playsRemaining,
-        error: `Cannot play: ${eligibility.reason}`
+        error: `Cannot play: ${eligibility.reason}`,
+        reason: eligibility.reason,
+        // Include detailed play limit info for frontend
+        playsUsed: eligibility.playsUsed,
+        maxPlays: eligibility.maxPlays,
+        nextResetTime: eligibility.nextResetTime,
+        resetHours: eligibility.resetHours
       };
+      console.log('🎮 Returning play limit response:', response);
       return res.status(403).json(response);
     }
 

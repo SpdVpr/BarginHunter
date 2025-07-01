@@ -133,9 +133,11 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
         console.error('🎮 Failed to start game session:', data.error);
 
         // Check if this is a play limit error - DO NOT bypass with temp session
-        if (data.error && (data.error.includes('ip_limit') || data.error.includes('limit') || !data.canPlay)) {
+        if (!data.canPlay && (data.reason === 'ip_limit' || data.reason === 'daily_limit' || (data.error && data.error.includes('limit')))) {
           console.log('🎮 Play limit reached - blocking game start');
-          console.log('🎮 Play limit info:', data);
+          console.log('🎮 Play limit info received:', data);
+          console.log('🎮 playsUsed:', data.playsUsed, 'maxPlays:', data.maxPlays);
+          console.log('🎮 nextResetTime:', data.nextResetTime, 'resetHours:', data.resetHours);
 
           // Show play limit message to user
           setGameState('gameOver');

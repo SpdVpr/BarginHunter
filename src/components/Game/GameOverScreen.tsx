@@ -34,18 +34,25 @@ export default function GameOverScreen({
   // Countdown timer for play limit reset
   useEffect(() => {
     if (isPlayLimitReached && playLimitInfo?.nextResetTime) {
+      console.log('🕒 Setting up countdown for reset time:', playLimitInfo.nextResetTime);
+
       const updateCountdown = () => {
         const now = new Date().getTime();
         const resetTime = new Date(playLimitInfo.nextResetTime!).getTime();
         const timeDiff = resetTime - now;
+
+        console.log('🕒 Countdown update - now:', now, 'resetTime:', resetTime, 'diff:', timeDiff);
 
         if (timeDiff > 0) {
           const hours = Math.floor(timeDiff / (1000 * 60 * 60));
           const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
           const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
 
-          setTimeUntilReset(`${hours}h ${minutes}m ${seconds}s`);
+          const countdownText = `${hours}h ${minutes}m ${seconds}s`;
+          console.log('🕒 Countdown text:', countdownText);
+          setTimeUntilReset(countdownText);
         } else {
+          console.log('🕒 Reset time reached!');
           setTimeUntilReset('You can play again now!');
         }
       };
@@ -53,6 +60,8 @@ export default function GameOverScreen({
       updateCountdown();
       const interval = setInterval(updateCountdown, 1000);
       return () => clearInterval(interval);
+    } else {
+      console.log('🕒 No countdown setup - isPlayLimitReached:', isPlayLimitReached, 'nextResetTime:', playLimitInfo?.nextResetTime);
     }
   }, [isPlayLimitReached, playLimitInfo?.nextResetTime]);
 

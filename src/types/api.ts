@@ -73,6 +73,12 @@ export interface StartGameResponse {
   canPlay: boolean;
   playsRemaining?: number;
   error?: string;
+  reason?: string;
+  // Play limit details
+  playsUsed?: number;
+  maxPlays?: number;
+  nextResetTime?: string;
+  resetHours?: number;
 }
 
 export interface FinishGameRequest {
