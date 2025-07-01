@@ -161,6 +161,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         minScoreForDiscount: Math.max(0, gameSettings.minScoreForDiscount),
         maxPlaysPerCustomer: Math.max(1, gameSettings.maxPlaysPerCustomer),
         maxPlaysPerDay: Math.max(1, gameSettings.maxPlaysPerDay),
+        playLimitResetHours: Math.max(1, gameSettings.playLimitResetHours || 24), // Default 24 hours
         discountTiers: gameSettings.discountTiers,
         gameSpeed: Math.max(0.1, Math.min(3, gameSettings.gameSpeed)),
         difficulty: gameSettings.difficulty,

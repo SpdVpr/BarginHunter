@@ -27,6 +27,7 @@ interface GameSettings {
   minScoreForDiscount: number;
   maxPlaysPerCustomer: number;
   maxPlaysPerDay: number;
+  playLimitResetHours: number; // New: Hours after which play limit resets
   gameSpeed: number;
   difficulty: 'easy' | 'medium' | 'hard';
   testMode: boolean; // Moved from widget settings
@@ -146,6 +147,7 @@ export function SettingsTab({ shop }: SettingsTabProps) {
           ...config.gameSettings,
           gameType: config.gameSettings?.gameType || 'dino',
           testMode: config.widgetSettings?.testMode ?? false, // Moved from widget settings
+          playLimitResetHours: config.gameSettings?.playLimitResetHours ?? 24, // Default 24 hours
           discountTiers: config.gameSettings?.discountTiers || [
             { minScore: 100, discount: 5, message: 'Great job! You earned 5% off!' },
             { minScore: 300, discount: 10, message: 'Amazing! You earned 10% off!' },
@@ -340,6 +342,14 @@ export function SettingsTab({ shop }: SettingsTabProps) {
                   type="number"
                   value={gameSettings.maxPlaysPerCustomer.toString()}
                   onChange={(value) => setGameSettings({...gameSettings, maxPlaysPerCustomer: parseInt(value) || 0})}
+                />
+
+                <TextField
+                  label="Play Limit Reset Hours"
+                  type="number"
+                  value={gameSettings.playLimitResetHours.toString()}
+                  onChange={(value) => setGameSettings({...gameSettings, playLimitResetHours: parseInt(value) || 24})}
+                  helpText="Hours after which play limit resets (default: 24 hours)"
                 />
 
                 <Select

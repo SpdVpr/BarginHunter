@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface GameOverScreenProps {
   finalScore: number;
@@ -9,6 +9,12 @@ interface GameOverScreenProps {
   onClose: () => void;
   onCopyCode: (code: string) => void;
   isPlayLimitReached?: boolean; // Special flag for play limit
+  playLimitInfo?: {
+    playsUsed: number;
+    maxPlays: number;
+    nextResetTime?: string;
+    resetHours?: number;
+  };
 }
 
 export default function GameOverScreen({
@@ -19,9 +25,36 @@ export default function GameOverScreen({
   onPlayAgain,
   onClose,
   onCopyCode,
-  isPlayLimitReached
+  isPlayLimitReached,
+  playLimitInfo
 }: GameOverScreenProps) {
   const [codeCopied, setCodeCopied] = useState(false);
+  const [timeUntilReset, setTimeUntilReset] = useState<string>('');
+
+  // Countdown timer for play limit reset
+  useEffect(() => {
+    if (isPlayLimitReached && playLimitInfo?.nextResetTime) {
+      const updateCountdown = () => {
+        const now = new Date().getTime();
+        const resetTime = new Date(playLimitInfo.nextResetTime!).getTime();
+        const timeDiff = resetTime - now;
+
+        if (timeDiff > 0) {
+          const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+          const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+
+          setTimeUntilReset(`${hours}h ${minutes}m ${seconds}s`);
+        } else {
+          setTimeUntilReset('You can play again now!');
+        }
+      };
+
+      updateCountdown();
+      const interval = setInterval(updateCountdown, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [isPlayLimitReached, playLimitInfo?.nextResetTime]);
 
   const currentTier = discountTiers
     .slice()
@@ -61,15 +94,54 @@ export default function GameOverScreen({
             Play Limit Reached! 🚫
           </h2>
 
+          {playLimitInfo && (
+            <div style={{
+              fontSize: '16px',
+              marginBottom: '20px',
+              color: '#fff',
+              textAlign: 'center',
+              lineHeight: '1.6',
+              background: 'rgba(255, 255, 255, 0.1)',
+              padding: '15px',
+              borderRadius: '8px',
+              border: '1px solid rgba(255, 255, 255, 0.2)'
+            }}>
+              <div style={{ marginBottom: '10px' }}>
+                <strong>Games played:</strong> {playLimitInfo.playsUsed} / {playLimitInfo.maxPlays}
+              </div>
+
+              {playLimitInfo.nextResetTime && timeUntilReset && (
+                <div>
+                  <div style={{ marginBottom: '5px' }}>
+                    <strong>Next reset in:</strong>
+                  </div>
+                  <div style={{
+                    fontSize: '18px',
+                    color: '#feca57',
+                    fontWeight: 'bold'
+                  }}>
+                    {timeUntilReset}
+                  </div>
+                  <div style={{
+                    fontSize: '14px',
+                    color: '#ddd',
+                    marginTop: '5px'
+                  }}>
+                    (Resets every {playLimitInfo.resetHours || 24} hours)
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           <div style={{
-            fontSize: '18px',
+            fontSize: '16px',
             marginBottom: '20px',
-            color: '#fff',
+            color: '#ddd',
             textAlign: 'center',
             lineHeight: '1.5'
           }}>
-            You've reached your maximum number of plays for today.<br/>
-            Come back tomorrow for more chances to win discounts!
+            Come back after the reset for more chances to win discounts!
           </div>
 
           <div className="game-actions">

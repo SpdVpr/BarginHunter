@@ -14,6 +14,12 @@ interface GameResult {
   discountCode?: string;
   gameData: any;
   isPlayLimitReached?: boolean;
+  playLimitInfo?: {
+    playsUsed: number;
+    maxPlays: number;
+    nextResetTime?: string;
+    resetHours?: number;
+  };
 }
 
 export default function EmbeddableWidget({ 

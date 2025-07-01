@@ -19,6 +19,12 @@ interface GameResult {
   discountCode?: string;
   gameData: any;
   isPlayLimitReached?: boolean; // Special flag for play limit reached
+  playLimitInfo?: {
+    playsUsed: number;
+    maxPlays: number;
+    nextResetTime?: string;
+    resetHours?: number;
+  };
 }
 
 const DEFAULT_DISCOUNT_TIERS = [
@@ -129,6 +135,8 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
         // Check if this is a play limit error - DO NOT bypass with temp session
         if (data.error && (data.error.includes('ip_limit') || data.error.includes('limit') || !data.canPlay)) {
           console.log('🎮 Play limit reached - blocking game start');
+          console.log('🎮 Play limit info:', data);
+
           // Show play limit message to user
           setGameState('gameOver');
           setGameResult({
@@ -136,6 +144,12 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
             discountEarned: 0,
             discountCode: undefined,
             isPlayLimitReached: true, // Special flag for play limit
+            playLimitInfo: {
+              playsUsed: data.playsUsed || 0,
+              maxPlays: data.maxPlays || 1,
+              nextResetTime: data.nextResetTime,
+              resetHours: data.resetHours || 24
+            },
             gameData: {
               duration: 0,
               objectsCollected: 0,
@@ -317,6 +331,7 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
         onClose={onClose}
         onCopyCode={handleCopyCode}
         isPlayLimitReached={gameResult.isPlayLimitReached}
+        playLimitInfo={gameResult.playLimitInfo}
       />
     );
   }

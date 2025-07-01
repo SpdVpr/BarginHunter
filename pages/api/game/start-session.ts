@@ -50,22 +50,32 @@ async function validatePlayEligibility(
 
     const maxPlaysPerCustomer = gameConfig.gameSettings.maxPlaysPerCustomer;
     const maxPlaysPerDay = gameConfig.gameSettings.maxPlaysPerDay;
+    const playLimitResetHours = gameConfig.gameSettings.playLimitResetHours || 24;
 
-    // Check IP-based limits (instead of customer-based)
+    // Check IP-based limits with time filtering
     console.log('🎮 Checking IP-based play limits for:', ipAddress);
     console.log('🎮 Max plays per customer setting:', maxPlaysPerCustomer);
     console.log('🎮 Max plays per day setting:', maxPlaysPerDay);
+    console.log('🎮 Play limit reset hours:', playLimitResetHours);
 
     const allSessions = await GameSessionService.getSessionsByShop(shopDomain, 1000);
     console.log('🎮 Total sessions in shop:', allSessions.length);
 
-    // Filter sessions by IP address - count ALL sessions, not just completed ones
-    const ipSessions = allSessions.filter(session => session.ipAddress === ipAddress);
-    console.log('🎮 Found', ipSessions.length, 'total sessions for IP:', ipAddress);
+    // Calculate time cutoff for play limit reset
+    const resetCutoff = new Date();
+    resetCutoff.setHours(resetCutoff.getHours() - playLimitResetHours);
+    console.log('🎮 Play limit reset cutoff time:', resetCutoff.toISOString());
 
-    // Also check completed sessions specifically
+    // Filter sessions by IP address and time
+    const ipSessions = allSessions.filter(session => {
+      const sessionTime = session.startedAt.toDate();
+      return session.ipAddress === ipAddress && sessionTime > resetCutoff;
+    });
+    console.log('🎮 Found', ipSessions.length, 'sessions for IP within reset period:', ipAddress);
+
+    // Also check completed sessions specifically within the time period
     const completedIpSessions = ipSessions.filter(session => session.completed);
-    console.log('🎮 Found', completedIpSessions.length, 'completed sessions for IP:', ipAddress);
+    console.log('🎮 Found', completedIpSessions.length, 'completed sessions for IP within reset period:', ipAddress);
 
     // Debug: Show some session details
     if (ipSessions.length > 0) {
@@ -79,12 +89,33 @@ async function validatePlayEligibility(
     }
 
     // Check per-IP limit (using maxPlaysPerCustomer setting) - count completed sessions only
+    const playsRemaining = Math.max(0, maxPlaysPerCustomer - completedIpSessions.length);
+
     if (completedIpSessions.length >= maxPlaysPerCustomer) {
       console.log('🎮 IP limit reached:', completedIpSessions.length, '>=', maxPlaysPerCustomer);
+
+      // Calculate next reset time
+      const nextResetTime = new Date();
+      if (completedIpSessions.length > 0) {
+        // Find the oldest completed session within the reset period
+        const oldestSession = completedIpSessions.reduce((oldest, session) => {
+          const sessionTime = session.startedAt.toDate();
+          const oldestTime = oldest.startedAt.toDate();
+          return sessionTime < oldestTime ? session : oldest;
+        });
+
+        const oldestTime = oldestSession.startedAt.toDate();
+        nextResetTime.setTime(oldestTime.getTime() + (playLimitResetHours * 60 * 60 * 1000));
+      }
+
       return {
         canPlay: false,
         reason: 'ip_limit',
-        playsRemaining: 0
+        playsRemaining: 0,
+        playsUsed: completedIpSessions.length,
+        maxPlays: maxPlaysPerCustomer,
+        nextResetTime: nextResetTime.toISOString(),
+        resetHours: playLimitResetHours
       };
     }
 
@@ -112,7 +143,10 @@ async function validatePlayEligibility(
 
     return {
       canPlay: true,
-      playsRemaining: Math.min(ipPlaysRemaining, dailyPlaysRemaining)
+      playsRemaining: Math.min(ipPlaysRemaining, dailyPlaysRemaining),
+      playsUsed: completedIpSessions.length,
+      maxPlays: maxPlaysPerCustomer,
+      resetHours: playLimitResetHours
     };
   } catch (error) {
     console.error('Error validating play eligibility:', error);
