@@ -8,6 +8,7 @@ interface GameOverScreenProps {
   onPlayAgain: () => void;
   onClose: () => void;
   onCopyCode: (code: string) => void;
+  isPlayLimitReached?: boolean; // Special flag for play limit
 }
 
 export default function GameOverScreen({
@@ -17,7 +18,8 @@ export default function GameOverScreen({
   discountTiers,
   onPlayAgain,
   onClose,
-  onCopyCode
+  onCopyCode,
+  isPlayLimitReached
 }: GameOverScreenProps) {
   const [codeCopied, setCodeCopied] = useState(false);
 
@@ -45,24 +47,72 @@ export default function GameOverScreen({
     return "Keep Hunting! 🔍";
   };
 
+  // Special UI for play limit reached
+  if (isPlayLimitReached) {
+    return (
+      <div className="game-over-screen fade-in">
+        <div className="game-over-content">
+          <h2 style={{
+            fontSize: '32px',
+            marginBottom: '10px',
+            color: '#ff6b6b',
+            textAlign: 'center'
+          }}>
+            Play Limit Reached! 🚫
+          </h2>
+
+          <div style={{
+            fontSize: '18px',
+            marginBottom: '20px',
+            color: '#fff',
+            textAlign: 'center',
+            lineHeight: '1.5'
+          }}>
+            You've reached your maximum number of plays for today.<br/>
+            Come back tomorrow for more chances to win discounts!
+          </div>
+
+          <div className="game-actions">
+            <button
+              className="close-button"
+              onClick={onClose}
+              style={{
+                background: '#ff6b6b',
+                color: 'white',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '8px',
+                fontSize: '16px',
+                cursor: 'pointer',
+                fontWeight: 'bold'
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="game-over-screen fade-in">
       <div className="game-over-content">
-        <h2 style={{ 
-          fontSize: '32px', 
-          marginBottom: '10px', 
+        <h2 style={{
+          fontSize: '32px',
+          marginBottom: '10px',
           color: '#fff',
           textAlign: 'center'
         }}>
           Game Over!
         </h2>
-        
+
         <div className="final-score bounce">
           {finalScore}
         </div>
-        
-        <p style={{ 
-          fontSize: '18px', 
+
+        <p style={{
+          fontSize: '18px',
           marginBottom: '20px',
           color: '#feca57'
         }}>

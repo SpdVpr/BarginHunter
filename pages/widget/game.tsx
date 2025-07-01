@@ -8,6 +8,7 @@ interface GameResult {
   discountEarned: number;
   discountCode?: string;
   gameData: any;
+  isPlayLimitReached?: boolean;
 }
 
 export default function WidgetGame() {

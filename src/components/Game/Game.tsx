@@ -18,6 +18,7 @@ interface GameResult {
   discountEarned: number;
   discountCode?: string;
   gameData: any;
+  isPlayLimitReached?: boolean; // Special flag for play limit reached
 }
 
 const DEFAULT_DISCOUNT_TIERS = [
@@ -123,17 +124,38 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
         setSessionId(data.sessionId);
         console.log('🎮 Real session created:', data.sessionId);
       } else {
-        console.error('🎮 CRITICAL: Failed to start game session:', data.error);
-        console.error('🎮 This will use temp session and may bypass play limits!');
-        // Generate a temporary session ID
+        console.error('🎮 Failed to start game session:', data.error);
+
+        // Check if this is a play limit error - DO NOT bypass with temp session
+        if (data.error && (data.error.includes('ip_limit') || data.error.includes('limit') || !data.canPlay)) {
+          console.log('🎮 Play limit reached - blocking game start');
+          // Show play limit message to user
+          setGameState('gameOver');
+          setGameResult({
+            score: 0,
+            discountEarned: 0,
+            discountCode: undefined,
+            isPlayLimitReached: true, // Special flag for play limit
+            gameData: {
+              duration: 0,
+              objectsCollected: 0,
+              obstaclesHit: 0,
+              maxCombo: 0,
+              distanceTraveled: 0
+            }
+          });
+          return; // Don't create temp session for play limits!
+        }
+
+        // Only use temp session for actual technical errors (network, database)
+        console.error('🎮 Technical error - using temp session as fallback');
         const tempSessionId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         setSessionId(tempSessionId);
-        console.log('🎮 Using temp session:', tempSessionId);
+        console.log('🎮 Using temp session for technical error:', tempSessionId);
       }
     } catch (error) {
-      console.error('🎮 CRITICAL: Network error starting game session:', error);
-      console.error('🎮 This will use temp session and may bypass play limits!');
-      // Generate a temporary session ID
+      console.error('🎮 Network error starting game session:', error);
+      // For network errors, use temp session as fallback (these are genuine technical issues)
       const tempSessionId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       setSessionId(tempSessionId);
       console.log('🎮 Using temp session due to network error:', tempSessionId);
@@ -294,6 +316,7 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
         onPlayAgain={handlePlayAgain}
         onClose={onClose}
         onCopyCode={handleCopyCode}
+        isPlayLimitReached={gameResult.isPlayLimitReached}
       />
     );
   }
