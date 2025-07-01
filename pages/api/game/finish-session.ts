@@ -210,14 +210,45 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    // Complete the session in database (skip for temp sessions)
-    if (!sessionId.startsWith('temp-')) {
-      try {
+    // Complete the session in database - ALWAYS track completed sessions for play limits
+    try {
+      if (!sessionId.startsWith('temp-')) {
+        // Update existing session
         await GameSessionService.completeSession(sessionId, finalScore, discountEarned, discountCode);
         console.log('🎮 Session completed in database');
-      } catch (dbError: any) {
-        console.error('🎮 Failed to complete session in database:', dbError);
+      } else {
+        // For temp sessions, create a new completed session to track play limits
+        console.log('🎮 Creating completed session record for temp session to track play limits');
+        const ipAddress = req.headers['x-forwarded-for']?.toString().split(',')[0] ||
+                         req.connection.remoteAddress || 'unknown';
+
+        const completedSessionData = {
+          shopDomain: session.shopDomain,
+          customerId: session.customerId || null,
+          customerEmail: session.customerEmail || null,
+          sessionId: sessionId, // Keep original temp sessionId
+          gameData: {
+            moves: 0,
+            timeSpent: 0,
+            difficulty: session.gameData?.difficulty || 'medium',
+            version: '1.0',
+          },
+          source: 'popup',
+          referrer: req.headers.referer || undefined,
+          userAgent: req.headers['user-agent'] || undefined,
+          ipAddress: ipAddress,
+          completed: true, // Mark as completed immediately
+          endedAt: Timestamp.now(),
+          finalScore: finalScore,
+          discountEarned: discountEarned,
+          discountCode: discountCode
+        };
+
+        await GameSessionService.createSession(completedSessionData);
+        console.log('🎮 Temp session recorded as completed for play limit tracking');
       }
+    } catch (dbError: any) {
+      console.error('🎮 Failed to complete session in database:', dbError);
     }
 
     // Record the score

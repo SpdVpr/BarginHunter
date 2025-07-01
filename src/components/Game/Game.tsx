@@ -121,15 +121,22 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
 
       if (response.ok && data.success) {
         setSessionId(data.sessionId);
+        console.log('🎮 Real session created:', data.sessionId);
       } else {
-        console.error('Failed to start game session:', data.error);
+        console.error('🎮 CRITICAL: Failed to start game session:', data.error);
+        console.error('🎮 This will use temp session and may bypass play limits!');
         // Generate a temporary session ID
-        setSessionId(`temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
+        const tempSessionId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        setSessionId(tempSessionId);
+        console.log('🎮 Using temp session:', tempSessionId);
       }
     } catch (error) {
-      console.error('Failed to start game session:', error);
+      console.error('🎮 CRITICAL: Network error starting game session:', error);
+      console.error('🎮 This will use temp session and may bypass play limits!');
       // Generate a temporary session ID
-      setSessionId(`temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
+      const tempSessionId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      setSessionId(tempSessionId);
+      console.log('🎮 Using temp session due to network error:', tempSessionId);
     }
   };
 

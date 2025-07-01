@@ -228,7 +228,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     try {
       await GameSessionService.createSession(sessionData);
-      console.log('🎮 Session created successfully');
+      console.log('🎮 Session created successfully in database');
 
       // Test: Try to retrieve the session immediately to verify it was saved
       const testRetrieve = await GameSessionService.getSession(sessionId);
@@ -239,7 +239,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.log('🎮 Shop sessions count:', shopSessions.length);
 
     } catch (dbError: any) {
-      console.error('🎮 Failed to create session in database:', dbError);
+      console.error('🎮 CRITICAL: Failed to create session in database:', {
+        error: dbError.message,
+        code: dbError.code,
+        details: dbError.details,
+        sessionId: sessionId,
+        shopDomain: shopDomain
+      });
+      console.error('🎮 This will cause frontend to use temp session, bypassing play limits!');
       // Continue anyway - the game can still work without database logging
     }
 
