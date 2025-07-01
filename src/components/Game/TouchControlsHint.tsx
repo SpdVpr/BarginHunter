@@ -31,9 +31,9 @@ const TouchControlsHint: React.FC<TouchControlsHintProps> = ({
       case 'flappy_bird':
         return '📱 Tap anywhere to jump';
       case 'tetris':
-        return '📱 Swipe ← → to move, ↑ ↓ to rotate/drop, tap to rotate';
+        return '📱 Hold and drag to move/rotate continuously';
       case 'snake':
-        return '📱 Swipe in direction to move';
+        return '📱 Hold and drag to control snake direction';
       case 'space_invaders':
         return '📱 Touch and drag to move ship';
       default:
@@ -45,17 +45,16 @@ const TouchControlsHint: React.FC<TouchControlsHintProps> = ({
     switch (gameType) {
       case 'tetris':
         return [
-          'Swipe left/right: Move piece',
-          'Swipe up: Rotate piece',
-          'Swipe down: Drop faster',
-          'Tap: Rotate piece'
+          'Hold and drag left/right: Move piece',
+          'Hold and drag up: Rotate piece',
+          'Hold and drag down: Drop faster',
+          'Quick tap: Rotate piece'
         ];
       case 'snake':
         return [
-          'Swipe up: Move up',
-          'Swipe down: Move down',
-          'Swipe left: Move left',
-          'Swipe right: Move right'
+          'Hold finger and move: Control direction',
+          'Continuous movement for smooth control',
+          'No need to lift finger between moves'
         ];
       case 'space_invaders':
         return [

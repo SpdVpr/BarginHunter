@@ -24,7 +24,13 @@ interface TetrisEngineProps {
 const getCanvasSize = () => {
   // Use full viewport dimensions to eliminate white space
   const width = window.innerWidth;
-  const height = window.innerHeight;
+  let height = window.innerHeight;
+
+  // Reduce height by 20% on mobile devices for better usability
+  const isMobile = width <= 768;
+  if (isMobile) {
+    height = height * 0.8; // 20% reduction
+  }
 
   return {
     width: width,
@@ -388,9 +394,11 @@ export default function TetrisEngine({
     startGame();
   }, [startGame]);
 
-  // Touch controls state
+  // Touch controls state - continuous movement
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [touchStartY, setTouchStartY] = useState<number | null>(null);
+  const [isTouching, setIsTouching] = useState(false);
+  const [lastMoveTime, setLastMoveTime] = useState(0);
 
   // Event listeners
   useEffect(() => {
@@ -426,43 +434,66 @@ export default function TetrisEngine({
       const touch = e.touches[0];
       setTouchStartX(touch.clientX);
       setTouchStartY(touch.clientY);
+      setIsTouching(true);
+      setLastMoveTime(Date.now());
     };
 
-    const handleTouchEnd = (e: TouchEvent) => {
+    const handleTouchMove = (e: TouchEvent) => {
       e.preventDefault();
-      if (touchStartX === null || touchStartY === null) return;
+      if (!isTouching || touchStartX === null || touchStartY === null) return;
 
-      const touch = e.changedTouches[0];
+      const touch = e.touches[0];
       const deltaX = touch.clientX - touchStartX;
       const deltaY = touch.clientY - touchStartY;
-      const minSwipeDistance = 30;
+      const minMoveDistance = 25; // Menší vzdálenost pro citlivější ovládání
+      const moveThrottle = 150; // Omezení rychlosti pohybu (ms)
+      const now = Date.now();
 
-      // Determine swipe direction
+      // Throttle movement to prevent too rapid changes
+      if (now - lastMoveTime < moveThrottle) return;
+
+      // Kontinuální pohyb na základě pozice prstu
       if (Math.abs(deltaX) > Math.abs(deltaY)) {
-        // Horizontal swipe
-        if (Math.abs(deltaX) > minSwipeDistance) {
+        // Horizontal movement
+        if (Math.abs(deltaX) > minMoveDistance) {
           if (deltaX > 0) {
             handleMoveRight();
           } else {
             handleMoveLeft();
           }
+          setLastMoveTime(now);
         }
       } else {
-        // Vertical swipe
-        if (Math.abs(deltaY) > minSwipeDistance) {
+        // Vertical movement
+        if (Math.abs(deltaY) > minMoveDistance) {
           if (deltaY > 0) {
             handleMoveDown();
           } else {
             handleRotate();
           }
-        } else {
-          // Tap (no significant swipe)
+          setLastMoveTime(now);
+        }
+      }
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      e.preventDefault();
+
+      // If it was a quick tap without much movement, rotate
+      if (isTouching && touchStartX !== null && touchStartY !== null) {
+        const touch = e.changedTouches[0];
+        const deltaX = touch.clientX - touchStartX;
+        const deltaY = touch.clientY - touchStartY;
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+        if (distance < 20) { // Quick tap
           handleRotate();
         }
       }
 
       setTouchStartX(null);
       setTouchStartY(null);
+      setIsTouching(false);
     };
 
     window.addEventListener('keydown', handleKeyPress);
@@ -470,6 +501,7 @@ export default function TetrisEngine({
     if (canvas) {
       canvas.addEventListener('click', handleClick);
       canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+      canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
       canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
       canvas.style.touchAction = 'none'; // Prevent scrolling on touch
     }
@@ -479,10 +511,11 @@ export default function TetrisEngine({
       if (canvas) {
         canvas.removeEventListener('click', handleClick);
         canvas.removeEventListener('touchstart', handleTouchStart);
+        canvas.removeEventListener('touchmove', handleTouchMove);
         canvas.removeEventListener('touchend', handleTouchEnd);
       }
     };
-  }, [handleRotate, handleMoveLeft, handleMoveRight, handleMoveDown, touchStartX, touchStartY]);
+  }, [handleRotate, handleMoveLeft, handleMoveRight, handleMoveDown, touchStartX, touchStartY, isTouching, lastMoveTime]);
 
   // Game loop effect
   useEffect(() => {

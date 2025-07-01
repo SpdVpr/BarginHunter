@@ -24,7 +24,13 @@ interface SnakeEngineProps {
 const getCanvasSize = () => {
   // Use full viewport dimensions to eliminate white space
   const width = window.innerWidth;
-  const height = window.innerHeight;
+  let height = window.innerHeight;
+
+  // Reduce height by 20% on mobile devices for better usability
+  const isMobile = width <= 768;
+  if (isMobile) {
+    height = height * 0.8; // 20% reduction
+  }
 
   return {
     width: width,
@@ -305,8 +311,9 @@ export default function SnakeEngine({
     }
   }, [isRunning, snake, changeDirection]);
 
-  // Touch controls
+  // Touch controls - continuous movement
   const [touchStartPos, setTouchStartPos] = useState<{x: number, y: number} | null>(null);
+  const [isTouching, setIsTouching] = useState(false);
 
   const handleTouchStart = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
     e.preventDefault();
@@ -321,37 +328,44 @@ export default function SnakeEngine({
     const touchY = touch.clientY - rect.top;
 
     setTouchStartPos({ x: touchX, y: touchY });
+    setIsTouching(true);
   }, [isRunning, snake]);
 
-  const handleTouchEnd = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
+  const handleTouchMove = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
     e.preventDefault();
-    if (!touchStartPos || !isRunning || snake.length === 0) return;
+    if (!isTouching || !touchStartPos || !isRunning || snake.length === 0) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const touch = e.changedTouches[0];
+    const touch = e.touches[0];
     const touchX = touch.clientX - rect.left;
     const touchY = touch.clientY - rect.top;
 
     const deltaX = touchX - touchStartPos.x;
     const deltaY = touchY - touchStartPos.y;
-    const minSwipeDistance = 20;
+    const minMoveDistance = 15; // Menší vzdálenost pro citlivější ovládání
 
-    // Determine direction based on swipe if it's significant enough
-    if (Math.abs(deltaX) > minSwipeDistance || Math.abs(deltaY) > minSwipeDistance) {
+    // Kontinuální změna směru na základě pozice prstu
+    if (Math.abs(deltaX) > minMoveDistance || Math.abs(deltaY) > minMoveDistance) {
       if (Math.abs(deltaX) > Math.abs(deltaY)) {
-        // Horizontal swipe
-        changeDirection(deltaX > 0 ? 'RIGHT' : 'LEFT');
+        // Horizontal movement
+        const newDirection = deltaX > 0 ? 'RIGHT' : 'LEFT';
+        changeDirection(newDirection);
       } else {
-        // Vertical swipe
-        changeDirection(deltaY > 0 ? 'DOWN' : 'UP');
+        // Vertical movement
+        const newDirection = deltaY > 0 ? 'DOWN' : 'UP';
+        changeDirection(newDirection);
       }
     }
+  }, [isTouching, touchStartPos, isRunning, snake, changeDirection]);
 
+  const handleTouchEnd = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
     setTouchStartPos(null);
-  }, [isRunning, snake, changeDirection, touchStartPos]);
+    setIsTouching(false);
+  }, []);
 
   // Draw game
   const draw = useCallback((ctx: CanvasRenderingContext2D) => {
@@ -499,6 +513,7 @@ export default function SnakeEngine({
         height={canvasSize.height}
         onClick={handleCanvasClick}
         onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         style={{
           display: 'block',

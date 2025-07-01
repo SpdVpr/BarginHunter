@@ -24,7 +24,13 @@ interface FlappyBirdEngineProps {
 const getCanvasSize = () => {
   // Use full viewport dimensions to eliminate white space
   const width = window.innerWidth;
-  const height = window.innerHeight;
+  let height = window.innerHeight;
+
+  // Reduce height by 20% on mobile devices for better usability
+  const isMobile = width <= 768;
+  if (isMobile) {
+    height = height * 0.8; // 20% reduction
+  }
 
   return {
     width: width,

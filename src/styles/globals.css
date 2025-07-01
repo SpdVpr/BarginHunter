@@ -362,13 +362,13 @@ a {
   .game-container {
     padding: 10px;
     width: 100vw;
-    height: 100vh;
+    height: 80vh; /* Reduced by 20% for better mobile usability */
     overflow: hidden;
   }
 
   .game-canvas {
     max-width: 100vw;
-    max-height: 100vh;
+    max-height: 80vh; /* Reduced by 20% for better mobile usability */
     border-radius: 0;
   }
 
