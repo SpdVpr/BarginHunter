@@ -22,7 +22,7 @@ import { AnalyticsTab } from '../src/components/dashboard/AnalyticsTab';
 import { CustomersTab } from '../src/components/dashboard/CustomersTab';
 import { DiscountsTab } from '../src/components/dashboard/DiscountsTab';
 import { SettingsTab } from '../src/components/dashboard/SettingsTab';
-import '../src/styles/modern-dashboard.css';
+import styles from '../src/styles/ModernDashboard.module.css';
 
 interface RecentSession {
   id: string;
@@ -89,10 +89,10 @@ export default function Dashboard() {
 
   return (
     <ModernDashboardLayout shop={typeof shop === 'string' ? shop : ''}>
-      <div className="modern-dashboard">
+      <div className={styles.modernDashboard}>
         {/* Modern Header */}
-        <div className="modern-header">
-          <div className="modern-header-content">
+        <div className={styles.modernHeader}>
+          <div className={styles.modernHeaderContent}>
             <div>
               <Text variant="headingXl" as="h1" color="subdued">
                 Bargain Hunter
@@ -118,8 +118,8 @@ export default function Dashboard() {
         </div>
 
         {/* Modern Tabs */}
-        <div className="modern-tabs-container">
-          <div className="modern-tabs-content">
+        <div className={styles.modernTabsContainer}>
+          <div className={styles.modernTabsContent}>
             <Tabs
               tabs={tabs}
               selected={selectedTab}
@@ -129,7 +129,7 @@ export default function Dashboard() {
         </div>
 
         {/* Tab Content */}
-        <div className="modern-content">
+        <div className={styles.modernContent}>
           {renderTabContent()}
         </div>
       </div>

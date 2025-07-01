@@ -48,14 +48,6 @@ export function ModernDashboardLayout({ children, shop }: ModernDashboardLayoutP
   const topBarMarkup = (
     <TopBar
       showNavigationToggle={false}
-      userMenu={{
-        actions: userMenuActions,
-        name: shop,
-        detail: 'Bargain Hunter Dashboard',
-        initials: shop.charAt(0).toUpperCase(),
-        open: userMenuActive,
-        onToggle: toggleUserMenu,
-      }}
     />
   );
 
