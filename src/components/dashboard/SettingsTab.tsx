@@ -29,6 +29,7 @@ interface GameSettings {
   maxPlaysPerDay: number;
   gameSpeed: number;
   difficulty: 'easy' | 'medium' | 'hard';
+  testMode: boolean; // Moved from widget settings
   discountTiers: Array<{
     minScore: number;
     discount: number;
@@ -46,7 +47,6 @@ interface WidgetSettings {
   customPages?: string[];
   targetUrls?: string[]; // New: URLs where widget should appear
   userPercentage: number;
-  testMode: boolean;
   showDelay: number;
   pageLoadTrigger: 'immediate' | 'after_delay' | 'on_scroll' | 'on_exit_intent';
   deviceTargeting: 'all' | 'desktop' | 'mobile' | 'tablet';
@@ -145,6 +145,7 @@ export function SettingsTab({ shop }: SettingsTabProps) {
         const gameSettings = {
           ...config.gameSettings,
           gameType: config.gameSettings?.gameType || 'dino',
+          testMode: config.widgetSettings?.testMode ?? false, // Moved from widget settings
           discountTiers: config.gameSettings?.discountTiers || [
             { minScore: 100, discount: 5, message: 'Great job! You earned 5% off!' },
             { minScore: 300, discount: 10, message: 'Amazing! You earned 10% off!' },
@@ -157,7 +158,6 @@ export function SettingsTab({ shop }: SettingsTabProps) {
         const widgetSettings = {
           ...config.widgetSettings,
           userPercentage: config.widgetSettings?.userPercentage ?? 100,
-          testMode: config.widgetSettings?.testMode ?? false,
           showDelay: config.widgetSettings?.showDelay ?? 0,
           pageLoadTrigger: config.widgetSettings?.pageLoadTrigger || 'immediate',
           deviceTargeting: config.widgetSettings?.deviceTargeting || 'all',
@@ -306,6 +306,13 @@ export function SettingsTab({ shop }: SettingsTabProps) {
                   label="Enable Game Widget"
                   checked={gameSettings.isEnabled}
                   onChange={(checked) => setGameSettings({...gameSettings, isEnabled: checked})}
+                />
+
+                <Checkbox
+                  label="Test Mode (show only to admin for testing)"
+                  checked={gameSettings.testMode}
+                  onChange={(checked) => setGameSettings({...gameSettings, testMode: checked})}
+                  helpText="When enabled, the game widget will only be visible to you for testing and configuration. Disable this to make the widget visible to all customers according to your targeting settings."
                 />
                 
                 <Select
@@ -496,11 +503,7 @@ export function SettingsTab({ shop }: SettingsTabProps) {
                   />
                 </div>
 
-                <Checkbox
-                  label="Test Mode (show to all users)"
-                  checked={widgetSettings.testMode}
-                  onChange={(checked) => setWidgetSettings({...widgetSettings, testMode: checked})}
-                />
+
 
                 <Checkbox
                   label="Enable Time-Based Rules"

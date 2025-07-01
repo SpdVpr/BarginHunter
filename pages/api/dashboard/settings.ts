@@ -102,7 +102,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    if (widgetSettings.testMode !== undefined && typeof widgetSettings.testMode !== 'boolean') {
+    // Test mode validation moved to game settings
+    if (gameSettings.testMode !== undefined && typeof gameSettings.testMode !== 'boolean') {
       return res.status(400).json({
         success: false,
         error: 'Test mode must be a boolean'
@@ -163,6 +164,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         discountTiers: gameSettings.discountTiers,
         gameSpeed: Math.max(0.1, Math.min(3, gameSettings.gameSpeed)),
         difficulty: gameSettings.difficulty,
+        testMode: gameSettings.testMode ?? false, // Moved from widget settings
       },
       widgetSettings: {
         displayMode: widgetSettings.displayMode,
@@ -174,7 +176,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         customPages: widgetSettings.customPages || [],
         // New targeting options
         userPercentage: widgetSettings.userPercentage ?? 100,
-        testMode: widgetSettings.testMode ?? false,
+
         showDelay: widgetSettings.showDelay ?? 0,
         pageLoadTrigger: widgetSettings.pageLoadTrigger || 'immediate',
         deviceTargeting: widgetSettings.deviceTargeting || 'all',

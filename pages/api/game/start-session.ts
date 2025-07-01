@@ -53,7 +53,11 @@ async function validatePlayEligibility(
 
     // Check IP-based limits (instead of customer-based)
     console.log('🎮 Checking IP-based play limits for:', ipAddress);
+    console.log('🎮 Max plays per customer setting:', maxPlaysPerCustomer);
+    console.log('🎮 Max plays per day setting:', maxPlaysPerDay);
+
     const allSessions = await GameSessionService.getSessionsByShop(shopDomain, 1000);
+    console.log('🎮 Total sessions in shop:', allSessions.length);
 
     // Filter sessions by IP address - count ALL sessions, not just completed ones
     const ipSessions = allSessions.filter(session => session.ipAddress === ipAddress);
@@ -62,6 +66,17 @@ async function validatePlayEligibility(
     // Also check completed sessions specifically
     const completedIpSessions = ipSessions.filter(session => session.completed);
     console.log('🎮 Found', completedIpSessions.length, 'completed sessions for IP:', ipAddress);
+
+    // Debug: Show some session details
+    if (ipSessions.length > 0) {
+      console.log('🎮 Recent IP sessions:', ipSessions.slice(0, 3).map(s => ({
+        id: s.id,
+        completed: s.completed,
+        startedAt: s.startedAt.toDate().toISOString(),
+        endedAt: s.endedAt?.toDate()?.toISOString(),
+        finalScore: s.finalScore
+      })));
+    }
 
     // Check per-IP limit (using maxPlaysPerCustomer setting) - count completed sessions only
     if (completedIpSessions.length >= maxPlaysPerCustomer) {

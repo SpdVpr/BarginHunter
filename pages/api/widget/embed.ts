@@ -106,12 +106,12 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       return false;
     }
 
-    // Check if test mode is enabled - if so, always show
-    if (widgetConfig.testMode) {
-      console.log('🎮 Bargain Hunter: Test mode enabled - checking page targeting only');
-      const shouldShow = checkPageTargeting();
-      console.log('🎮 Bargain Hunter: Page targeting result:', shouldShow);
-      return shouldShow;
+    // Check if test mode is enabled - if so, only show to admin (skip for now, implement admin detection later)
+    if (widgetConfig.gameSettings && widgetConfig.gameSettings.testMode) {
+      console.log('🎮 Bargain Hunter: Test mode enabled - widget only visible to admin');
+      // For now, when test mode is enabled, don't show to anyone
+      // TODO: Implement admin detection (check if current user is shop owner)
+      return false;
     }
 
     // Check user percentage targeting
@@ -246,14 +246,45 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
             // Normalize URLs for comparison
             const normalizedTarget = targetUrl.toLowerCase().trim();
             const normalizedCurrent = currentUrl.toLowerCase();
+            const normalizedCurrentPath = currentPath.toLowerCase();
 
-            // Check for exact match or if current URL starts with target URL
-            return normalizedCurrent === normalizedTarget ||
-                   normalizedCurrent.startsWith(normalizedTarget);
+            console.log('🎮 Bargain Hunter: Comparing URLs:', {
+              target: normalizedTarget,
+              currentUrl: normalizedCurrent,
+              currentPath: normalizedCurrentPath
+            });
+
+            // Multiple matching strategies:
+            // 1. Exact URL match
+            if (normalizedCurrent === normalizedTarget) {
+              console.log('🎮 Bargain Hunter: Exact URL match found');
+              return true;
+            }
+
+            // 2. URL starts with target (for query params)
+            if (normalizedCurrent.startsWith(normalizedTarget)) {
+              console.log('🎮 Bargain Hunter: URL starts with target');
+              return true;
+            }
+
+            // 3. Path-only matching (if target is just a path)
+            if (normalizedTarget.startsWith('/') && normalizedCurrentPath === normalizedTarget) {
+              console.log('🎮 Bargain Hunter: Path match found');
+              return true;
+            }
+
+            // 4. Path contains target (for partial matches)
+            if (normalizedTarget.startsWith('/') && normalizedCurrentPath.includes(normalizedTarget)) {
+              console.log('🎮 Bargain Hunter: Path contains target');
+              return true;
+            }
+
+            return false;
           });
-          console.log('🎮 Bargain Hunter: URL targeting check:', matches, 'Target URLs:', widgetConfig.targetUrls);
+          console.log('🎮 Bargain Hunter: URL targeting final result:', matches, 'Target URLs:', widgetConfig.targetUrls);
           return matches;
         }
+        console.log('🎮 Bargain Hunter: No target URLs configured');
         return false;
       case 'all_pages':
       default:
