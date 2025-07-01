@@ -73,15 +73,15 @@ export function CustomersTab({ shop }: CustomersTabProps) {
 
   const customersTableRows = filteredCustomers.map((customer) => [
     customer.email,
-    customer.totalSessions.toString(),
-    Math.round(customer.averageScore).toString(),
-    customer.bestScore.toString(),
-    customer.totalDiscountsEarned.toString(),
-    customer.totalDiscountsUsed.toString(),
-    customer.totalDiscountsUsed > 0 
+    customer.totalSessions?.toString() || '0',
+    Math.round(customer.averageScore || 0).toString(),
+    customer.bestScore?.toString() || '0',
+    customer.totalDiscountsEarned?.toString() || '0',
+    customer.totalDiscountsUsed?.toString() || '0',
+    customer.totalDiscountsUsed > 0
       ? `${Math.round((customer.totalDiscountsUsed / customer.totalDiscountsEarned) * 100)}%`
       : '0%',
-    new Date(customer.lastPlayedAt).toLocaleDateString(),
+    customer.lastPlayedAt ? new Date(customer.lastPlayedAt).toLocaleDateString() : 'Never',
     <Badge status={customer.status === 'active' ? 'success' : 'attention'}>
       {customer.status}
     </Badge>,

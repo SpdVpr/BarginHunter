@@ -27,14 +27,14 @@ export function AnalyticsTab({ shop }: AnalyticsTabProps) {
     { label: 'Last year', value: '1y' },
   ];
 
-  const topScoresRows = analyticsData?.topScores.map((score) => [
+  const topScoresRows = analyticsData?.topScores?.map((score) => [
     score.customerEmail,
     score.score.toString(),
     `${score.discount}%`,
     new Date(score.achievedAt).toLocaleDateString(),
   ]) || [];
 
-  const hourlyRows = analyticsData?.hourlyBreakdown.map((hour) => [
+  const hourlyRows = analyticsData?.hourlyBreakdown?.map((hour) => [
     `${hour.hour}:00`,
     hour.sessions.toString(),
     hour.completions.toString(),
@@ -221,7 +221,7 @@ export function AnalyticsTab({ shop }: AnalyticsTabProps) {
                   Traffic Sources
                 </Text>
                 <Stack>
-                  {Object.entries(analyticsData.sourceBreakdown).map(([source, count]) => (
+                  {analyticsData.sourceBreakdown && Object.entries(analyticsData.sourceBreakdown).map(([source, count]) => (
                     <Badge key={source} status="info">
                       {`${source}: ${String(count)}`}
                     </Badge>

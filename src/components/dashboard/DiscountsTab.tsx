@@ -158,7 +158,7 @@ export function DiscountsTab({ shop }: DiscountsTabProps) {
           <Card>
             <div style={{ padding: '1.5rem', textAlign: 'center' }}>
               <Text variant="heading2xl" as="p">
-                ${summary.averageOrderValue.toFixed(0)}
+                ${(summary.averageOrderValue || 0).toFixed(0)}
               </Text>
               <Text variant="headingMd" as="h3" color="subdued">
                 Avg Order Value
@@ -172,7 +172,7 @@ export function DiscountsTab({ shop }: DiscountsTabProps) {
           <Card>
             <div style={{ padding: '1.5rem', textAlign: 'center' }}>
               <Text variant="heading2xl" as="p">
-                ${summary.totalValue.toFixed(0)}
+                ${(summary.totalValue || 0).toFixed(0)}
               </Text>
               <Text variant="headingMd" as="h3" color="subdued">
                 Total Discount Value
@@ -186,7 +186,7 @@ export function DiscountsTab({ shop }: DiscountsTabProps) {
           <Card>
             <div style={{ padding: '1.5rem', textAlign: 'center' }}>
               <Text variant="heading2xl" as="p">
-                ${summary.usedValue.toFixed(0)}
+                ${(summary.usedValue || 0).toFixed(0)}
               </Text>
               <Text variant="headingMd" as="h3" color="subdued">
                 Used Discount Value
