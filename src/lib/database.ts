@@ -158,23 +158,47 @@ export class GameSessionService {
   }
 
   static async getSessionsByShop(shopDomain: string, limit = 100): Promise<GameSessionDocument[]> {
-    const snapshot = await db.collection(collections.gameSessions)
-      .where('shopDomain', '==', shopDomain)
-      .orderBy('startedAt', 'desc')
-      .limit(limit)
-      .get();
-    
-    return snapshot.docs.map(doc => doc.data() as GameSessionDocument);
+    // Keep orderBy since this works (index exists) - but add fallback
+    try {
+      const snapshot = await db.collection(collections.gameSessions)
+        .where('shopDomain', '==', shopDomain)
+        .orderBy('startedAt', 'desc')
+        .limit(limit)
+        .get();
+
+      return snapshot.docs.map(doc => doc.data() as GameSessionDocument);
+    } catch (error: any) {
+      if (error.code === 9) {
+        // Fallback without orderBy if index missing
+        const snapshot = await db.collection(collections.gameSessions)
+          .where('shopDomain', '==', shopDomain)
+          .limit(limit)
+          .get();
+
+        const sessions = snapshot.docs.map(doc => doc.data() as GameSessionDocument);
+        return sessions.sort((a, b) => {
+          const dateA = a.startedAt.toDate();
+          const dateB = b.startedAt.toDate();
+          return dateB.getTime() - dateA.getTime();
+        });
+      }
+      throw error;
+    }
   }
 
   static async getSessionsByCustomer(shopDomain: string, customerId: string): Promise<GameSessionDocument[]> {
+    // Remove orderBy to avoid potential index issues
     const snapshot = await db.collection(collections.gameSessions)
       .where('shopDomain', '==', shopDomain)
       .where('customerId', '==', customerId)
-      .orderBy('startedAt', 'desc')
       .get();
-    
-    return snapshot.docs.map(doc => doc.data() as GameSessionDocument);
+
+    const sessions = snapshot.docs.map(doc => doc.data() as GameSessionDocument);
+    return sessions.sort((a, b) => {
+      const dateA = a.startedAt.toDate();
+      const dateB = b.startedAt.toDate();
+      return dateB.getTime() - dateA.getTime();
+    });
   }
 }
 
@@ -203,23 +227,37 @@ export class GameScoreService {
   }
 
   static async getCustomerScores(shopDomain: string, customerId: string): Promise<GameScoreDocument[]> {
+    // Remove orderBy to avoid index requirement - sort in memory instead
     const snapshot = await db.collection(collections.gameScores)
       .where('shopDomain', '==', shopDomain)
       .where('customerId', '==', customerId)
-      .orderBy('achievedAt', 'desc')
       .get();
 
-    return snapshot.docs.map(doc => doc.data() as GameScoreDocument);
+    const scores = snapshot.docs.map(doc => doc.data() as GameScoreDocument);
+
+    // Sort in memory by achievedAt desc
+    return scores.sort((a, b) => {
+      const dateA = a.achievedAt.toDate();
+      const dateB = b.achievedAt.toDate();
+      return dateB.getTime() - dateA.getTime();
+    });
   }
 
   static async getScoresByShop(shopDomain: string, limit = 100): Promise<GameScoreDocument[]> {
+    // Remove orderBy to avoid index requirement - sort in memory instead
     const snapshot = await db.collection(collections.gameScores)
       .where('shopDomain', '==', shopDomain)
-      .orderBy('achievedAt', 'desc')
       .limit(limit)
       .get();
 
-    return snapshot.docs.map(doc => doc.data() as GameScoreDocument);
+    const scores = snapshot.docs.map(doc => doc.data() as GameScoreDocument);
+
+    // Sort in memory by achievedAt desc
+    return scores.sort((a, b) => {
+      const dateA = a.achievedAt.toDate();
+      const dateB = b.achievedAt.toDate();
+      return dateB.getTime() - dateA.getTime();
+    });
   }
 }
 
@@ -333,13 +371,20 @@ export class CustomerService {
   }
 
   static async getCustomersByShop(shopDomain: string, limit = 100): Promise<CustomerDocument[]> {
+    // Remove orderBy to avoid index requirement - sort in memory instead
     const snapshot = await db.collection(collections.customers)
       .where('shopDomain', '==', shopDomain)
-      .orderBy('lastPlayedAt', 'desc')
       .limit(limit)
       .get();
 
-    return snapshot.docs.map(doc => doc.data() as CustomerDocument);
+    const customers = snapshot.docs.map(doc => doc.data() as CustomerDocument);
+
+    // Sort in memory by lastPlayedAt desc (handle null values)
+    return customers.sort((a, b) => {
+      const dateA = a.lastPlayedAt ? a.lastPlayedAt.toDate() : new Date(0);
+      const dateB = b.lastPlayedAt ? b.lastPlayedAt.toDate() : new Date(0);
+      return dateB.getTime() - dateA.getTime();
+    });
   }
 
   static async updateCustomerStats(
