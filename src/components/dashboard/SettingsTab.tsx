@@ -40,10 +40,36 @@ interface WidgetSettings {
   displayMode: 'popup' | 'tab' | 'inline';
   triggerEvent: 'immediate' | 'scroll' | 'exit_intent' | 'time_delay';
   position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
-  showOn: 'all_pages' | 'product_pages' | 'cart_page' | 'checkout_page' | 'collection_pages';
+  showOn: 'all_pages' | 'product_pages' | 'cart_page' | 'checkout_page' | 'collection_pages' | 'custom';
+  timeDelay?: number;
+  scrollPercentage?: number;
+  customPages?: string[];
   userPercentage: number;
   testMode: boolean;
   showDelay: number;
+  pageLoadTrigger: 'immediate' | 'after_delay' | 'on_scroll' | 'on_exit_intent';
+  deviceTargeting: 'all' | 'desktop' | 'mobile' | 'tablet';
+  geoTargeting?: string[];
+  timeBasedRules?: {
+    enabled: boolean;
+    startTime?: string;
+    endTime?: string;
+    timezone?: string;
+    daysOfWeek?: number[];
+  };
+}
+
+interface AppearanceSettings {
+  primaryColor: string;
+  secondaryColor: string;
+  backgroundTheme: 'default' | 'dark' | 'light' | 'custom';
+}
+
+interface BusinessRules {
+  excludeDiscountedProducts: boolean;
+  allowStackingDiscounts: boolean;
+  discountExpiryHours: number;
+  minimumOrderValue?: number;
 }
 
 interface IntroSettings {
@@ -64,6 +90,8 @@ export function SettingsTab({ shop }: SettingsTabProps) {
   const [gameSettings, setGameSettings] = useState<GameSettings | null>(null);
   const [widgetSettings, setWidgetSettings] = useState<WidgetSettings | null>(null);
   const [introSettings, setIntroSettings] = useState<IntroSettings | null>(null);
+  const [appearanceSettings, setAppearanceSettings] = useState<AppearanceSettings | null>(null);
+  const [businessRules, setBusinessRules] = useState<BusinessRules | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toastActive, setToastActive] = useState(false);
@@ -81,6 +109,16 @@ export function SettingsTab({ shop }: SettingsTabProps) {
       panelID: 'widget-settings-panel',
     },
     {
+      id: 'appearance',
+      content: 'Appearance',
+      panelID: 'appearance-settings-panel',
+    },
+    {
+      id: 'business',
+      content: 'Business Rules',
+      panelID: 'business-settings-panel',
+    },
+    {
       id: 'intro',
       content: 'Intro Screen',
       panelID: 'intro-settings-panel',
@@ -96,13 +134,52 @@ export function SettingsTab({ shop }: SettingsTabProps) {
   const loadAllSettings = async () => {
     try {
       setLoading(true);
-      
-      // Load game settings
-      const gameResponse = await fetch(`/api/dashboard/settings?shop=${shop}`);
-      if (gameResponse.ok) {
-        const gameData = await gameResponse.json();
-        setGameSettings(gameData.gameSettings);
-        setWidgetSettings(gameData.widgetSettings);
+
+      // Load game config (contains all settings)
+      const configResponse = await fetch(`/api/game/config/${shop}`);
+      if (configResponse.ok) {
+        const config = await configResponse.json();
+
+        // Set game settings with defaults
+        const gameSettings = {
+          ...config.gameSettings,
+          gameType: config.gameSettings?.gameType || 'dino',
+          discountTiers: config.gameSettings?.discountTiers || [
+            { minScore: 100, discount: 5, message: 'Great job! You earned 5% off!' },
+            { minScore: 300, discount: 10, message: 'Amazing! You earned 10% off!' },
+            { minScore: 500, discount: 15, message: 'Incredible! You earned 15% off!' }
+          ]
+        };
+        setGameSettings(gameSettings);
+
+        // Set widget settings with defaults
+        const widgetSettings = {
+          ...config.widgetSettings,
+          userPercentage: config.widgetSettings?.userPercentage ?? 100,
+          testMode: config.widgetSettings?.testMode ?? false,
+          showDelay: config.widgetSettings?.showDelay ?? 0,
+          pageLoadTrigger: config.widgetSettings?.pageLoadTrigger || 'immediate',
+          deviceTargeting: config.widgetSettings?.deviceTargeting || 'all',
+          geoTargeting: config.widgetSettings?.geoTargeting || [],
+          customPages: config.widgetSettings?.customPages || [],
+          timeBasedRules: config.widgetSettings?.timeBasedRules || {
+            enabled: false,
+          },
+        };
+        setWidgetSettings(widgetSettings);
+
+        setAppearanceSettings(config.appearance || {
+          primaryColor: '#667eea',
+          secondaryColor: '#764ba2',
+          backgroundTheme: 'default',
+        });
+
+        setBusinessRules(config.businessRules || {
+          excludeDiscountedProducts: false,
+          allowStackingDiscounts: false,
+          discountExpiryHours: 24,
+          minimumOrderValue: 0,
+        });
       }
 
       // Load intro settings
@@ -110,6 +187,20 @@ export function SettingsTab({ shop }: SettingsTabProps) {
       if (introResponse.ok) {
         const introData = await introResponse.json();
         setIntroSettings(introData);
+      } else {
+        // Set default intro settings
+        setIntroSettings({
+          title: 'Bargain Hunter',
+          subtitle: 'Jump & earn discounts!',
+          backgroundColor: '#667eea',
+          textColor: '#ffffff',
+          buttonColor: '#28a745',
+          buttonTextColor: '#ffffff',
+          discountText: 'Win {minDiscount}% - {maxDiscount}% OFF!',
+          showEmojis: true,
+          borderRadius: 12,
+          padding: 12,
+        });
       }
     } catch (error) {
       console.error('Failed to load settings:', error);
@@ -247,9 +338,71 @@ export function SettingsTab({ shop }: SettingsTabProps) {
                     { label: 'Product Pages Only', value: 'product_pages' },
                     { label: 'Cart Page Only', value: 'cart_page' },
                     { label: 'Collection Pages', value: 'collection_pages' },
+                    { label: 'Custom Pages', value: 'custom' },
                   ]}
                   value={widgetSettings.showOn}
                   onChange={(value) => setWidgetSettings({...widgetSettings, showOn: value as any})}
+                />
+
+                {widgetSettings.showOn === 'custom' && (
+                  <TextField
+                    label="Custom Pages (comma separated URLs)"
+                    value={widgetSettings.customPages?.join(', ') || ''}
+                    onChange={(value) => setWidgetSettings({
+                      ...widgetSettings,
+                      customPages: value.split(',').map(p => p.trim()).filter(Boolean)
+                    })}
+                    helpText="Enter page URLs where the widget should appear"
+                  />
+                )}
+
+                <Select
+                  label="Page Load Trigger"
+                  options={[
+                    { label: 'Immediate', value: 'immediate' },
+                    { label: 'After Delay', value: 'after_delay' },
+                    { label: 'On Scroll', value: 'on_scroll' },
+                    { label: 'On Exit Intent', value: 'on_exit_intent' },
+                  ]}
+                  value={widgetSettings.pageLoadTrigger}
+                  onChange={(value) => setWidgetSettings({...widgetSettings, pageLoadTrigger: value as any})}
+                />
+
+                {widgetSettings.pageLoadTrigger === 'after_delay' && (
+                  <TextField
+                    label="Delay (seconds)"
+                    type="number"
+                    value={widgetSettings.timeDelay?.toString() || '3'}
+                    onChange={(value) => setWidgetSettings({...widgetSettings, timeDelay: parseInt(value) || 3})}
+                  />
+                )}
+
+                {widgetSettings.pageLoadTrigger === 'on_scroll' && (
+                  <div>
+                    <Text variant="bodyMd" as="p">
+                      Scroll Percentage: {widgetSettings.scrollPercentage || 50}%
+                    </Text>
+                    <RangeSlider
+                      label=""
+                      value={widgetSettings.scrollPercentage || 50}
+                      min={10}
+                      max={90}
+                      step={10}
+                      onChange={(value) => setWidgetSettings({...widgetSettings, scrollPercentage: value})}
+                    />
+                  </div>
+                )}
+
+                <Select
+                  label="Device Targeting"
+                  options={[
+                    { label: 'All Devices', value: 'all' },
+                    { label: 'Desktop Only', value: 'desktop' },
+                    { label: 'Mobile Only', value: 'mobile' },
+                    { label: 'Tablet Only', value: 'tablet' },
+                  ]}
+                  value={widgetSettings.deviceTargeting}
+                  onChange={(value) => setWidgetSettings({...widgetSettings, deviceTargeting: value as any})}
                 />
 
                 <div>
@@ -270,6 +423,155 @@ export function SettingsTab({ shop }: SettingsTabProps) {
                   label="Test Mode (show to all users)"
                   checked={widgetSettings.testMode}
                   onChange={(checked) => setWidgetSettings({...widgetSettings, testMode: checked})}
+                />
+
+                <Checkbox
+                  label="Enable Time-Based Rules"
+                  checked={widgetSettings.timeBasedRules?.enabled || false}
+                  onChange={(checked) => setWidgetSettings({
+                    ...widgetSettings,
+                    timeBasedRules: { ...widgetSettings.timeBasedRules, enabled: checked }
+                  })}
+                />
+
+                {widgetSettings.timeBasedRules?.enabled && (
+                  <>
+                    <TextField
+                      label="Start Time (24h format)"
+                      value={widgetSettings.timeBasedRules?.startTime || '09:00'}
+                      onChange={(value) => setWidgetSettings({
+                        ...widgetSettings,
+                        timeBasedRules: { ...widgetSettings.timeBasedRules, startTime: value }
+                      })}
+                    />
+                    <TextField
+                      label="End Time (24h format)"
+                      value={widgetSettings.timeBasedRules?.endTime || '17:00'}
+                      onChange={(value) => setWidgetSettings({
+                        ...widgetSettings,
+                        timeBasedRules: { ...widgetSettings.timeBasedRules, endTime: value }
+                      })}
+                    />
+                  </>
+                )}
+              </FormLayout>
+            </Stack>
+          </div>
+        </Card>
+      </div>
+    );
+  };
+
+  const renderAppearanceSettings = () => {
+    if (!appearanceSettings) return null;
+
+    return (
+      <div style={{ display: 'grid', gap: '2rem' }}>
+        <Card>
+          <div style={{ padding: '2rem' }}>
+            <Stack vertical spacing="loose">
+              <Text variant="headingLg" as="h3">
+                Theme & Colors
+              </Text>
+              <FormLayout>
+                <Select
+                  label="Background Theme"
+                  options={[
+                    { label: 'Default Gradient', value: 'default' },
+                    { label: 'Dark Theme', value: 'dark' },
+                    { label: 'Light Theme', value: 'light' },
+                    { label: 'Custom', value: 'custom' },
+                  ]}
+                  value={appearanceSettings.backgroundTheme}
+                  onChange={(value) => setAppearanceSettings({...appearanceSettings, backgroundTheme: value as any})}
+                />
+
+                <TextField
+                  label="Primary Color"
+                  value={appearanceSettings.primaryColor}
+                  onChange={(value) => setAppearanceSettings({...appearanceSettings, primaryColor: value})}
+                  type="color"
+                />
+
+                <TextField
+                  label="Secondary Color"
+                  value={appearanceSettings.secondaryColor}
+                  onChange={(value) => setAppearanceSettings({...appearanceSettings, secondaryColor: value})}
+                  type="color"
+                />
+              </FormLayout>
+            </Stack>
+          </div>
+        </Card>
+
+        {/* Preview */}
+        <Card>
+          <div style={{ padding: '2rem' }}>
+            <Stack vertical spacing="loose">
+              <Text variant="headingLg" as="h3">
+                Preview
+              </Text>
+              <div style={{
+                background: `linear-gradient(135deg, ${appearanceSettings.primaryColor} 0%, ${appearanceSettings.secondaryColor} 100%)`,
+                padding: '2rem',
+                borderRadius: '12px',
+                color: 'white',
+                textAlign: 'center',
+              }}>
+                <Text variant="headingMd" as="h4" color="inherit">
+                  Sample Widget Preview
+                </Text>
+                <Text variant="bodyMd" as="p" color="inherit">
+                  This is how your widget will look with the selected colors
+                </Text>
+              </div>
+            </Stack>
+          </div>
+        </Card>
+      </div>
+    );
+  };
+
+  const renderBusinessRules = () => {
+    if (!businessRules) return null;
+
+    return (
+      <div style={{ display: 'grid', gap: '2rem' }}>
+        <Card>
+          <div style={{ padding: '2rem' }}>
+            <Stack vertical spacing="loose">
+              <Text variant="headingLg" as="h3">
+                Discount Rules
+              </Text>
+              <FormLayout>
+                <Checkbox
+                  label="Exclude already discounted products"
+                  checked={businessRules.excludeDiscountedProducts}
+                  onChange={(checked) => setBusinessRules({...businessRules, excludeDiscountedProducts: checked})}
+                  helpText="Prevent game discounts on products that already have discounts"
+                />
+
+                <Checkbox
+                  label="Allow stacking with other discounts"
+                  checked={businessRules.allowStackingDiscounts}
+                  onChange={(checked) => setBusinessRules({...businessRules, allowStackingDiscounts: checked})}
+                  helpText="Allow game discounts to combine with other discount codes"
+                />
+
+                <TextField
+                  label="Discount Expiry (hours)"
+                  type="number"
+                  value={businessRules.discountExpiryHours.toString()}
+                  onChange={(value) => setBusinessRules({...businessRules, discountExpiryHours: parseInt(value) || 24})}
+                  helpText="How long discount codes remain valid"
+                />
+
+                <TextField
+                  label="Minimum Order Value ($)"
+                  type="number"
+                  value={businessRules.minimumOrderValue?.toString() || '0'}
+                  onChange={(value) => setBusinessRules({...businessRules, minimumOrderValue: parseInt(value) || 0})}
+                  helpText="Minimum cart value required to use discount (0 = no minimum)"
                 />
               </FormLayout>
             </Stack>
@@ -438,7 +740,9 @@ export function SettingsTab({ shop }: SettingsTabProps) {
         <div style={{ padding: '2rem' }}>
           {selectedSettingsTab === 0 && renderGameSettings()}
           {selectedSettingsTab === 1 && renderWidgetSettings()}
-          {selectedSettingsTab === 2 && renderIntroSettings()}
+          {selectedSettingsTab === 2 && renderAppearanceSettings()}
+          {selectedSettingsTab === 3 && renderBusinessRules()}
+          {selectedSettingsTab === 4 && renderIntroSettings()}
         </div>
       </Card>
     </div>

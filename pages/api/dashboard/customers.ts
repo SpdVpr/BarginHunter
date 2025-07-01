@@ -1,6 +1,4 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { db } from '../../../src/lib/firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -14,72 +12,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // Get game sessions
-    const sessionsRef = collection(db, 'gameSessions');
-    const sessionsQuery = query(
-      sessionsRef,
-      where('shop', '==', shop)
-    );
-    const sessionsSnapshot = await getDocs(sessionsQuery);
-    const sessions = sessionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // Generate mock customer data for now
+    const mockCustomers = [
+      {
+        id: 'customer1',
+        email: 'customer1@example.com',
+        totalSessions: 5,
+        completedSessions: 3,
+        scores: [150, 200, 180],
+        lastPlayedAt: new Date().toISOString(),
+        totalDiscountsEarned: 2,
+        totalDiscountsUsed: 1,
+      },
+      {
+        id: 'customer2',
+        email: 'customer2@example.com',
+        totalSessions: 3,
+        completedSessions: 2,
+        scores: [120, 160],
+        lastPlayedAt: new Date(Date.now() - 86400000).toISOString(),
+        totalDiscountsEarned: 1,
+        totalDiscountsUsed: 1,
+      },
+    ];
 
-    // Get discount codes
-    const discountsRef = collection(db, 'discountCodes');
-    const discountsQuery = query(
-      discountsRef,
-      where('shop', '==', shop)
-    );
-    const discountsSnapshot = await getDocs(discountsQuery);
-    const discounts = discountsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    // Group sessions by customer
-    const customerMap = new Map();
-    
-    sessions.forEach(session => {
-      const email = session.customerEmail || 'Anonymous';
-      if (!customerMap.has(email)) {
-        customerMap.set(email, {
-          id: email,
-          email: email,
-          totalSessions: 0,
-          completedSessions: 0,
-          scores: [],
-          lastPlayedAt: session.createdAt,
-          totalDiscountsEarned: 0,
-          totalDiscountsUsed: 0,
-        });
-      }
-      
-      const customer = customerMap.get(email);
-      customer.totalSessions++;
-      
-      if (session.status === 'completed') {
-        customer.completedSessions++;
-        if (session.score) {
-          customer.scores.push(session.score);
-        }
-      }
-      
-      // Update last played date
-      if (new Date(session.createdAt) > new Date(customer.lastPlayedAt)) {
-        customer.lastPlayedAt = session.createdAt;
-      }
-    });
-
-    // Add discount information
-    discounts.forEach(discount => {
-      const email = discount.customerEmail || 'Anonymous';
-      if (customerMap.has(email)) {
-        const customer = customerMap.get(email);
-        customer.totalDiscountsEarned++;
-        if (discount.isUsed) {
-          customer.totalDiscountsUsed++;
-        }
-      }
-    });
-
-    // Convert to array and calculate derived fields
-    const customers = Array.from(customerMap.values()).map(customer => {
+    // Process mock customers
+    const customers = mockCustomers.map(customer => {
       const averageScore = customer.scores.length > 0 
         ? customer.scores.reduce((a, b) => a + b, 0) / customer.scores.length 
         : 0;
