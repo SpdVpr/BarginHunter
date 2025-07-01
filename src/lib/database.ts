@@ -159,11 +159,14 @@ export class GameSessionService {
   }
 
   static async completeSession(
-    sessionId: string, 
-    finalScore: number, 
-    discountEarned: number, 
+    sessionId: string,
+    finalScore: number,
+    discountEarned: number,
     discountCode?: string
   ): Promise<void> {
+    console.log('🎮 completeSession called for:', sessionId);
+    console.log('🎮 Updating session with completed: true');
+
     await db.collection(collections.gameSessions).doc(sessionId).update({
       endedAt: Timestamp.now(),
       finalScore,
@@ -171,6 +174,8 @@ export class GameSessionService {
       discountCode,
       completed: true,
     });
+
+    console.log('🎮 Session update completed successfully');
   }
 
   static async getSessionsByShop(shopDomain: string, limit = 100): Promise<GameSessionDocument[]> {

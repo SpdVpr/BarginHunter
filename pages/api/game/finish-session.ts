@@ -214,8 +214,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       if (!sessionId.startsWith('temp-')) {
         // Update existing session
+        console.log('🎮 Completing real session:', sessionId);
         await GameSessionService.completeSession(sessionId, finalScore, discountEarned, discountCode);
-        console.log('🎮 Session completed in database');
+        console.log('🎮 Real session completed in database');
       } else {
         // For temp sessions, create a new completed session to track play limits
         console.log('🎮 Creating completed session record for temp session to track play limits');

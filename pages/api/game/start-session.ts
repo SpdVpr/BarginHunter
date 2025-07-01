@@ -90,6 +90,8 @@ async function validatePlayEligibility(
     // Also check completed sessions specifically within the time period
     const completedIpSessions = ipSessions.filter(session => session.completed);
     console.log('🎮 Found', completedIpSessions.length, 'completed sessions for IP within reset period:', ipAddress);
+    console.log('🎮 All IP sessions:', ipSessions.map(s => ({ id: s.id, completed: s.completed, startedAt: s.startedAt.toDate().toISOString() })));
+    console.log('🎮 Completed IP sessions:', completedIpSessions.map(s => ({ id: s.id, completed: s.completed, startedAt: s.startedAt.toDate().toISOString() })));
 
     // Debug: Show some session details
     if (ipSessions.length > 0) {
@@ -224,7 +226,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Validate play eligibility based on IP address
     console.log('🎮 Validating play eligibility for IP:', ipAddress);
     const eligibility = await validatePlayEligibility(shopDomain, ipAddress);
-    console.log('🎮 Eligibility result:', eligibility);
+    console.log('🎮 Eligibility result:', JSON.stringify(eligibility, null, 2));
 
     if (!eligibility.canPlay) {
       const response = {
