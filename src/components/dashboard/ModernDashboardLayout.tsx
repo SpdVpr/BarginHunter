@@ -61,11 +61,21 @@ export function ModernDashboardLayout({ children, shop }: ModernDashboardLayoutP
   return (
     <div style={{
       minHeight: '100vh',
+      height: 'auto',
+      maxHeight: 'none',
       overflow: 'auto',
       position: 'relative',
+      width: '100%',
     }}>
       {toastMarkup}
-      {children}
+      <div style={{
+        overflow: 'auto',
+        height: 'auto',
+        maxHeight: 'none',
+        width: '100%',
+      }}>
+        {children}
+      </div>
     </div>
   );
 }

@@ -35,27 +35,41 @@ body {
   height: 100vh;
 }
 
-/* Force scrolling in admin dashboard */
-.admin-dashboard body {
+/* Force scrolling in admin dashboard - aggressive approach */
+body.admin-dashboard {
   overflow: auto !important;
   height: auto !important;
+  max-height: none !important;
 }
 
-.admin-dashboard #root {
+body.admin-dashboard #root {
   overflow: auto !important;
   height: auto !important;
+  max-height: none !important;
   min-height: 100vh;
 }
 
-/* Polaris Frame override for admin */
-.admin-dashboard .Polaris-Frame {
-  overflow: auto !important;
-  height: auto !important;
+/* Override all Polaris components that might block scrolling */
+body.admin-dashboard * {
+  max-height: none !important;
 }
 
-.admin-dashboard .Polaris-Frame__Main {
+body.admin-dashboard .Polaris-Frame,
+body.admin-dashboard .Polaris-Frame__Main,
+body.admin-dashboard .Polaris-Page,
+body.admin-dashboard .Polaris-Layout,
+body.admin-dashboard .Polaris-Layout__Section {
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+/* Ensure the main dashboard container can scroll */
+body.admin-dashboard [class*="modernDashboard"] {
   overflow: auto !important;
   height: auto !important;
+  max-height: none !important;
+  min-height: 100vh;
 }
 
 a {
