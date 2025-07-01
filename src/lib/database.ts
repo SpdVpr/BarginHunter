@@ -76,18 +76,25 @@ export class StoreService {
 // Game configuration operations
 export class GameConfigService {
   static async createOrUpdateConfig(configData: Omit<GameConfigDocument, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    console.log('🔄 createOrUpdateConfig called for shop:', configData.shopDomain);
+    console.log('🔄 Config data to save:', JSON.stringify(configData, null, 2));
+
     const existing = await this.getConfig(configData.shopDomain);
 
     if (existing) {
+      console.log('🔄 Updating existing config with ID:', existing.id);
       // Clean undefined values before update
       const cleanedData = removeUndefinedValues({
         ...configData,
         updatedAt: Timestamp.now(),
       });
 
+      console.log('🔄 Cleaned data for update:', JSON.stringify(cleanedData, null, 2));
       await db.collection(collections.gameConfigs).doc(existing.id).update(cleanedData);
+      console.log('🔄 Config updated successfully');
       return existing.id;
     } else {
+      console.log('🔄 Creating new config');
       const docRef = db.collection(collections.gameConfigs).doc();
       const config: GameConfigDocument = {
         ...configData,
@@ -95,20 +102,29 @@ export class GameConfigService {
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       };
-      
+
+      console.log('🔄 New config to create:', JSON.stringify(config, null, 2));
       await docRef.set(config);
+      console.log('🔄 Config created successfully with ID:', docRef.id);
       return docRef.id;
     }
   }
 
   static async getConfig(shopDomain: string): Promise<GameConfigDocument | null> {
+    console.log('🔍 GameConfigService.getConfig called for shop:', shopDomain);
     const snapshot = await db.collection(collections.gameConfigs)
       .where('shopDomain', '==', shopDomain)
       .limit(1)
       .get();
-    
-    if (snapshot.empty) return null;
-    return snapshot.docs[0].data() as GameConfigDocument;
+
+    if (snapshot.empty) {
+      console.log('🔍 No config found for shop:', shopDomain);
+      return null;
+    }
+
+    const config = snapshot.docs[0].data() as GameConfigDocument;
+    console.log('🔍 Config loaded from database:', JSON.stringify(config, null, 2));
+    return config;
   }
 
   static async updateConfig(shopDomain: string, updates: Partial<GameConfigDocument>): Promise<void> {

@@ -50,6 +50,7 @@ async function validatePlayEligibility(
     console.log('🎮 Getting game config for shop:', shopDomain);
     const gameConfig = await GameConfigService.getConfig(shopDomain);
     console.log('🎮 Game config found:', !!gameConfig, gameConfig?.isEnabled);
+    console.log('🎮 Full game config:', JSON.stringify(gameConfig, null, 2));
 
     if (!gameConfig || !gameConfig.isEnabled) {
       console.log('🎮 Shop inactive or config not found');
@@ -59,6 +60,11 @@ async function validatePlayEligibility(
     const maxPlaysPerCustomer = gameConfig.gameSettings.maxPlaysPerCustomer;
     const maxPlaysPerDay = gameConfig.gameSettings.maxPlaysPerDay;
     const playLimitResetHours = gameConfig.gameSettings.playLimitResetHours || 24;
+
+    console.log('🎮 Loaded settings:');
+    console.log('🎮 - maxPlaysPerCustomer:', maxPlaysPerCustomer);
+    console.log('🎮 - maxPlaysPerDay:', maxPlaysPerDay);
+    console.log('🎮 - playLimitResetHours:', playLimitResetHours);
 
     // Check IP-based limits with time filtering
     console.log('🎮 Checking IP-based play limits for:', ipAddress);

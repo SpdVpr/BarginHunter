@@ -152,6 +152,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Update or create game configuration
     console.log('🔧 Settings API: Updating Firebase configuration...');
+    console.log('🔧 Game settings received:', JSON.stringify(gameSettings, null, 2));
+    console.log('🔧 Specifically - maxPlaysPerCustomer:', gameSettings.maxPlaysPerCustomer);
     await GameConfigService.createOrUpdateConfig({
       shopDomain: shop,
       isEnabled: gameSettings.isEnabled,
