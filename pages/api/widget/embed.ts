@@ -86,7 +86,14 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
   function shouldShowWidget() {
     console.log('🎮 Bargain Hunter: Checking if widget should show...');
-    console.log('🎮 Bargain Hunter: Widget config:', widgetConfig);
+    console.log('🎮 Bargain Hunter: Widget config:', {
+      displayMode: widgetConfig?.displayMode,
+      showOn: widgetConfig?.showOn,
+      userPercentage: widgetConfig?.userPercentage,
+      testMode: widgetConfig?.testMode,
+      targetUrls: widgetConfig?.targetUrls,
+      customPages: widgetConfig?.customPages
+    });
 
     if (!widgetConfig) {
       console.log('🎮 Bargain Hunter: No widget config - not showing');
@@ -133,18 +140,20 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
   function checkUserPercentage() {
     const percentage = widgetConfig.userPercentage || 100;
-    if (percentage >= 100) return true;
+    console.log('🎮 Bargain Hunter: Checking user percentage:', percentage + '%');
 
-    // Generate a consistent hash based on user's session/IP
-    let userHash = localStorage.getItem('bargain-hunter-user-hash');
-    if (!userHash) {
-      userHash = Math.random().toString(36).substring(2, 15);
-      localStorage.setItem('bargain-hunter-user-hash', userHash);
+    if (percentage >= 100) {
+      console.log('🎮 Bargain Hunter: 100% targeting - showing to all users');
+      return true;
     }
 
-    // Convert hash to number between 0-100
-    const hashNumber = parseInt(userHash.substring(0, 8), 36) % 100;
-    return hashNumber < percentage;
+    // Use a simple random check for each page load
+    // This ensures the percentage is actually respected
+    const randomValue = Math.random() * 100;
+    const shouldShow = randomValue < percentage;
+
+    console.log('🎮 Bargain Hunter: Random value:', randomValue.toFixed(2), 'Target percentage:', percentage, 'Should show:', shouldShow);
+    return shouldShow;
   }
 
   function checkDeviceTargeting() {

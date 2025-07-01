@@ -19,7 +19,7 @@ import {
 import { ModernDashboardLayout } from '../src/components/dashboard/ModernDashboardLayout';
 import { OverviewTab } from '../src/components/dashboard/OverviewTab';
 import { AnalyticsTab } from '../src/components/dashboard/AnalyticsTab';
-import { CustomersTab } from '../src/components/dashboard/CustomersTab';
+
 import { DiscountsTab } from '../src/components/dashboard/DiscountsTab';
 import { SettingsTab } from '../src/components/dashboard/SettingsTab';
 import styles from '../src/styles/ModernDashboard.module.css';
@@ -50,11 +50,6 @@ export default function Dashboard() {
       panelID: 'analytics-panel',
     },
     {
-      id: 'customers',
-      content: 'Customers',
-      panelID: 'customers-panel',
-    },
-    {
       id: 'discounts',
       content: 'Discounts',
       panelID: 'discounts-panel',
@@ -77,10 +72,8 @@ export default function Dashboard() {
       case 1:
         return <AnalyticsTab shop={shop} />;
       case 2:
-        return <CustomersTab shop={shop} />;
-      case 3:
         return <DiscountsTab shop={shop} />;
-      case 4:
+      case 3:
         return <SettingsTab shop={shop} />;
       default:
         return <OverviewTab shop={shop} />;

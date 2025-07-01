@@ -66,10 +66,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Validate widget settings
+    console.log('🔧 Settings API: Validating widget settings:', {
+      displayMode: widgetSettings.displayMode,
+      triggerEvent: widgetSettings.triggerEvent,
+      position: widgetSettings.position,
+      showOn: widgetSettings.showOn,
+      userPercentage: widgetSettings.userPercentage,
+      targetUrls: widgetSettings.targetUrls
+    });
+
     if (!['popup', 'tab', 'inline'].includes(widgetSettings.displayMode) ||
         !['immediate', 'scroll', 'exit_intent', 'time_delay'].includes(widgetSettings.triggerEvent) ||
         !['top-left', 'top-right', 'bottom-left', 'bottom-right', 'center'].includes(widgetSettings.position) ||
-        !['all_pages', 'homepage', 'product_pages', 'cart_page', 'checkout_page', 'collection_pages', 'custom'].includes(widgetSettings.showOn)) {
+        !['all_pages', 'homepage', 'product_pages', 'cart_page', 'checkout_page', 'collection_pages', 'custom', 'url_targeting'].includes(widgetSettings.showOn)) {
+      console.log('🔧 Settings API: Widget validation failed for:', {
+        displayMode: widgetSettings.displayMode,
+        triggerEvent: widgetSettings.triggerEvent,
+        position: widgetSettings.position,
+        showOn: widgetSettings.showOn
+      });
       return res.status(400).json({
         success: false,
         error: 'Invalid widget settings'
