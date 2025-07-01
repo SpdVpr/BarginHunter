@@ -3,6 +3,7 @@ import { AppProvider } from '@shopify/polaris';
 import '@shopify/polaris/build/esm/styles.css';
 import '../src/styles/globals.css';
 import '../src/App.css';
+import '../src/styles/admin-scroll-fix.css';
 
 // Basic i18n configuration
 const i18n = {

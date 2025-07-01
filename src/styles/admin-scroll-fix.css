@@ -1,0 +1,162 @@
+/* Admin Dashboard Scroll Fix - Only applies to admin pages */
+
+/* Target only pages with admin-dashboard class */
+.admin-dashboard-page {
+  overflow: auto !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+/* Override Polaris Frame specifically for admin */
+.admin-dashboard-page .Polaris-Frame {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.admin-dashboard-page .Polaris-Frame__Main {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  padding-bottom: 2rem;
+}
+
+.admin-dashboard-page .Polaris-Frame__Content {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* Ensure Page component allows scrolling */
+.admin-dashboard-page .Polaris-Page {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.admin-dashboard-page .Polaris-Page__Content {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* Layout components */
+.admin-dashboard-page .Polaris-Layout {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.admin-dashboard-page .Polaris-Layout__Section {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* Card components */
+.admin-dashboard-page .Polaris-Card {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* Tabs components */
+.admin-dashboard-page .Polaris-Tabs {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.admin-dashboard-page .Polaris-Tabs__Panel {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  padding-bottom: 3rem;
+}
+
+/* DataTable components */
+.admin-dashboard-page .Polaris-DataTable {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.admin-dashboard-page .Polaris-DataTable__ScrollContainer {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* Ensure body and html allow scrolling for admin */
+html.admin-dashboard-html {
+  overflow: auto !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+body.admin-dashboard-body {
+  overflow: auto !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+/* Modern dashboard specific */
+.admin-dashboard-page [class*="modernDashboard"] {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  min-height: 100vh;
+}
+
+.admin-dashboard-page [class*="modernContent"] {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  padding-bottom: 4rem;
+}
+
+/* Force scroll visibility */
+.admin-dashboard-page {
+  scrollbar-width: auto;
+  scrollbar-color: #888 #f1f1f1;
+}
+
+.admin-dashboard-page::-webkit-scrollbar {
+  width: 12px;
+}
+
+.admin-dashboard-page::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.admin-dashboard-page::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 6px;
+}
+
+.admin-dashboard-page::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Mobile scroll fix */
+@media (max-width: 768px) {
+  .admin-dashboard-page {
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto !important;
+  }
+  
+  .admin-dashboard-page .Polaris-Frame__Main {
+    padding-bottom: 4rem;
+  }
+}
+
+/* Ensure minimum height for content */
+.admin-dashboard-page .Polaris-Frame__Main {
+  min-height: calc(100vh - 60px);
+}
+
+/* Debug - add visible border to scrollable area */
+.admin-dashboard-page.debug-scroll {
+  border: 2px solid red !important;
+  min-height: 150vh; /* Force content to be taller than viewport */
+}

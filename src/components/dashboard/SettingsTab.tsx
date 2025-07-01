@@ -212,18 +212,56 @@ export function SettingsTab({ shop }: SettingsTabProps) {
   const saveSettings = async () => {
     try {
       setSaving(true);
-      
-      // Save game and widget settings
-      const gameResponse = await fetch(`/api/dashboard/settings?shop=${shop}`, {
+
+      // Prepare all settings data
+      const settingsData = {
+        shop,
+        gameSettings: gameSettings || {
+          isEnabled: true,
+          gameType: 'dino',
+          minScoreForDiscount: 100,
+          maxPlaysPerCustomer: 5,
+          maxPlaysPerDay: 10,
+          gameSpeed: 1,
+          difficulty: 'medium',
+          discountTiers: [
+            { minScore: 100, discount: 5, message: 'Great job! You earned 5% off!' },
+            { minScore: 300, discount: 10, message: 'Amazing! You earned 10% off!' },
+            { minScore: 500, discount: 15, message: 'Incredible! You earned 15% off!' }
+          ]
+        },
+        widgetSettings: widgetSettings || {
+          displayMode: 'popup',
+          triggerEvent: 'immediate',
+          position: 'center',
+          showOn: 'all_pages',
+          userPercentage: 100,
+          testMode: false,
+          showDelay: 0,
+          pageLoadTrigger: 'immediate',
+          deviceTargeting: 'all',
+        },
+        appearance: appearanceSettings || {
+          primaryColor: '#667eea',
+          secondaryColor: '#764ba2',
+          backgroundTheme: 'default',
+        },
+        businessRules: businessRules || {
+          excludeDiscountedProducts: false,
+          allowStackingDiscounts: false,
+          discountExpiryHours: 24,
+          minimumOrderValue: 0,
+        }
+      };
+
+      // Save main settings
+      const gameResponse = await fetch(`/api/dashboard/settings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          gameSettings,
-          widgetSettings,
-        }),
+        body: JSON.stringify(settingsData),
       });
 
-      // Save intro settings
+      // Save intro settings separately
       const introResponse = await fetch(`/api/dashboard/intro-settings?shop=${shop}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -234,11 +272,14 @@ export function SettingsTab({ shop }: SettingsTabProps) {
         setToastMessage('Settings saved successfully!');
         setToastActive(true);
       } else {
-        throw new Error('Failed to save settings');
+        const gameError = await gameResponse.text();
+        const introError = await introResponse.text();
+        console.error('Settings API errors:', { gameError, introError });
+        throw new Error(`Failed to save settings: ${gameError || introError}`);
       }
     } catch (error) {
       console.error('Error saving settings:', error);
-      setToastMessage('Failed to save settings. Please try again.');
+      setToastMessage(`Failed to save settings: ${error.message}`);
       setToastActive(true);
     } finally {
       setSaving(false);

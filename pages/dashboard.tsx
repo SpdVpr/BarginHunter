@@ -87,17 +87,27 @@ export default function Dashboard() {
     }
   };
 
-  // Add admin-dashboard class to body when component mounts
+  // Add admin-dashboard classes when component mounts
   React.useEffect(() => {
-    document.body.classList.add('admin-dashboard');
+    document.documentElement.classList.add('admin-dashboard-html');
+    document.body.classList.add('admin-dashboard-body');
+    const rootElement = document.getElementById('__next');
+    if (rootElement) {
+      rootElement.classList.add('admin-dashboard-page');
+    }
+
     return () => {
-      document.body.classList.remove('admin-dashboard');
+      document.documentElement.classList.remove('admin-dashboard-html');
+      document.body.classList.remove('admin-dashboard-body');
+      if (rootElement) {
+        rootElement.classList.remove('admin-dashboard-page');
+      }
     };
   }, []);
 
   return (
     <ModernDashboardLayout shop={typeof shop === 'string' ? shop : ''}>
-      <div className={`${styles.modernDashboard} admin-dashboard`}>
+      <div className={`${styles.modernDashboard} admin-dashboard-page`}>
         {/* Modern Header */}
         <div className={styles.modernHeader}>
           <div className={styles.modernHeaderContent}>
