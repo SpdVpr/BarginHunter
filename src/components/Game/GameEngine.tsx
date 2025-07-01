@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
+import TouchControlsHint from './TouchControlsHint';
 
 interface GameEngineProps {
   onGameEnd: (score: number, gameData: any) => void;
@@ -167,12 +168,19 @@ export default function GameEngine({
       handleJump();
     };
 
+    const handleTouchEnd = (event: TouchEvent) => {
+      event.preventDefault();
+    };
+
     canvas.addEventListener('click', handleClick);
-    canvas.addEventListener('touchstart', handleTouchStart);
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+    canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+    canvas.style.touchAction = 'none'; // Prevent scrolling on touch
 
     return () => {
       canvas.removeEventListener('click', handleClick);
       canvas.removeEventListener('touchstart', handleTouchStart);
+      canvas.removeEventListener('touchend', handleTouchEnd);
     };
   }, [handleJump]);
 
@@ -440,10 +448,7 @@ export default function GameEngine({
         </div>
       </div>
 
-      <div style={{ marginTop: '20px', textAlign: 'center' }}>
-        <p><strong>Controls:</strong> Click mouse or press SPACE to Jump</p>
-        <p><strong>Mobile:</strong> Tap anywhere to Jump</p>
-      </div>
+      <TouchControlsHint gameType="dino" />
     </div>
   );
 }

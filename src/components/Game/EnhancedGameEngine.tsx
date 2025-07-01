@@ -1,5 +1,6 @@
 /** @jsxImportSource react */
 import React, { useRef, useEffect, useState, useCallback } from 'react';
+import TouchControlsHint from './TouchControlsHint';
 import { GameScorer, DIFFICULTY_PROGRESSION, getDifficultyName, formatScore } from '../../utils/gameScoring';
 
 interface GameConfig {
@@ -527,18 +528,37 @@ export default function EnhancedGameEngine({
         handleJump();
       }
     };
-    
-    const handleClick = () => {
+
+    const handleClick = (e: MouseEvent) => {
+      e.preventDefault();
       handleJump();
     };
-    
+
+    const handleTouchStart = (e: TouchEvent) => {
+      e.preventDefault();
+      handleJump();
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      e.preventDefault();
+    };
+
     window.addEventListener('keydown', handleKeyPress);
     const canvas = canvasRef.current;
-    canvas?.addEventListener('click', handleClick);
-    
+    if (canvas) {
+      canvas.addEventListener('click', handleClick);
+      canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+      canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+      canvas.style.touchAction = 'none'; // Prevent scrolling on touch
+    }
+
     return () => {
       window.removeEventListener('keydown', handleKeyPress);
-      canvas?.removeEventListener('click', handleClick);
+      if (canvas) {
+        canvas.removeEventListener('click', handleClick);
+        canvas.removeEventListener('touchstart', handleTouchStart);
+        canvas.removeEventListener('touchend', handleTouchEnd);
+      }
     };
   }, [handleJump]);
 
@@ -556,26 +576,29 @@ export default function EnhancedGameEngine({
   }, [isRunning, gameLoop]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={canvasSize.width}
-      height={canvasSize.height}
-      style={{
-        display: 'block',
-        cursor: 'pointer',
-        background: '#f7f7f7',
-        margin: 0,
-        padding: 0,
-        border: 'none',
-        borderRadius: 0,
-        boxShadow: 'none',
-        width: '100vw',
-        height: '100vh',
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        zIndex: 1
-      }}
-    />
+    <>
+      <canvas
+        ref={canvasRef}
+        width={canvasSize.width}
+        height={canvasSize.height}
+        style={{
+          display: 'block',
+          cursor: 'pointer',
+          background: '#f7f7f7',
+          margin: 0,
+          padding: 0,
+          border: 'none',
+          borderRadius: 0,
+          boxShadow: 'none',
+          width: '100vw',
+          height: '100vh',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          zIndex: 1
+        }}
+      />
+      <TouchControlsHint gameType="dino" />
+    </>
   );
 }

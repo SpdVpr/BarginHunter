@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
+import TouchControlsHint from './TouchControlsHint';
 
 interface NewGameEngineProps {
   onGameEnd: (score: number, gameData: any) => void;
@@ -82,16 +83,36 @@ export default function NewGameEngine({ onGameEnd, onScoreUpdate, discountTiers,
       }
     };
 
-    const handleClick = () => {
+    const handleClick = (e: MouseEvent) => {
+      e.preventDefault();
       jump();
     };
 
+    const handleTouchStart = (e: TouchEvent) => {
+      e.preventDefault();
+      jump();
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      e.preventDefault();
+    };
+
     window.addEventListener('keydown', handleKeyPress);
-    window.addEventListener('click', handleClick);
+    const canvas = canvasRef.current;
+    if (canvas) {
+      canvas.addEventListener('click', handleClick);
+      canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+      canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+      canvas.style.touchAction = 'none'; // Prevent scrolling on touch
+    }
 
     return () => {
       window.removeEventListener('keydown', handleKeyPress);
-      window.removeEventListener('click', handleClick);
+      if (canvas) {
+        canvas.removeEventListener('click', handleClick);
+        canvas.removeEventListener('touchstart', handleTouchStart);
+        canvas.removeEventListener('touchend', handleTouchEnd);
+      }
     };
   }, [jump]);
 
@@ -476,9 +497,7 @@ export default function NewGameEngine({ onGameEnd, onScoreUpdate, discountTiers,
       <div style={{ marginTop: '10px', fontSize: '18px', fontWeight: 'bold' }}>
         Score: {Math.floor(score)}
       </div>
-      <div style={{ marginTop: '5px', fontSize: '14px', color: '#666' }}>
-        Click or press SPACE to jump!
-      </div>
+      <TouchControlsHint gameType="dino" />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 /** @jsxImportSource react */
 import React, { useRef, useEffect, useState, useCallback } from 'react';
+import TouchControlsHint from './TouchControlsHint';
 import { GameScorer, getDifficultyName, formatScore } from '../../utils/gameScoring';
 
 interface GameConfig {
@@ -387,6 +388,10 @@ export default function TetrisEngine({
     startGame();
   }, [startGame]);
 
+  // Touch controls state
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
+
   // Event listeners
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -410,20 +415,74 @@ export default function TetrisEngine({
           break;
       }
     };
-    
-    const handleClick = () => {
+
+    const handleClick = (e: MouseEvent) => {
+      e.preventDefault();
       handleRotate();
     };
-    
+
+    const handleTouchStart = (e: TouchEvent) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      setTouchStartX(touch.clientX);
+      setTouchStartY(touch.clientY);
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      e.preventDefault();
+      if (touchStartX === null || touchStartY === null) return;
+
+      const touch = e.changedTouches[0];
+      const deltaX = touch.clientX - touchStartX;
+      const deltaY = touch.clientY - touchStartY;
+      const minSwipeDistance = 30;
+
+      // Determine swipe direction
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        // Horizontal swipe
+        if (Math.abs(deltaX) > minSwipeDistance) {
+          if (deltaX > 0) {
+            handleMoveRight();
+          } else {
+            handleMoveLeft();
+          }
+        }
+      } else {
+        // Vertical swipe
+        if (Math.abs(deltaY) > minSwipeDistance) {
+          if (deltaY > 0) {
+            handleMoveDown();
+          } else {
+            handleRotate();
+          }
+        } else {
+          // Tap (no significant swipe)
+          handleRotate();
+        }
+      }
+
+      setTouchStartX(null);
+      setTouchStartY(null);
+    };
+
     window.addEventListener('keydown', handleKeyPress);
     const canvas = canvasRef.current;
-    canvas?.addEventListener('click', handleClick);
-    
+    if (canvas) {
+      canvas.addEventListener('click', handleClick);
+      canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+      canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+      canvas.style.touchAction = 'none'; // Prevent scrolling on touch
+    }
+
     return () => {
       window.removeEventListener('keydown', handleKeyPress);
-      canvas?.removeEventListener('click', handleClick);
+      if (canvas) {
+        canvas.removeEventListener('click', handleClick);
+        canvas.removeEventListener('touchstart', handleTouchStart);
+        canvas.removeEventListener('touchend', handleTouchEnd);
+      }
     };
-  }, [handleRotate, handleMoveLeft, handleMoveRight, handleMoveDown]);
+  }, [handleRotate, handleMoveLeft, handleMoveRight, handleMoveDown, touchStartX, touchStartY]);
 
   // Game loop effect
   useEffect(() => {
@@ -439,26 +498,29 @@ export default function TetrisEngine({
   }, [isRunning, gameLoop]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={canvasSize.width}
-      height={canvasSize.height}
-      style={{
-        display: 'block',
-        cursor: 'pointer',
-        background: '#000',
-        margin: 0,
-        padding: 0,
-        border: 'none',
-        borderRadius: 0,
-        boxShadow: 'none',
-        width: '100vw',
-        height: '100vh',
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        zIndex: 1
-      }}
-    />
+    <>
+      <canvas
+        ref={canvasRef}
+        width={canvasSize.width}
+        height={canvasSize.height}
+        style={{
+          display: 'block',
+          cursor: 'pointer',
+          background: '#000',
+          margin: 0,
+          padding: 0,
+          border: 'none',
+          borderRadius: 0,
+          boxShadow: 'none',
+          width: '100vw',
+          height: '100vh',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          zIndex: 1
+        }}
+      />
+      <TouchControlsHint gameType="tetris" />
+    </>
   );
 }

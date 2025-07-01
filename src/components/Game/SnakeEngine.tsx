@@ -1,5 +1,6 @@
 /** @jsxImportSource react */
 import React, { useRef, useEffect, useState, useCallback } from 'react';
+import TouchControlsHint from './TouchControlsHint';
 import { GameScorer, DIFFICULTY_PROGRESSION, getDifficultyName, formatScore } from '../../utils/gameScoring';
 
 interface GameConfig {
@@ -305,6 +306,8 @@ export default function SnakeEngine({
   }, [isRunning, snake, changeDirection]);
 
   // Touch controls
+  const [touchStartPos, setTouchStartPos] = useState<{x: number, y: number} | null>(null);
+
   const handleTouchStart = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
     e.preventDefault();
     if (!isRunning || snake.length === 0) return;
@@ -317,22 +320,38 @@ export default function SnakeEngine({
     const touchX = touch.clientX - rect.left;
     const touchY = touch.clientY - rect.top;
 
-    const head = snake[0];
-    const headPixelX = head.x * GRID_SIZE + GRID_SIZE / 2;
-    const headPixelY = head.y * GRID_SIZE + GRID_SIZE / 2;
+    setTouchStartPos({ x: touchX, y: touchY });
+  }, [isRunning, snake]);
 
-    const deltaX = touchX - headPixelX;
-    const deltaY = touchY - headPixelY;
+  const handleTouchEnd = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    if (!touchStartPos || !isRunning || snake.length === 0) return;
 
-    // Determine direction based on which delta is larger
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      // Horizontal movement
-      changeDirection(deltaX > 0 ? 'RIGHT' : 'LEFT');
-    } else {
-      // Vertical movement
-      changeDirection(deltaY > 0 ? 'DOWN' : 'UP');
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.changedTouches[0];
+    const touchX = touch.clientX - rect.left;
+    const touchY = touch.clientY - rect.top;
+
+    const deltaX = touchX - touchStartPos.x;
+    const deltaY = touchY - touchStartPos.y;
+    const minSwipeDistance = 20;
+
+    // Determine direction based on swipe if it's significant enough
+    if (Math.abs(deltaX) > minSwipeDistance || Math.abs(deltaY) > minSwipeDistance) {
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        // Horizontal swipe
+        changeDirection(deltaX > 0 ? 'RIGHT' : 'LEFT');
+      } else {
+        // Vertical swipe
+        changeDirection(deltaY > 0 ? 'DOWN' : 'UP');
+      }
     }
-  }, [isRunning, snake, changeDirection]);
+
+    setTouchStartPos(null);
+  }, [isRunning, snake, changeDirection, touchStartPos]);
 
   // Draw game
   const draw = useCallback((ctx: CanvasRenderingContext2D) => {
@@ -473,29 +492,33 @@ export default function SnakeEngine({
   }, [isRunning, gameLoop]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={canvasSize.width}
-      height={canvasSize.height}
-      onClick={handleCanvasClick}
-      onTouchStart={handleTouchStart}
-      style={{
-        display: 'block',
-        backgroundColor: BACKGROUND_COLOR,
-        cursor: 'pointer',
-        touchAction: 'none',
-        margin: 0,
-        padding: 0,
-        border: 'none',
-        borderRadius: 0,
-        boxShadow: 'none',
-        width: '100vw',
-        height: '100vh',
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        zIndex: 1
-      }}
-    />
+    <>
+      <canvas
+        ref={canvasRef}
+        width={canvasSize.width}
+        height={canvasSize.height}
+        onClick={handleCanvasClick}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        style={{
+          display: 'block',
+          backgroundColor: BACKGROUND_COLOR,
+          cursor: 'pointer',
+          touchAction: 'none',
+          margin: 0,
+          padding: 0,
+          border: 'none',
+          borderRadius: 0,
+          boxShadow: 'none',
+          width: '100vw',
+          height: '100vh',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          zIndex: 1
+        }}
+      />
+      <TouchControlsHint gameType="snake" />
+    </>
   );
 }

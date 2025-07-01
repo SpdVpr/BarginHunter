@@ -1,5 +1,6 @@
 /** @jsxImportSource react */
 import React, { useRef, useEffect, useState, useCallback } from 'react';
+import TouchControlsHint from './TouchControlsHint';
 import { GameScorer, DIFFICULTY_PROGRESSION, getDifficultyName, formatScore } from '../../utils/gameScoring';
 
 interface GameConfig {
@@ -204,10 +205,10 @@ export default function SpaceInvadersEngine({
   const handleTouchStart = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
     e.preventDefault();
     if (!isRunning) return;
-    
+
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
-    
+
     const touch = e.touches[0];
     const x = (touch.clientX - rect.left) * (canvasSize.width / rect.width);
     setTouchX(x);
@@ -217,10 +218,10 @@ export default function SpaceInvadersEngine({
   const handleTouchMove = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
     e.preventDefault();
     if (!isTouching) return;
-    
+
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
-    
+
     const touch = e.touches[0];
     const x = (touch.clientX - rect.left) * (canvasSize.width / rect.width);
     setTouchX(x);
@@ -229,6 +230,14 @@ export default function SpaceInvadersEngine({
   const handleTouchEnd = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
     e.preventDefault();
     setIsTouching(false);
+  }, []);
+
+  // Set touch action on canvas
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      canvas.style.touchAction = 'none'; // Prevent scrolling on touch
+    }
   }, []);
 
   // Game logic functions
@@ -565,30 +574,33 @@ export default function SpaceInvadersEngine({
   }, [isRunning, gameLoop]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={canvasSize.width}
-      height={canvasSize.height}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-      style={{
-        display: 'block',
-        backgroundColor: '#000',
-        cursor: 'pointer',
-        touchAction: 'none',
-        margin: 0,
-        padding: 0,
-        border: 'none',
-        borderRadius: 0,
-        boxShadow: 'none',
-        width: '100vw',
-        height: '100vh',
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        zIndex: 1
-      }}
-    />
+    <>
+      <canvas
+        ref={canvasRef}
+        width={canvasSize.width}
+        height={canvasSize.height}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{
+          display: 'block',
+          backgroundColor: '#000',
+          cursor: 'pointer',
+          touchAction: 'none',
+          margin: 0,
+          padding: 0,
+          border: 'none',
+          borderRadius: 0,
+          boxShadow: 'none',
+          width: '100vw',
+          height: '100vh',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          zIndex: 1
+        }}
+      />
+      <TouchControlsHint gameType="space_invaders" />
+    </>
   );
 }
