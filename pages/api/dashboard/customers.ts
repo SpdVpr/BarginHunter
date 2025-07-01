@@ -13,26 +13,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    console.log('🔍 Customers API: Getting real data for shop:', shop);
+    console.log('🔍 Customers API: Getting real data from webhooks for shop:', shop);
 
-    // Get real customer data (same approach as stats API)
-    let customers: any[] = [];
+    // Get real data from sessions and discounts (webhook data)
     let allSessions: any[] = [];
     let allDiscounts: any[] = [];
 
     try {
-      customers = await CustomerService.getCustomersByShop(shop);
-      console.log('🔍 Found customers:', customers.length);
-
-      // Get all sessions and discounts once for efficiency
+      // Get all sessions and discounts (these contain customer data from webhooks)
       allSessions = await GameSessionService.getSessionsByShop(shop, 1000);
       allDiscounts = await DiscountService.getDiscountsByShop(shop, 1000);
       console.log('🔍 Found sessions:', allSessions.length, 'discounts:', allDiscounts.length);
     } catch (indexError: any) {
-      // If indexes are building, return empty arrays (same as stats API)
+      // If indexes are building, return empty arrays
       if (indexError.code === 9 && indexError.details?.includes('index is currently building')) {
         console.log('🔍 Firebase indexes are building, returning empty data...');
-        customers = [];
         allSessions = [];
         allDiscounts = [];
       } else {
@@ -40,8 +35,58 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    if (customers.length === 0) {
-      console.log('🔍 No customers found, returning empty array');
+    // Extract unique customers from sessions and discounts (webhook data)
+    const customerMap = new Map();
+
+    // Process customers from sessions
+    allSessions.forEach(session => {
+      const email = session.customerEmail || session.customerId;
+      if (email && !customerMap.has(email)) {
+        customerMap.set(email, {
+          email: email,
+          customerId: session.customerId || email,
+          firstSeen: session.startedAt,
+          lastSeen: session.startedAt,
+          source: 'session'
+        });
+      } else if (email && customerMap.has(email)) {
+        const existing = customerMap.get(email);
+        if (session.startedAt.toDate() > existing.lastSeen.toDate()) {
+          existing.lastSeen = session.startedAt;
+        }
+        if (session.startedAt.toDate() < existing.firstSeen.toDate()) {
+          existing.firstSeen = session.startedAt;
+        }
+      }
+    });
+
+    // Process customers from discounts (webhook order data)
+    allDiscounts.forEach(discount => {
+      const email = discount.customerEmail || discount.customerId;
+      if (email && !customerMap.has(email)) {
+        customerMap.set(email, {
+          email: email,
+          customerId: discount.customerId || email,
+          firstSeen: discount.createdAt,
+          lastSeen: discount.createdAt,
+          source: 'discount'
+        });
+      } else if (email && customerMap.has(email)) {
+        const existing = customerMap.get(email);
+        if (discount.createdAt.toDate() > existing.lastSeen.toDate()) {
+          existing.lastSeen = discount.createdAt;
+        }
+        if (discount.createdAt.toDate() < existing.firstSeen.toDate()) {
+          existing.firstSeen = discount.createdAt;
+        }
+      }
+    });
+
+    const uniqueCustomers = Array.from(customerMap.values());
+    console.log('🔍 Found unique customers from webhook data:', uniqueCustomers.length);
+
+    if (uniqueCustomers.length === 0) {
+      console.log('🔍 No customers found in webhook data, returning empty array');
       return res.status(200).json({
         customers: [],
         summary: {
@@ -53,10 +98,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Process real customers
-    const processedCustomers = await Promise.all(customers.map(async (customer) => {
+    // Process customers from webhook data
+    const processedCustomers = await Promise.all(uniqueCustomers.map(async (customer) => {
       try {
-        // Get customer's scores (optimized - single call per customer)
+        // Get customer's scores
         let scores: any[] = [];
         try {
           scores = await GameScoreService.getCustomerScores(shop, customer.customerId || customer.email);
@@ -69,12 +114,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // Filter sessions and discounts from already loaded data
         const customerSessions = allSessions.filter(s =>
           s.customerId === customer.customerId ||
-          s.customerEmail === customer.email
+          s.customerEmail === customer.email ||
+          s.customerId === customer.email ||
+          s.customerEmail === customer.customerId
         );
 
         const customerDiscounts = allDiscounts.filter(d =>
           d.customerId === customer.customerId ||
-          d.customerEmail === customer.email
+          d.customerEmail === customer.email ||
+          d.customerId === customer.email ||
+          d.customerEmail === customer.customerId
         );
 
         const averageScore = scoreValues.length > 0
@@ -88,7 +137,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // Determine if customer is active (played in last 30 days)
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const isActive = customer.lastPlayedAt && new Date(customer.lastPlayedAt.toDate()) > thirtyDaysAgo;
+        const isActive = customer.lastSeen && new Date(customer.lastSeen.toDate()) > thirtyDaysAgo;
 
         return {
           id: customer.customerId || customer.email,
@@ -96,12 +145,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           totalSessions: customerSessions.length,
           completedSessions: customerSessions.filter(s => s.completed).length,
           scores: scoreValues,
-          lastPlayedAt: customer.lastPlayedAt ? customer.lastPlayedAt.toDate().toISOString() : null,
+          lastPlayedAt: customer.lastSeen ? customer.lastSeen.toDate().toISOString() : null,
           totalDiscountsEarned: customerDiscounts.length,
           totalDiscountsUsed: customerDiscounts.filter(d => d.isUsed).length,
           averageScore: Math.round(averageScore * 100) / 100,
           bestScore,
           status: isActive ? 'active' : 'inactive',
+          source: customer.source, // 'session' or 'discount' - shows where we found this customer
         };
       } catch (error) {
         console.error('Error processing customer:', customer, error);
