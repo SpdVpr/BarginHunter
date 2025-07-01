@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { GameSessionService, GameScoreService, DiscountService } from '../../../src/lib/database';
 
 // Mock analytics data when APIs are not available
 function getMockAnalyticsData() {
@@ -39,20 +40,31 @@ async function getAnalyticsFromExistingAPI(shop: string, period: string) {
   try {
     console.log('🔍 Getting real analytics data for shop:', shop, 'period:', period);
 
-    // Import Firebase services
-    const { GameSessionService, GameScoreService, DiscountService } = await import('../../../src/lib/database');
+    // Get real sessions data (same approach as stats API)
+    let sessions: any[] = [];
+    let scores: any[] = [];
+    let discounts: any[] = [];
 
-    // Get real sessions data
-    const sessions = await GameSessionService.getSessionsByShop(shop, 1000);
-    console.log('🔍 Found sessions:', sessions.length);
+    try {
+      sessions = await GameSessionService.getSessionsByShop(shop, 1000);
+      console.log('🔍 Found sessions:', sessions.length);
 
-    // Get real scores data
-    const scores = await GameScoreService.getScoresByShop(shop, 100);
-    console.log('🔍 Found scores:', scores.length);
+      scores = await GameScoreService.getScoresByShop(shop, 100);
+      console.log('🔍 Found scores:', scores.length);
 
-    // Get real discounts data
-    const discounts = await DiscountService.getDiscountsByShop(shop, 100);
-    console.log('🔍 Found discounts:', discounts.length);
+      discounts = await DiscountService.getDiscountsByShop(shop, 100);
+      console.log('🔍 Found discounts:', discounts.length);
+    } catch (indexError: any) {
+      // If indexes are building, return empty arrays (same as stats API)
+      if (indexError.code === 9 && indexError.details?.includes('index is currently building')) {
+        console.log('🔍 Firebase indexes are building, returning empty data...');
+        sessions = [];
+        scores = [];
+        discounts = [];
+      } else {
+        throw indexError;
+      }
+    }
 
     // Calculate period filter
     const now = new Date();
@@ -179,15 +191,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    console.log('🔍 Analytics API: Getting real data for shop:', shop);
+    console.log('🔍 Analytics API: Getting real data for shop:', shop, 'period:', period);
 
     // Try to get real analytics data from Firebase
     const analyticsData = await getAnalyticsFromExistingAPI(shop, period as string);
 
-    console.log('🔍 Analytics API: Real data retrieved:', analyticsData);
+    console.log('🔍 Analytics API: Real data retrieved successfully');
+    console.log('🔍 Analytics metrics:', analyticsData.metrics);
     res.status(200).json(analyticsData);
   } catch (error) {
-    console.error('❌ Error fetching analytics data:', error);
+    console.error('❌ Analytics API Error:', error);
+    console.error('❌ Error details:', {
+      message: error.message,
+      code: error.code,
+      stack: error.stack
+    });
 
     // Return empty/zero data instead of mock data to see what's really working
     const emptyData = {
@@ -217,6 +235,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       },
     };
 
+    console.log('🔍 Returning empty data due to error');
     res.status(200).json(emptyData);
   }
 }

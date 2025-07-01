@@ -208,7 +208,17 @@ export class GameScoreService {
       .where('customerId', '==', customerId)
       .orderBy('achievedAt', 'desc')
       .get();
-    
+
+    return snapshot.docs.map(doc => doc.data() as GameScoreDocument);
+  }
+
+  static async getScoresByShop(shopDomain: string, limit = 100): Promise<GameScoreDocument[]> {
+    const snapshot = await db.collection(collections.gameScores)
+      .where('shopDomain', '==', shopDomain)
+      .orderBy('achievedAt', 'desc')
+      .limit(limit)
+      .get();
+
     return snapshot.docs.map(doc => doc.data() as GameScoreDocument);
   }
 }

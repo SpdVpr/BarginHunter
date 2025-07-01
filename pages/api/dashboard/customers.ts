@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { CustomerService, GameSessionService, GameScoreService, DiscountService } from '../../../src/lib/database';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -14,35 +15,64 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     console.log('🔍 Customers API: Getting real data for shop:', shop);
 
-    // Import Firebase services
-    const { CustomerService, GameSessionService, GameScoreService, DiscountService } = await import('../../../src/lib/database');
+    // Get real customer data (same approach as stats API)
+    let customers: any[] = [];
+    let allSessions: any[] = [];
+    let allDiscounts: any[] = [];
 
-    // Get real customer data
-    const customers = await CustomerService.getCustomersByShop(shop);
-    console.log('🔍 Found customers:', customers.length);
+    try {
+      customers = await CustomerService.getCustomersByShop(shop);
+      console.log('🔍 Found customers:', customers.length);
+
+      // Get all sessions and discounts once for efficiency
+      allSessions = await GameSessionService.getSessionsByShop(shop, 1000);
+      allDiscounts = await DiscountService.getDiscountsByShop(shop, 1000);
+      console.log('🔍 Found sessions:', allSessions.length, 'discounts:', allDiscounts.length);
+    } catch (indexError: any) {
+      // If indexes are building, return empty arrays (same as stats API)
+      if (indexError.code === 9 && indexError.details?.includes('index is currently building')) {
+        console.log('🔍 Firebase indexes are building, returning empty data...');
+        customers = [];
+        allSessions = [];
+        allDiscounts = [];
+      } else {
+        throw indexError;
+      }
+    }
 
     if (customers.length === 0) {
       console.log('🔍 No customers found, returning empty array');
-      return res.status(200).json([]);
+      return res.status(200).json({
+        customers: [],
+        summary: {
+          totalCustomers: 0,
+          activeCustomers: 0,
+          averageSessionsPerCustomer: 0,
+          topPerformers: 0,
+        },
+      });
     }
 
     // Process real customers
     const processedCustomers = await Promise.all(customers.map(async (customer) => {
       try {
-        // Get customer's scores
-        const scores = await GameScoreService.getCustomerScores(shop, customer.customerId || customer.email);
+        // Get customer's scores (optimized - single call per customer)
+        let scores: any[] = [];
+        try {
+          scores = await GameScoreService.getCustomerScores(shop, customer.customerId || customer.email);
+        } catch (scoreError) {
+          console.log('🔍 Could not get scores for customer:', customer.email, scoreError);
+          scores = [];
+        }
         const scoreValues = scores.map(s => s.score);
 
-        // Get customer's sessions
-        const sessions = await GameSessionService.getSessionsByShop(shop, 1000);
-        const customerSessions = sessions.filter(s =>
+        // Filter sessions and discounts from already loaded data
+        const customerSessions = allSessions.filter(s =>
           s.customerId === customer.customerId ||
           s.customerEmail === customer.email
         );
 
-        // Get customer's discounts
-        const discounts = await DiscountService.getDiscountsByShop(shop, 1000);
-        const customerDiscounts = discounts.filter(d =>
+        const customerDiscounts = allDiscounts.filter(d =>
           d.customerId === customer.customerId ||
           d.customerEmail === customer.email
         );
