@@ -40,10 +40,11 @@ interface WidgetSettings {
   displayMode: 'popup' | 'tab' | 'inline';
   triggerEvent: 'immediate' | 'scroll' | 'exit_intent' | 'time_delay';
   position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
-  showOn: 'all_pages' | 'product_pages' | 'cart_page' | 'checkout_page' | 'collection_pages' | 'custom';
+  showOn: 'all_pages' | 'product_pages' | 'cart_page' | 'checkout_page' | 'collection_pages' | 'custom' | 'url_targeting';
   timeDelay?: number;
   scrollPercentage?: number;
   customPages?: string[];
+  targetUrls?: string[]; // New: URLs where widget should appear
   userPercentage: number;
   testMode: boolean;
   showDelay: number;
@@ -162,6 +163,7 @@ export function SettingsTab({ shop }: SettingsTabProps) {
           deviceTargeting: config.widgetSettings?.deviceTargeting || 'all',
           geoTargeting: config.widgetSettings?.geoTargeting || [],
           customPages: config.widgetSettings?.customPages || [],
+          targetUrls: config.widgetSettings?.targetUrls || [],
           timeBasedRules: config.widgetSettings?.timeBasedRules || {
             enabled: false,
           },
@@ -240,6 +242,8 @@ export function SettingsTab({ shop }: SettingsTabProps) {
           showDelay: 0,
           pageLoadTrigger: 'immediate',
           deviceTargeting: 'all',
+          customPages: [],
+          targetUrls: [],
         },
         appearance: appearanceSettings || {
           primaryColor: '#667eea',
@@ -380,6 +384,7 @@ export function SettingsTab({ shop }: SettingsTabProps) {
                     { label: 'Cart Page Only', value: 'cart_page' },
                     { label: 'Collection Pages', value: 'collection_pages' },
                     { label: 'Custom Pages', value: 'custom' },
+                    { label: 'Specific URLs (Direct Link)', value: 'url_targeting' },
                   ]}
                   value={widgetSettings.showOn}
                   onChange={(value) => setWidgetSettings({...widgetSettings, showOn: value as any})}
@@ -395,6 +400,37 @@ export function SettingsTab({ shop }: SettingsTabProps) {
                     })}
                     helpText="Enter page URLs where the widget should appear"
                   />
+                )}
+
+                {widgetSettings.showOn === 'url_targeting' && (
+                  <div style={{ display: 'grid', gap: '1rem' }}>
+                    <TextField
+                      label="Target URLs (one per line)"
+                      value={widgetSettings.targetUrls?.join('\n') || ''}
+                      onChange={(value) => setWidgetSettings({
+                        ...widgetSettings,
+                        targetUrls: value.split('\n').map(url => url.trim()).filter(Boolean)
+                      })}
+                      multiline={4}
+                      helpText="Enter complete URLs where the widget popup should appear. When someone visits these URLs, the game popup will show immediately."
+                      placeholder="https://example.com/special-offer&#10;https://example.com/sale&#10;https://example.com/discount"
+                    />
+                    <div style={{
+                      padding: '1rem',
+                      background: '#f6f6f7',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      color: '#637381'
+                    }}>
+                      <strong>How URL Targeting Works:</strong>
+                      <ul style={{ margin: '0.5rem 0', paddingLeft: '1.5rem' }}>
+                        <li>Widget will appear as popup when someone visits the exact URLs listed above</li>
+                        <li>Perfect for special landing pages, promotional campaigns, or direct links</li>
+                        <li>Example: Share https://yourstore.com/special-offer and visitors will see the game popup</li>
+                        <li>URLs must be complete including https://</li>
+                      </ul>
+                    </div>
+                  </div>
                 )}
 
                 <Select

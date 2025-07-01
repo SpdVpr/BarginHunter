@@ -211,7 +211,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
   function checkPageTargeting() {
     const currentPath = window.location.pathname;
-    console.log('🎮 Bargain Hunter: Checking page targeting for path:', currentPath, 'showOn:', widgetConfig.showOn);
+    const currentUrl = window.location.href;
+    console.log('🎮 Bargain Hunter: Checking page targeting for path:', currentPath, 'URL:', currentUrl, 'showOn:', widgetConfig.showOn);
 
     switch (widgetConfig.showOn) {
       case 'homepage':
@@ -229,6 +230,22 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       case 'custom':
         return widgetConfig.customPages &&
                widgetConfig.customPages.some(page => currentPath.includes(page));
+      case 'url_targeting':
+        // Check if current URL matches any of the target URLs
+        if (widgetConfig.targetUrls && widgetConfig.targetUrls.length > 0) {
+          const matches = widgetConfig.targetUrls.some(targetUrl => {
+            // Normalize URLs for comparison
+            const normalizedTarget = targetUrl.toLowerCase().trim();
+            const normalizedCurrent = currentUrl.toLowerCase();
+
+            // Check for exact match or if current URL starts with target URL
+            return normalizedCurrent === normalizedTarget ||
+                   normalizedCurrent.startsWith(normalizedTarget);
+          });
+          console.log('🎮 Bargain Hunter: URL targeting check:', matches, 'Target URLs:', widgetConfig.targetUrls);
+          return matches;
+        }
+        return false;
       case 'all_pages':
       default:
         return true;

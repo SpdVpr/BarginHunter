@@ -84,8 +84,9 @@ export interface WidgetConfiguration {
   triggerEvent: 'immediate' | 'exit_intent' | 'time_delay' | 'scroll';
   triggerDelay?: number;
   position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
-  showOn: 'all_pages' | 'product_pages' | 'collection_pages' | 'cart_page' | 'checkout_page' | 'custom';
+  showOn: 'all_pages' | 'product_pages' | 'collection_pages' | 'cart_page' | 'checkout_page' | 'custom' | 'url_targeting';
   customPages?: string[];
+  targetUrls?: string[]; // URLs where widget should appear as popup
   // New targeting options
   userPercentage: number; // 0-100% of users who will see the widget
   testMode: boolean; // Enable test mode for debugging

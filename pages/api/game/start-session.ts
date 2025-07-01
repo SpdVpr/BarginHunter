@@ -35,7 +35,7 @@ function getBrowserType(userAgent: string): string {
 
 async function validatePlayEligibility(
   shopDomain: string,
-  customerIdentifier: string
+  ipAddress: string
 ): Promise<{ canPlay: boolean; reason?: string; playsRemaining: number }> {
   try {
     // Get game configuration
@@ -51,21 +51,25 @@ async function validatePlayEligibility(
     const maxPlaysPerCustomer = gameConfig.gameSettings.maxPlaysPerCustomer;
     const maxPlaysPerDay = gameConfig.gameSettings.maxPlaysPerDay;
 
-    // Check customer-specific limits if customer is identified
-    if (customerIdentifier && customerIdentifier !== 'unknown') {
-      const customer = await CustomerService.getCustomer(shopDomain, customerIdentifier);
+    // Check IP-based limits (instead of customer-based)
+    console.log('🎮 Checking IP-based play limits for:', ipAddress);
+    const allSessions = await GameSessionService.getSessionsByShop(shopDomain, 1000);
 
-      if (customer && customer.totalSessions >= maxPlaysPerCustomer) {
-        return {
-          canPlay: false,
-          reason: 'customer_limit',
-          playsRemaining: 0
-        };
-      }
+    // Filter sessions by IP address
+    const ipSessions = allSessions.filter(session => session.ipAddress === ipAddress);
+    console.log('🎮 Found', ipSessions.length, 'sessions for IP:', ipAddress);
+
+    // Check per-IP limit (using maxPlaysPerCustomer setting)
+    if (ipSessions.length >= maxPlaysPerCustomer) {
+      console.log('🎮 IP limit reached:', ipSessions.length, '>=', maxPlaysPerCustomer);
+      return {
+        canPlay: false,
+        reason: 'ip_limit',
+        playsRemaining: 0
+      };
     }
 
     // Check daily limits by getting today's sessions
-    const allSessions = await GameSessionService.getSessionsByShop(shopDomain, 1000);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -82,9 +86,12 @@ async function validatePlayEligibility(
       };
     }
 
+    const ipPlaysRemaining = maxPlaysPerCustomer - ipSessions.length;
+    const dailyPlaysRemaining = maxPlaysPerDay - todaySessions.length;
+
     return {
       canPlay: true,
-      playsRemaining: maxPlaysPerDay - todaySessions.length
+      playsRemaining: Math.min(ipPlaysRemaining, dailyPlaysRemaining)
     };
   } catch (error) {
     console.error('Error validating play eligibility:', error);
@@ -127,9 +134,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const deviceType = getDeviceType(userAgent);
     const browserType = getBrowserType(userAgent);
 
-    // Use IP address as customer identifier if no customer data provided
-    const customerIdentifier = customerData?.email || customerData?.id || ipAddress;
-
     // Get game configuration first
     console.log('🎮 Getting game config for session...');
     const gameConfigDoc = await GameConfigService.getConfig(shopDomain);
@@ -146,9 +150,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Validate play eligibility
-    console.log('🎮 Validating play eligibility for:', customerIdentifier);
-    const eligibility = await validatePlayEligibility(shopDomain, customerIdentifier);
+    // Validate play eligibility based on IP address
+    console.log('🎮 Validating play eligibility for IP:', ipAddress);
+    const eligibility = await validatePlayEligibility(shopDomain, ipAddress);
     console.log('🎮 Eligibility result:', eligibility);
 
     if (!eligibility.canPlay) {

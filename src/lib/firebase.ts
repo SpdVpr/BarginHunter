@@ -107,10 +107,11 @@ export interface GameConfigDocument {
     displayMode: 'popup' | 'tab' | 'inline';
     triggerEvent: 'immediate' | 'scroll' | 'exit_intent' | 'time_delay';
     position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
-    showOn: 'all_pages' | 'product_pages' | 'cart_page' | 'checkout_page' | 'collection_pages' | 'custom';
+    showOn: 'all_pages' | 'product_pages' | 'cart_page' | 'checkout_page' | 'collection_pages' | 'custom' | 'url_targeting';
     timeDelay?: number;
     scrollPercentage?: number;
     customPages?: string[];
+    targetUrls?: string[];
     // New targeting options
     userPercentage: number;
     testMode: boolean;
