@@ -50,19 +50,24 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     console.log('🎮 Bargain Hunter: API URL:', API_BASE + '/game/config/' + SHOP_DOMAIN);
 
     return fetch(API_BASE + '/game/config/' + SHOP_DOMAIN + '?t=' + Date.now())
-      .then(response => {
+      .then(function(response) {
         console.log('🎮 Bargain Hunter: Config response status:', response.status);
         return response.json();
       })
-      .then(config => {
+      .then(function(config) {
         console.log('🎮 Bargain Hunter: Config loaded:', config);
         // Extract widget settings from nested structure
-        widgetConfig = {
-          ...config.widgetSettings,
-          gameSettings: config.gameSettings,
-          appearance: config.appearance,
-          success: config.success
-        };
+        widgetConfig = {};
+        // Copy all properties from config.widgetSettings
+        for (var key in config.widgetSettings) {
+          if (config.widgetSettings.hasOwnProperty(key)) {
+            widgetConfig[key] = config.widgetSettings[key];
+          }
+        }
+        // Add additional properties
+        widgetConfig.gameSettings = config.gameSettings;
+        widgetConfig.appearance = config.appearance;
+        widgetConfig.success = config.success;
 
         // Add default floating button config if not present
         if (widgetConfig.displayMode === 'floating_button' && !widgetConfig.floatingButton) {
@@ -89,7 +94,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         console.log('🎮 Bargain Hunter: Widget config extracted:', widgetConfig);
         return config;
       })
-      .catch(error => {
+      .catch(function(error) {
         console.error('🎮 Bargain Hunter: Failed to load config:', error);
         // Use default config
         widgetConfig = {
@@ -110,13 +115,13 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   function shouldShowWidget() {
     console.log('🎮 Bargain Hunter: Checking if widget should show...');
     console.log('🎮 Bargain Hunter: Widget config:', {
-      displayMode: widgetConfig?.displayMode,
-      showOn: widgetConfig?.showOn,
-      userPercentage: widgetConfig?.userPercentage,
-      testMode: widgetConfig?.testMode,
-      targetUrls: widgetConfig?.targetUrls,
-      customPages: widgetConfig?.customPages,
-      isEnabled: widgetConfig?.gameSettings?.isEnabled
+      displayMode: widgetConfig && widgetConfig.displayMode,
+      showOn: widgetConfig && widgetConfig.showOn,
+      userPercentage: widgetConfig && widgetConfig.userPercentage,
+      testMode: widgetConfig && widgetConfig.testMode,
+      targetUrls: widgetConfig && widgetConfig.targetUrls,
+      customPages: widgetConfig && widgetConfig.customPages,
+      isEnabled: widgetConfig && widgetConfig.gameSettings && widgetConfig.gameSettings.isEnabled
     });
 
     if (!widgetConfig) {
@@ -134,9 +139,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     if (widgetConfig.testMode === true) {
       console.log('🎮 Bargain Hunter: Test mode enabled - widget only visible to admin');
       // For now, when test mode is enabled, don't show to anyone except in test environment
-      const isTestEnvironment = window.location.search.includes('test=true') ||
-                                window.location.hostname === 'localhost' ||
-                                window.location.hostname.includes('vercel.app');
+      var isTestEnvironment = window.location.search.indexOf('test=true') !== -1 ||
+                              window.location.hostname === 'localhost' ||
+                              window.location.hostname.indexOf('vercel.app') !== -1;
       if (!isTestEnvironment) {
         console.log('🎮 Bargain Hunter: Not in test environment, hiding widget');
         return false;
@@ -217,7 +222,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
     // Check days of week
     if (timeRules.daysOfWeek && timeRules.daysOfWeek.length > 0) {
-      if (!timeRules.daysOfWeek.includes(currentDay)) {
+      if (timeRules.daysOfWeek.indexOf(currentDay) === -1) {
         return false;
       }
     }
@@ -258,16 +263,16 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         console.log('🎮 Bargain Hunter: Homepage check:', isHomepage);
         return isHomepage;
       case 'product_pages':
-        return currentPath.includes('/products/');
+        return currentPath.indexOf('/products/') !== -1;
       case 'collection_pages':
-        return currentPath.includes('/collections/');
+        return currentPath.indexOf('/collections/') !== -1;
       case 'cart_page':
-        return currentPath.includes('/cart');
+        return currentPath.indexOf('/cart') !== -1;
       case 'checkout_page':
-        return currentPath.includes('/checkout');
+        return currentPath.indexOf('/checkout') !== -1;
       case 'custom':
         return widgetConfig.customPages &&
-               widgetConfig.customPages.some(page => currentPath.includes(page));
+               widgetConfig.customPages.some(function(page) { return currentPath.indexOf(page) !== -1; });
       case 'url_targeting':
         // Check if current URL matches any of the target URLs
         if (widgetConfig.targetUrls && widgetConfig.targetUrls.length > 0) {
@@ -721,13 +726,13 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         const iframe = document.querySelector('#bargain-hunter-modal iframe');
         if (iframe && event.data.height) {
           // More reliable mobile detection for iframe context
-          const isMobile = window.innerWidth < 768 ||
-                           window.screen?.width <= 768 ||
-                           /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+          var isMobile = window.innerWidth < 768 ||
+                         (window.screen && window.screen.width <= 768) ||
+                         /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
           // Use standardized sizes for consistent experience
-          const newWidth = isMobile ? 370 : 540; // Matches initial sizing
-          const newHeight = event.data.height;
+          var newWidth = isMobile ? 370 : 540; // Matches initial sizing
+          var newHeight = event.data.height;
 
           // Update iframe size with standardized dimensions
           iframe.style.height = newHeight + 'px';
