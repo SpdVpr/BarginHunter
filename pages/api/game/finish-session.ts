@@ -62,7 +62,11 @@ function getScoreMessage(score: number, discountEarned: number): string {
 // This function is no longer needed - we use the real Shopify API function
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  console.log('🎮 finish-session API called - method:', req.method);
+  console.log('🎮 finish-session request body:', JSON.stringify(req.body, null, 2));
+
   if (req.method !== 'POST') {
+    console.log('🎮 finish-session: Method not allowed');
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
@@ -70,7 +74,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const body: FinishGameRequest = req.body;
     const { sessionId, finalScore, gameData, playerEmail } = body;
 
-    console.log('🎮 Finish session request:', { sessionId, finalScore, gameData, playerEmail });
+    console.log('🎮 Finish session request parsed:', { sessionId, finalScore, gameData, playerEmail });
 
     if (!sessionId) {
       return res.status(400).json({
@@ -295,10 +299,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       nextTierScore: nextTierScore || undefined
     };
 
+    console.log('🎮 finish-session completed successfully, sending response:', response);
     res.status(200).json(response);
 
   } catch (error) {
-    console.error('Error finishing game session:', error);
+    console.error('🎮 Error finishing game session:', error);
     res.status(500).json({
       success: false,
       discountEarned: 0,
