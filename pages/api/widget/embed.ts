@@ -29,17 +29,17 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   console.log('🎮 Bargain Hunter: Initialization started');
 
   // Configuration
-  const SHOP_DOMAIN = '${shopDomain}'.split(',')[0]; // Fix duplicate shop parameter
-  const API_BASE = '${process.env.NEXT_PUBLIC_API_BASE || 'https://bargin-hunter2.vercel.app/api'}';
-  const WIDGET_BASE = '${process.env.NEXT_PUBLIC_WIDGET_URL || 'https://bargin-hunter2.vercel.app/widget'}';
+  var SHOP_DOMAIN = '${shopDomain}'.split(',')[0]; // Fix duplicate shop parameter
+  var API_BASE = '${process.env.NEXT_PUBLIC_API_BASE || 'https://bargin-hunter2.vercel.app/api'}';
+  var WIDGET_BASE = '${process.env.NEXT_PUBLIC_WIDGET_URL || 'https://bargin-hunter2.vercel.app/widget'}';
 
   // Widget configuration (will be loaded from API)
-  let widgetConfig = null;
-  let isWidgetLoaded = false;
+  var widgetConfig = null;
+  var isWidgetLoaded = false;
 
   // Utility functions
   function createStylesheet() {
-    const link = document.createElement('link');
+    var link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = WIDGET_BASE + '/styles.css';
     document.head.appendChild(link);
@@ -248,13 +248,13 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   function checkPageTargeting() {
-    const currentPath = window.location.pathname;
-    const currentUrl = window.location.href;
+    var currentPath = window.location.pathname;
+    var currentUrl = window.location.href;
     console.log('🎮 Bargain Hunter: Checking page targeting for path:', currentPath, 'URL:', currentUrl, 'showOn:', widgetConfig.showOn);
 
     switch (widgetConfig.showOn) {
       case 'homepage':
-        const isHomepage = currentPath === '/' || currentPath === '';
+        var isHomepage = currentPath === '/' || currentPath === '';
         console.log('🎮 Bargain Hunter: Homepage check:', isHomepage);
         return isHomepage;
       case 'product_pages':
@@ -272,16 +272,16 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         // Check if current URL matches any of the target URLs
         if (widgetConfig.targetUrls && widgetConfig.targetUrls.length > 0) {
           console.log('🎮 Bargain Hunter: URL targeting enabled with URLs:', widgetConfig.targetUrls);
-          const matches = widgetConfig.targetUrls.some(targetUrl => {
+          var matches = widgetConfig.targetUrls.some(function(targetUrl) {
             if (!targetUrl || targetUrl.trim() === '') {
               console.log('🎮 Bargain Hunter: Empty target URL, skipping');
               return false;
             }
 
             // Normalize URLs for comparison
-            const normalizedTarget = targetUrl.toLowerCase().trim();
-            const normalizedCurrent = currentUrl.toLowerCase();
-            const normalizedCurrentPath = currentPath.toLowerCase();
+            var normalizedTarget = targetUrl.toLowerCase().trim();
+            var normalizedCurrent = currentUrl.toLowerCase();
+            var normalizedCurrentPath = currentPath.toLowerCase();
 
             console.log('🎮 Bargain Hunter: Comparing URLs:', {
               target: normalizedTarget,
@@ -291,47 +291,47 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
             // Multiple matching strategies:
             // 1. Exact URL match (remove trailing slashes for comparison)
-            const cleanTarget = normalizedTarget.replace(/\/$/, '');
-            const cleanCurrent = normalizedCurrent.replace(/\/$/, '');
+            var cleanTarget = normalizedTarget.replace(/\/$/, '');
+            var cleanCurrent = normalizedCurrent.replace(/\/$/, '');
             if (cleanCurrent === cleanTarget) {
               console.log('🎮 Bargain Hunter: Exact URL match found');
               return true;
             }
 
             // 2. URL starts with target (for query params and trailing content)
-            if (normalizedCurrent.startsWith(normalizedTarget)) {
+            if (normalizedCurrent.indexOf(normalizedTarget) === 0) {
               console.log('🎮 Bargain Hunter: URL starts with target');
               return true;
             }
 
             // 3. Path-only matching (if target is just a path)
-            if (normalizedTarget.startsWith('/') && !normalizedTarget.includes('://')) {
-              const cleanTargetPath = normalizedTarget.replace(/\/$/, '');
-              const cleanCurrentPath = normalizedCurrentPath.replace(/\/$/, '');
+            if (normalizedTarget.indexOf('/') === 0 && normalizedTarget.indexOf('://') === -1) {
+              var cleanTargetPath = normalizedTarget.replace(/\/$/, '');
+              var cleanCurrentPath = normalizedCurrentPath.replace(/\/$/, '');
 
               if (cleanCurrentPath === cleanTargetPath) {
                 console.log('🎮 Bargain Hunter: Exact path match found');
                 return true;
               }
 
-              if (normalizedCurrentPath.startsWith(normalizedTarget)) {
+              if (normalizedCurrentPath.indexOf(normalizedTarget) === 0) {
                 console.log('🎮 Bargain Hunter: Path starts with target');
                 return true;
               }
             }
 
             // 4. Domain + path matching for full URLs
-            if (normalizedTarget.includes('://')) {
+            if (normalizedTarget.indexOf('://') !== -1) {
               try {
-                const targetUrlObj = new URL(normalizedTarget);
-                const currentUrlObj = new URL(normalizedCurrent);
+                var targetUrlObj = new URL(normalizedTarget);
+                var currentUrlObj = new URL(normalizedCurrent);
 
                 // Check if domain matches and path matches
                 if (targetUrlObj.hostname === currentUrlObj.hostname) {
-                  const targetPath = targetUrlObj.pathname.replace(/\/$/, '');
-                  const currentPath = currentUrlObj.pathname.replace(/\/$/, '');
+                  var targetPath = targetUrlObj.pathname.replace(/\/$/, '');
+                  var currentPath = currentUrlObj.pathname.replace(/\/$/, '');
 
-                  if (currentPath === targetPath || currentPath.startsWith(targetPath + '/')) {
+                  if (currentPath === targetPath || currentPath.indexOf(targetPath + '/') === 0) {
                     console.log('🎮 Bargain Hunter: Domain and path match found');
                     return true;
                   }
@@ -356,7 +356,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   function createWidgetContainer() {
-    const container = document.createElement('div');
+    var container = document.createElement('div');
     container.id = 'bargain-hunter-widget-container';
     container.style.cssText =
       'position: fixed;' +
@@ -368,12 +368,12 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   function createTabWidget(container) {
-    const tab = document.createElement('div');
+    var tab = document.createElement('div');
     tab.className = 'bargain-hunter-tab';
     tab.innerHTML = '🎮 Play for Discount!';
-    
+
     // Position the tab
-    const position = widgetConfig.position || 'bottom-right';
+    var position = widgetConfig.position || 'bottom-right';
     switch (position) {
       case 'bottom-right':
         tab.style.cssText =
@@ -424,7 +424,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   function createFloatingButtonWidget(container) {
-    const floatingConfig = widgetConfig.floatingButton || {
+    var floatingConfig = widgetConfig.floatingButton || {
       text: 'Play Game',
       icon: '🎮',
       backgroundColor: '#ff6b6b',
@@ -443,18 +443,18 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       showOnHover: false
     };
 
-    const button = document.createElement('button');
+    var button = document.createElement('button');
     button.innerHTML =
       '<span style="font-size: 1.2em;">' + floatingConfig.icon + '</span>' +
       '<span>' + floatingConfig.text + '</span>';
 
     // Detect if mobile
-    const isMobile = window.innerWidth < 768 ||
-                     window.screen?.width <= 768 ||
-                     /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    var isMobile = window.innerWidth < 768 ||
+                   (window.screen && window.screen.width <= 768) ||
+                   /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-    const position = isMobile ? floatingConfig.position.mobile : floatingConfig.position.desktop;
-    const offset = isMobile ? floatingConfig.offset.mobile : floatingConfig.offset.desktop;
+    var position = isMobile ? floatingConfig.position.mobile : floatingConfig.position.desktop;
+    var offset = isMobile ? floatingConfig.offset.mobile : floatingConfig.offset.desktop;
 
     // Base styles
     button.style.cssText =
