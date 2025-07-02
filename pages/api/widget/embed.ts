@@ -514,7 +514,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
     // Animation styles
     if (floatingConfig.animation && floatingConfig.animation !== 'none') {
-      let animationCSS = '';
+      var animationCSS = '';
       switch (floatingConfig.animation) {
         case 'pulse':
           animationCSS = 'pulse 2s infinite';
@@ -555,7 +555,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
     // Add keyframe animations to document if not already added
     if (!document.getElementById('bargain-hunter-animations')) {
-      const style = document.createElement('style');
+      var style = document.createElement('style');
       style.id = 'bargain-hunter-animations';
       style.textContent =
         '@keyframes pulse {' +
@@ -596,7 +596,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         break;
       case 'scroll':
         window.addEventListener('scroll', function() {
-          const scrollPercent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+          var scrollPercent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
           if (scrollPercent > 50) {
             openGameModal();
             window.removeEventListener('scroll', arguments.callee);
@@ -613,7 +613,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     }
 
     // Create modal overlay
-    const overlay = document.createElement('div');
+    var overlay = document.createElement('div');
     overlay.id = 'bargain-hunter-modal';
     overlay.style.cssText =
       'position: fixed;' +
@@ -628,7 +628,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       'justify-content: center;';
 
     // Create modal content
-    const modal = document.createElement('div');
+    var modal = document.createElement('div');
     modal.style.cssText =
       'background: white;' +
       'border-radius: 12px;' +
@@ -642,7 +642,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       'overflow: hidden;';
 
     // Create iframe for the game
-    const iframe = document.createElement('iframe');
+    var iframe = document.createElement('iframe');
     iframe.src = API_BASE.replace('/api', '') + '/widget/game?shop=' + encodeURIComponent(SHOP_DOMAIN);
     iframe.style.cssText =
       'width: 100%;' +
@@ -656,9 +656,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       'border-radius: 12px;';
 
     // Standardized sizing for consistent game experience with reliable mobile detection
-    const isMobile = window.innerWidth < 768 ||
-                     window.screen?.width <= 768 ||
-                     /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    var isMobile = window.innerWidth < 768 ||
+                   (window.screen && window.screen.width <= 768) ||
+                   /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
     if (isMobile) {
       // Mobile: optimized for mobile games
@@ -671,7 +671,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     }
 
     // Close button
-    const closeBtn = document.createElement('button');
+    var closeBtn = document.createElement('button');
     closeBtn.innerHTML = '×';
     closeBtn.style.cssText =
       'position: absolute;' +
@@ -764,14 +764,14 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       }
 
       console.log('🎮 Bargain Hunter: Widget should show - proceeding with initialization');
-      const showDelay = widgetConfig.showDelay || 0;
-      const pageLoadTrigger = widgetConfig.pageLoadTrigger || 'immediate';
+      var showDelay = widgetConfig.showDelay || 0;
+      var pageLoadTrigger = widgetConfig.pageLoadTrigger || 'immediate';
 
       console.log('🎮 Bargain Hunter: Show delay:', showDelay, 'Page load trigger:', pageLoadTrigger);
 
       function showWidget() {
         console.log('🎮 Bargain Hunter: Creating widget with display mode:', widgetConfig.displayMode);
-        const container = createWidgetContainer();
+        var container = createWidgetContainer();
 
         switch (widgetConfig.displayMode) {
           case 'tab':
@@ -812,7 +812,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
           break;
 
         case 'on_scroll':
-          let scrollTriggered = false;
+          var scrollTriggered = false;
           function handleScroll() {
             if (!scrollTriggered && window.scrollY > 100) {
               scrollTriggered = true;
@@ -824,7 +824,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
           break;
 
         case 'on_exit_intent':
-          let exitTriggered = false;
+          var exitTriggered = false;
           function handleMouseLeave(e) {
             if (!exitTriggered && e.clientY <= 0) {
               exitTriggered = true;
