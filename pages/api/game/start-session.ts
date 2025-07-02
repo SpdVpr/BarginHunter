@@ -72,7 +72,9 @@ async function validateDiscountCodeEligibility(
     console.log('🎮 Discount code reset cutoff time:', resetCutoff.toISOString());
 
     // NEW SYSTEM: Get sessions with discount codes for this IP within time period
+    console.log('🎮 About to call getDiscountCodesByIP...');
     const sessionsWithCodes = await GameSessionService.getDiscountCodesByIP(shopDomain, ipAddress, resetCutoff);
+    console.log('🎮 getDiscountCodesByIP completed successfully');
 
     console.log('🎮 Sessions with discount codes:', sessionsWithCodes.map(s => ({
       id: s.id,
