@@ -14,7 +14,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   // Generate the embed script
-  const embedScript = \`
+  const embedScript = `
 (function() {
   'use strict';
 
@@ -29,9 +29,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   console.log('🎮 Bargain Hunter: Initialization started');
 
   // Configuration
-  var SHOP_DOMAIN = '\${shopDomain}'.split(',')[0]; // Fix duplicate shop parameter
-  var API_BASE = '\${process.env.NEXT_PUBLIC_API_BASE || 'https://bargin-hunter2.vercel.app/api'}';
-  var WIDGET_BASE = '\${process.env.NEXT_PUBLIC_WIDGET_URL || 'https://bargin-hunter2.vercel.app/widget'}';
+  var SHOP_DOMAIN = '${shopDomain}'.split(',')[0]; // Fix duplicate shop parameter
+  var API_BASE = '${process.env.NEXT_PUBLIC_API_BASE || 'https://bargin-hunter2.vercel.app/api'}';
+  var WIDGET_BASE = '${process.env.NEXT_PUBLIC_WIDGET_URL || 'https://bargin-hunter2.vercel.app/widget'}';
 
   // Widget configuration (will be loaded from API)
   var widgetConfig = null;
@@ -564,7 +564,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
 })();
-\`;
+`;
 
   res.status(200).end(embedScript);
 }
