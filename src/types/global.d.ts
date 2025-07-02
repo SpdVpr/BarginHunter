@@ -99,10 +99,28 @@ export interface GameConfigDocument {
     difficulty: 'easy' | 'medium' | 'hard';
   };
   widgetSettings: {
-    displayMode: 'popup' | 'tab' | 'inline';
+    displayMode: 'popup' | 'tab' | 'inline' | 'floating_button';
     triggerEvent: 'immediate' | 'scroll' | 'exit_intent' | 'time_delay';
     position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
-    showOn: 'all_pages' | 'product_pages' | 'cart_page' | 'checkout_page';
+    showOn: 'all_pages' | 'product_pages' | 'cart_page' | 'checkout_page' | 'collection_pages' | 'custom' | 'url_targeting';
+    floatingButton?: {
+      text: string;
+      icon: string;
+      backgroundColor: string;
+      textColor: string;
+      borderRadius: number;
+      size: 'small' | 'medium' | 'large';
+      position: {
+        desktop: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+        mobile: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+      };
+      offset: {
+        desktop: { x: number; y: number };
+        mobile: { x: number; y: number };
+      };
+      animation: 'none' | 'pulse' | 'bounce' | 'shake';
+      showOnHover: boolean;
+    };
   };
   appearance: {
     primaryColor: string;

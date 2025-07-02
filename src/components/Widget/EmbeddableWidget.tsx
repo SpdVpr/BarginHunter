@@ -265,6 +265,116 @@ export default function EmbeddableWidget({
     </div>
   );
 
+  const renderFloatingButtonMode = () => {
+    const floatingConfig = config.floatingButton || {
+      text: 'Play Game',
+      icon: '🎮',
+      backgroundColor: '#ff6b6b',
+      textColor: '#ffffff',
+      borderRadius: 25,
+      size: 'medium',
+      position: {
+        desktop: 'bottom-right',
+        mobile: 'bottom-right'
+      },
+      offset: {
+        desktop: { x: 20, y: 20 },
+        mobile: { x: 15, y: 15 }
+      },
+      animation: 'pulse',
+      showOnHover: false
+    };
+
+    const isMobile = window.innerWidth < 768;
+    const position = isMobile ? floatingConfig.position.mobile : floatingConfig.position.desktop;
+    const offset = isMobile ? floatingConfig.offset.mobile : floatingConfig.offset.desktop;
+
+    const getPositionStyles = () => {
+      switch (position) {
+        case 'top-left':
+          return { top: `${offset.y}px`, left: `${offset.x}px` };
+        case 'top-right':
+          return { top: `${offset.y}px`, right: `${offset.x}px` };
+        case 'bottom-left':
+          return { bottom: `${offset.y}px`, left: `${offset.x}px` };
+        default: // bottom-right
+          return { bottom: `${offset.y}px`, right: `${offset.x}px` };
+      }
+    };
+
+    const getSizeStyles = () => {
+      switch (floatingConfig.size) {
+        case 'small':
+          return {
+            padding: isMobile ? '10px 16px' : '8px 16px',
+            fontSize: '14px'
+          };
+        case 'large':
+          return {
+            padding: isMobile ? '14px 20px' : '16px 24px',
+            fontSize: isMobile ? '16px' : '18px'
+          };
+        default: // medium
+          return {
+            padding: isMobile ? '12px 18px' : '12px 20px',
+            fontSize: isMobile ? '15px' : '16px'
+          };
+      }
+    };
+
+    return (
+      <>
+        {!isGameActive && (
+          <button
+            onClick={handleStartGame}
+            className={`widget-floating-button size-${floatingConfig.size} position-${position} ${floatingConfig.animation !== 'none' ? `animation-${floatingConfig.animation}` : ''}`}
+            style={{
+              ...getPositionStyles(),
+              ...getSizeStyles(),
+              backgroundColor: floatingConfig.backgroundColor,
+              color: floatingConfig.textColor,
+              borderRadius: `${floatingConfig.borderRadius}px`,
+            }}
+          >
+            <span style={{ fontSize: '1.2em' }}>{floatingConfig.icon}</span>
+            <span>{floatingConfig.text}</span>
+          </button>
+        )}
+
+        {isGameActive && (
+          <>
+            <div className="widget-overlay" onClick={handleClose} />
+            <div className="widget-popup">
+              <div style={{ padding: '20px', position: 'relative' }}>
+                <button
+                  onClick={handleClose}
+                  style={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '20px',
+                    cursor: 'pointer',
+                    color: '#666'
+                  }}
+                >
+                  ×
+                </button>
+
+                <Game
+                  shopDomain={shopDomain}
+                  onGameComplete={handleGameComplete}
+                  onClose={handleClose}
+                />
+              </div>
+            </div>
+          </>
+        )}
+      </>
+    );
+  };
+
   if (!isVisible) {
     return null;
   }
@@ -273,6 +383,7 @@ export default function EmbeddableWidget({
     <div className="bargain-hunter-widget">
       {config.displayMode === 'popup' && renderPopupMode()}
       {config.displayMode === 'tab' && renderTabMode()}
+      {config.displayMode === 'floating_button' && renderFloatingButtonMode()}
       {config.displayMode === 'inline' && renderInlineMode()}
     </div>
   );

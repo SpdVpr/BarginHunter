@@ -92,7 +92,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       userPercentage: widgetConfig?.userPercentage,
       testMode: widgetConfig?.testMode,
       targetUrls: widgetConfig?.targetUrls,
-      customPages: widgetConfig?.customPages
+      customPages: widgetConfig?.customPages,
+      isEnabled: widgetConfig?.gameSettings?.isEnabled
     });
 
     if (!widgetConfig) {
@@ -101,17 +102,22 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     }
 
     // Check if game is enabled
-    if (widgetConfig.gameSettings && !widgetConfig.gameSettings.isEnabled) {
-      console.log('🎮 Bargain Hunter: Game is not enabled - not showing');
+    if (widgetConfig.gameSettings && widgetConfig.gameSettings.isEnabled === false) {
+      console.log('🎮 Bargain Hunter: Game is disabled - not showing');
       return false;
     }
 
     // Check if test mode is enabled - if so, only show to admin (skip for now, implement admin detection later)
-    if (widgetConfig.gameSettings && widgetConfig.gameSettings.testMode) {
+    if (widgetConfig.testMode === true) {
       console.log('🎮 Bargain Hunter: Test mode enabled - widget only visible to admin');
-      // For now, when test mode is enabled, don't show to anyone
-      // TODO: Implement admin detection (check if current user is shop owner)
-      return false;
+      // For now, when test mode is enabled, don't show to anyone except in test environment
+      const isTestEnvironment = window.location.search.includes('test=true') ||
+                                window.location.hostname === 'localhost' ||
+                                window.location.hostname.includes('vercel.app');
+      if (!isTestEnvironment) {
+        console.log('🎮 Bargain Hunter: Not in test environment, hiding widget');
+        return false;
+      }
     }
 
     // Check user percentage targeting
@@ -242,7 +248,13 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       case 'url_targeting':
         // Check if current URL matches any of the target URLs
         if (widgetConfig.targetUrls && widgetConfig.targetUrls.length > 0) {
+          console.log('🎮 Bargain Hunter: URL targeting enabled with URLs:', widgetConfig.targetUrls);
           const matches = widgetConfig.targetUrls.some(targetUrl => {
+            if (!targetUrl || targetUrl.trim() === '') {
+              console.log('🎮 Bargain Hunter: Empty target URL, skipping');
+              return false;
+            }
+
             // Normalize URLs for comparison
             const normalizedTarget = targetUrl.toLowerCase().trim();
             const normalizedCurrent = currentUrl.toLowerCase();
@@ -255,28 +267,55 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
             });
 
             // Multiple matching strategies:
-            // 1. Exact URL match
-            if (normalizedCurrent === normalizedTarget) {
+            // 1. Exact URL match (remove trailing slashes for comparison)
+            const cleanTarget = normalizedTarget.replace(/\/$/, '');
+            const cleanCurrent = normalizedCurrent.replace(/\/$/, '');
+            if (cleanCurrent === cleanTarget) {
               console.log('🎮 Bargain Hunter: Exact URL match found');
               return true;
             }
 
-            // 2. URL starts with target (for query params)
+            // 2. URL starts with target (for query params and trailing content)
             if (normalizedCurrent.startsWith(normalizedTarget)) {
               console.log('🎮 Bargain Hunter: URL starts with target');
               return true;
             }
 
             // 3. Path-only matching (if target is just a path)
-            if (normalizedTarget.startsWith('/') && normalizedCurrentPath === normalizedTarget) {
-              console.log('🎮 Bargain Hunter: Path match found');
-              return true;
+            if (normalizedTarget.startsWith('/') && !normalizedTarget.includes('://')) {
+              const cleanTargetPath = normalizedTarget.replace(/\/$/, '');
+              const cleanCurrentPath = normalizedCurrentPath.replace(/\/$/, '');
+
+              if (cleanCurrentPath === cleanTargetPath) {
+                console.log('🎮 Bargain Hunter: Exact path match found');
+                return true;
+              }
+
+              if (normalizedCurrentPath.startsWith(normalizedTarget)) {
+                console.log('🎮 Bargain Hunter: Path starts with target');
+                return true;
+              }
             }
 
-            // 4. Path contains target (for partial matches)
-            if (normalizedTarget.startsWith('/') && normalizedCurrentPath.includes(normalizedTarget)) {
-              console.log('🎮 Bargain Hunter: Path contains target');
-              return true;
+            // 4. Domain + path matching for full URLs
+            if (normalizedTarget.includes('://')) {
+              try {
+                const targetUrlObj = new URL(normalizedTarget);
+                const currentUrlObj = new URL(normalizedCurrent);
+
+                // Check if domain matches and path matches
+                if (targetUrlObj.hostname === currentUrlObj.hostname) {
+                  const targetPath = targetUrlObj.pathname.replace(/\/$/, '');
+                  const currentPath = currentUrlObj.pathname.replace(/\/$/, '');
+
+                  if (currentPath === targetPath || currentPath.startsWith(targetPath + '/')) {
+                    console.log('🎮 Bargain Hunter: Domain and path match found');
+                    return true;
+                  }
+                }
+              } catch (urlError) {
+                console.log('🎮 Bargain Hunter: URL parsing error:', urlError);
+              }
             }
 
             return false;
@@ -284,10 +323,11 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
           console.log('🎮 Bargain Hunter: URL targeting final result:', matches, 'Target URLs:', widgetConfig.targetUrls);
           return matches;
         }
-        console.log('🎮 Bargain Hunter: No target URLs configured');
+        console.log('🎮 Bargain Hunter: No target URLs configured for URL targeting');
         return false;
       case 'all_pages':
       default:
+        console.log('🎮 Bargain Hunter: Showing on all pages');
         return true;
     }
   }
@@ -361,6 +401,164 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     });
     
     container.appendChild(tab);
+  }
+
+  function createFloatingButtonWidget(container) {
+    const floatingConfig = widgetConfig.floatingButton || {
+      text: 'Play Game',
+      icon: '🎮',
+      backgroundColor: '#ff6b6b',
+      textColor: '#ffffff',
+      borderRadius: 25,
+      size: 'medium',
+      position: {
+        desktop: 'bottom-right',
+        mobile: 'bottom-right'
+      },
+      offset: {
+        desktop: { x: 20, y: 20 },
+        mobile: { x: 15, y: 15 }
+      },
+      animation: 'pulse',
+      showOnHover: false
+    };
+
+    const button = document.createElement('button');
+    button.innerHTML = \`
+      <span style="font-size: 1.2em;">\${floatingConfig.icon}</span>
+      <span>\${floatingConfig.text}</span>
+    \`;
+
+    // Detect if mobile
+    const isMobile = window.innerWidth < 768 ||
+                     window.screen?.width <= 768 ||
+                     /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    const position = isMobile ? floatingConfig.position.mobile : floatingConfig.position.desktop;
+    const offset = isMobile ? floatingConfig.offset.mobile : floatingConfig.offset.desktop;
+
+    // Base styles
+    button.style.cssText = \`
+      position: fixed;
+      z-index: 999999;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      backdrop-filter: blur(10px);
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      background: \${floatingConfig.backgroundColor};
+      color: \${floatingConfig.textColor};
+      border-radius: \${floatingConfig.borderRadius}px;
+    \`;
+
+    // Size-specific styles
+    switch (floatingConfig.size) {
+      case 'small':
+        button.style.padding = isMobile ? '10px 16px' : '8px 16px';
+        button.style.fontSize = '14px';
+        break;
+      case 'large':
+        button.style.padding = isMobile ? '14px 20px' : '16px 24px';
+        button.style.fontSize = isMobile ? '16px' : '18px';
+        break;
+      default: // medium
+        button.style.padding = isMobile ? '12px 18px' : '12px 20px';
+        button.style.fontSize = isMobile ? '15px' : '16px';
+    }
+
+    // Position styles
+    switch (position) {
+      case 'top-left':
+        button.style.top = offset.y + 'px';
+        button.style.left = offset.x + 'px';
+        break;
+      case 'top-right':
+        button.style.top = offset.y + 'px';
+        button.style.right = offset.x + 'px';
+        break;
+      case 'bottom-left':
+        button.style.bottom = offset.y + 'px';
+        button.style.left = offset.x + 'px';
+        break;
+      default: // bottom-right
+        button.style.bottom = offset.y + 'px';
+        button.style.right = offset.x + 'px';
+    }
+
+    // Animation styles
+    if (floatingConfig.animation && floatingConfig.animation !== 'none') {
+      let animationCSS = '';
+      switch (floatingConfig.animation) {
+        case 'pulse':
+          animationCSS = 'pulse 2s infinite';
+          break;
+        case 'bounce':
+          animationCSS = 'bounce 2s infinite';
+          break;
+        case 'shake':
+          animationCSS = 'shake 0.5s infinite';
+          break;
+      }
+      button.style.animation = animationCSS;
+    }
+
+    // Add hover effects
+    button.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-2px)';
+      this.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.2)';
+    });
+
+    button.addEventListener('mouseleave', function() {
+      this.style.transform = 'translateY(0)';
+      this.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.15)';
+    });
+
+    button.addEventListener('mousedown', function() {
+      this.style.transform = 'translateY(0)';
+      this.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)';
+    });
+
+    button.addEventListener('mouseup', function() {
+      this.style.transform = 'translateY(-2px)';
+      this.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.2)';
+    });
+
+    // Click handler
+    button.addEventListener('click', openGameModal);
+
+    // Add keyframe animations to document if not already added
+    if (!document.getElementById('bargain-hunter-animations')) {
+      const style = document.createElement('style');
+      style.id = 'bargain-hunter-animations';
+      style.textContent = \`
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+          40% { transform: translateY(-10px); }
+          60% { transform: translateY(-5px); }
+        }
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+          20%, 40%, 60%, 80% { transform: translateX(3px); }
+        }
+      \`;
+      document.head.appendChild(style);
+    }
+
+    container.appendChild(button);
   }
 
   function createPopupWidget(container) {
@@ -570,6 +768,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
           case 'popup':
             console.log('🎮 Bargain Hunter: Creating popup widget');
             createPopupWidget(container);
+            break;
+          case 'floating_button':
+            console.log('🎮 Bargain Hunter: Creating floating button widget');
+            createFloatingButtonWidget(container);
             break;
           case 'inline':
             // Inline mode would need to be handled differently

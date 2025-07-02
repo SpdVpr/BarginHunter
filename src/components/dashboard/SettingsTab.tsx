@@ -39,7 +39,7 @@ interface GameSettings {
 }
 
 interface WidgetSettings {
-  displayMode: 'popup' | 'tab' | 'inline';
+  displayMode: 'popup' | 'tab' | 'inline' | 'floating_button';
   triggerEvent: 'immediate' | 'scroll' | 'exit_intent' | 'time_delay';
   position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
   showOn: 'all_pages' | 'product_pages' | 'cart_page' | 'checkout_page' | 'collection_pages' | 'custom' | 'url_targeting';
@@ -58,6 +58,24 @@ interface WidgetSettings {
     endTime?: string;
     timezone?: string;
     daysOfWeek?: number[];
+  };
+  floatingButton?: {
+    text: string;
+    icon: string;
+    backgroundColor: string;
+    textColor: string;
+    borderRadius: number;
+    size: 'small' | 'medium' | 'large';
+    position: {
+      desktop: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+      mobile: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+    };
+    offset: {
+      desktop: { x: number; y: number };
+      mobile: { x: number; y: number };
+    };
+    animation: 'none' | 'pulse' | 'bounce' | 'shake';
+    showOnHover: boolean;
   };
 }
 
@@ -99,6 +117,25 @@ export function SettingsTab({ shop }: SettingsTabProps) {
   const [resetting, setResetting] = useState(false);
   const [toastActive, setToastActive] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+
+  const getDefaultFloatingButton = () => ({
+    text: 'Play Game',
+    icon: '🎮',
+    backgroundColor: '#ff6b6b',
+    textColor: '#ffffff',
+    borderRadius: 25,
+    size: 'medium' as const,
+    position: {
+      desktop: 'bottom-right' as const,
+      mobile: 'bottom-right' as const,
+    },
+    offset: {
+      desktop: { x: 20, y: 20 },
+      mobile: { x: 15, y: 15 },
+    },
+    animation: 'pulse' as const,
+    showOnHover: false,
+  });
 
   const settingsTabs = [
     {
@@ -489,10 +526,12 @@ export function SettingsTab({ shop }: SettingsTabProps) {
                   options={[
                     { label: 'Popup Modal', value: 'popup' },
                     { label: 'Side Tab', value: 'tab' },
+                    { label: 'Floating Button', value: 'floating_button' },
                     { label: 'Inline Widget', value: 'inline' },
                   ]}
                   value={widgetSettings.displayMode}
                   onChange={(value) => setWidgetSettings({...widgetSettings, displayMode: value as any})}
+                  helpText="Floating Button: Non-intrusive button that users can click when interested"
                 />
 
                 <Select
@@ -650,6 +689,182 @@ export function SettingsTab({ shop }: SettingsTabProps) {
             </Stack>
           </div>
         </Card>
+
+        {/* Floating Button Configuration */}
+        {widgetSettings.displayMode === 'floating_button' && (
+          <Card>
+            <div style={{ padding: '2rem' }}>
+              <Stack vertical spacing="loose">
+                <Text variant="headingLg" as="h3">
+                  Floating Button Configuration
+                </Text>
+                <FormLayout>
+                  <TextField
+                    label="Button Text"
+                    value={widgetSettings.floatingButton?.text || '🎮 Play Game'}
+                    onChange={(value) => setWidgetSettings({
+                      ...widgetSettings,
+                      floatingButton: {
+                        ...getDefaultFloatingButton(),
+                        ...widgetSettings.floatingButton,
+                        text: value
+                      }
+                    })}
+                    helpText="Text displayed on the floating button"
+                  />
+
+                  <TextField
+                    label="Button Icon"
+                    value={widgetSettings.floatingButton?.icon || '🎮'}
+                    onChange={(value) => setWidgetSettings({
+                      ...widgetSettings,
+                      floatingButton: {
+                        ...getDefaultFloatingButton(),
+                        ...widgetSettings.floatingButton,
+                        icon: value
+                      }
+                    })}
+                    helpText="Emoji or icon for the button (e.g., 🎮, 🎯, 💰, 🎁)"
+                  />
+
+                  <TextField
+                    label="Background Color"
+                    value={widgetSettings.floatingButton?.backgroundColor || '#ff6b6b'}
+                    onChange={(value) => setWidgetSettings({
+                      ...widgetSettings,
+                      floatingButton: {
+                        ...getDefaultFloatingButton(),
+                        ...widgetSettings.floatingButton,
+                        backgroundColor: value
+                      }
+                    })}
+                    type="color"
+                  />
+
+                  <TextField
+                    label="Text Color"
+                    value={widgetSettings.floatingButton?.textColor || '#ffffff'}
+                    onChange={(value) => setWidgetSettings({
+                      ...widgetSettings,
+                      floatingButton: {
+                        ...getDefaultFloatingButton(),
+                        ...widgetSettings.floatingButton,
+                        textColor: value
+                      }
+                    })}
+                    type="color"
+                  />
+
+                  <Select
+                    label="Button Size"
+                    options={[
+                      { label: 'Small', value: 'small' },
+                      { label: 'Medium', value: 'medium' },
+                      { label: 'Large', value: 'large' },
+                    ]}
+                    value={widgetSettings.floatingButton?.size || 'medium'}
+                    onChange={(value) => setWidgetSettings({
+                      ...widgetSettings,
+                      floatingButton: {
+                        ...getDefaultFloatingButton(),
+                        ...widgetSettings.floatingButton,
+                        size: value as any
+                      }
+                    })}
+                  />
+
+                  <Select
+                    label="Desktop Position"
+                    options={[
+                      { label: 'Top Left', value: 'top-left' },
+                      { label: 'Top Right', value: 'top-right' },
+                      { label: 'Bottom Left', value: 'bottom-left' },
+                      { label: 'Bottom Right', value: 'bottom-right' },
+                    ]}
+                    value={widgetSettings.floatingButton?.position?.desktop || 'bottom-right'}
+                    onChange={(value) => setWidgetSettings({
+                      ...widgetSettings,
+                      floatingButton: {
+                        ...getDefaultFloatingButton(),
+                        ...widgetSettings.floatingButton,
+                        position: {
+                          ...widgetSettings.floatingButton?.position,
+                          desktop: value as any
+                        }
+                      }
+                    })}
+                  />
+
+                  <Select
+                    label="Mobile Position"
+                    options={[
+                      { label: 'Top Left', value: 'top-left' },
+                      { label: 'Top Right', value: 'top-right' },
+                      { label: 'Bottom Left', value: 'bottom-left' },
+                      { label: 'Bottom Right', value: 'bottom-right' },
+                    ]}
+                    value={widgetSettings.floatingButton?.position?.mobile || 'bottom-right'}
+                    onChange={(value) => setWidgetSettings({
+                      ...widgetSettings,
+                      floatingButton: {
+                        ...getDefaultFloatingButton(),
+                        ...widgetSettings.floatingButton,
+                        position: {
+                          ...widgetSettings.floatingButton?.position,
+                          mobile: value as any
+                        }
+                      }
+                    })}
+                  />
+
+                  <Select
+                    label="Animation"
+                    options={[
+                      { label: 'None', value: 'none' },
+                      { label: 'Pulse', value: 'pulse' },
+                      { label: 'Bounce', value: 'bounce' },
+                      { label: 'Shake', value: 'shake' },
+                    ]}
+                    value={widgetSettings.floatingButton?.animation || 'pulse'}
+                    onChange={(value) => setWidgetSettings({
+                      ...widgetSettings,
+                      floatingButton: {
+                        ...getDefaultFloatingButton(),
+                        ...widgetSettings.floatingButton,
+                        animation: value as any
+                      }
+                    })}
+                  />
+
+                  <div style={{ marginTop: '1rem' }}>
+                    <Text variant="bodyMd" as="p" color="subdued">
+                      💡 <strong>Floating Button Preview:</strong>
+                    </Text>
+                    <div style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '12px 20px',
+                      backgroundColor: widgetSettings.floatingButton?.backgroundColor || '#ff6b6b',
+                      color: widgetSettings.floatingButton?.textColor || '#ffffff',
+                      borderRadius: `${widgetSettings.floatingButton?.borderRadius || 25}px`,
+                      fontSize: widgetSettings.floatingButton?.size === 'small' ? '14px' :
+                               widgetSettings.floatingButton?.size === 'large' ? '18px' : '16px',
+                      fontWeight: 'bold',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                      marginTop: '8px',
+                      cursor: 'pointer',
+                      transition: 'transform 0.2s ease'
+                    }}>
+                      <span>{widgetSettings.floatingButton?.icon || '🎮'}</span>
+                      <span>{widgetSettings.floatingButton?.text || 'Play Game'}</span>
+                    </div>
+                  </div>
+                </FormLayout>
+              </Stack>
+            </div>
+          </Card>
+        )}
       </div>
     );
   };

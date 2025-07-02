@@ -22,7 +22,7 @@ const defaultConfig = {
     difficulty: 'medium' as 'easy' | 'medium' | 'hard'
   },
   widgetSettings: {
-    displayMode: 'tab' as 'popup' | 'tab' | 'inline',
+    displayMode: 'tab' as 'popup' | 'tab' | 'inline' | 'floating_button',
     triggerEvent: 'immediate' as 'immediate' | 'scroll' | 'exit_intent' | 'time_delay',
     position: 'bottom-right' as 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center',
     showOn: 'all_pages' as 'all_pages' | 'product_pages' | 'cart_page' | 'checkout_page' | 'collection_pages' | 'custom' | 'url_targeting',
@@ -40,6 +40,24 @@ const defaultConfig = {
       endTime: undefined,
       timezone: undefined,
       daysOfWeek: undefined,
+    },
+    floatingButton: {
+      text: 'Play Game',
+      icon: '🎮',
+      backgroundColor: '#ff6b6b',
+      textColor: '#ffffff',
+      borderRadius: 25,
+      size: 'medium' as 'small' | 'medium' | 'large',
+      position: {
+        desktop: 'bottom-right' as 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right',
+        mobile: 'bottom-right' as 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right',
+      },
+      offset: {
+        desktop: { x: 20, y: 20 },
+        mobile: { x: 15, y: 15 },
+      },
+      animation: 'pulse' as 'none' | 'pulse' | 'bounce' | 'shake',
+      showOnHover: false,
     },
   },
   appearance: {

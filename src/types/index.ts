@@ -80,7 +80,7 @@ export interface ShopSettings {
 }
 
 export interface WidgetConfiguration {
-  displayMode: 'popup' | 'tab' | 'inline';
+  displayMode: 'popup' | 'tab' | 'inline' | 'floating_button';
   triggerEvent: 'immediate' | 'exit_intent' | 'time_delay' | 'scroll';
   triggerDelay?: number;
   position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
@@ -92,6 +92,25 @@ export interface WidgetConfiguration {
   testMode: boolean; // Enable test mode for debugging
   showDelay: number; // Delay in seconds before showing widget
   pageLoadTrigger: 'immediate' | 'after_delay' | 'on_scroll' | 'on_exit_intent';
+  // Floating button configuration
+  floatingButton?: {
+    text: string;
+    icon: string;
+    backgroundColor: string;
+    textColor: string;
+    borderRadius: number;
+    size: 'small' | 'medium' | 'large';
+    position: {
+      desktop: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+      mobile: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+    };
+    offset: {
+      desktop: { x: number; y: number };
+      mobile: { x: number; y: number };
+    };
+    animation: 'none' | 'pulse' | 'bounce' | 'shake';
+    showOnHover: boolean;
+  };
   // Advanced targeting
   deviceTargeting: 'all' | 'desktop' | 'mobile' | 'tablet';
   geoTargeting?: string[]; // Country codes
