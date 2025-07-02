@@ -75,7 +75,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       targetUrls: widgetSettings.targetUrls
     });
 
-    if (!['popup', 'tab', 'inline'].includes(widgetSettings.displayMode) ||
+    if (!['popup', 'tab', 'inline', 'floating_button'].includes(widgetSettings.displayMode) ||
         !['immediate', 'scroll', 'exit_intent', 'time_delay'].includes(widgetSettings.triggerEvent) ||
         !['top-left', 'top-right', 'bottom-left', 'bottom-right', 'center'].includes(widgetSettings.position) ||
         !['all_pages', 'homepage', 'product_pages', 'cart_page', 'checkout_page', 'collection_pages', 'custom', 'url_targeting'].includes(widgetSettings.showOn)) {
@@ -116,6 +116,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         success: false,
         error: 'Show delay must be a non-negative number'
       });
+    }
+
+    // Validate floating button settings if floating_button mode is selected
+    if (widgetSettings.displayMode === 'floating_button' && widgetSettings.floatingButton) {
+      const fb = widgetSettings.floatingButton;
+      if (typeof fb.text !== 'string' ||
+          typeof fb.icon !== 'string' ||
+          typeof fb.backgroundColor !== 'string' ||
+          typeof fb.textColor !== 'string' ||
+          typeof fb.borderRadius !== 'number' ||
+          !['small', 'medium', 'large'].includes(fb.size) ||
+          !fb.position ||
+          !['top-left', 'top-right', 'bottom-left', 'bottom-right'].includes(fb.position.desktop) ||
+          !['top-left', 'top-right', 'bottom-left', 'bottom-right'].includes(fb.position.mobile) ||
+          !fb.offset ||
+          typeof fb.offset.desktop?.x !== 'number' ||
+          typeof fb.offset.desktop?.y !== 'number' ||
+          typeof fb.offset.mobile?.x !== 'number' ||
+          typeof fb.offset.mobile?.y !== 'number' ||
+          !['none', 'pulse', 'bounce', 'shake'].includes(fb.animation) ||
+          typeof fb.showOnHover !== 'boolean') {
+        console.log('🔧 Settings API: Floating button validation failed:', fb);
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid floating button settings'
+        });
+      }
     }
 
     // Validate appearance settings
@@ -191,6 +218,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           ...(widgetSettings.timeBasedRules?.timezone && { timezone: widgetSettings.timeBasedRules.timezone }),
           ...(widgetSettings.timeBasedRules?.daysOfWeek && { daysOfWeek: widgetSettings.timeBasedRules.daysOfWeek }),
         },
+        targetUrls: widgetSettings.targetUrls || [],
+        // Floating button configuration
+        ...(widgetSettings.floatingButton && { floatingButton: widgetSettings.floatingButton }),
       },
       appearance: {
         primaryColor: appearance.primaryColor,
