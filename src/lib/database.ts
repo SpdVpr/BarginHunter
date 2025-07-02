@@ -141,15 +141,23 @@ export class GameConfigService {
 // Game session operations
 export class GameSessionService {
   static async createSession(sessionData: Omit<GameSessionDocument, 'id' | 'startedAt'>): Promise<string> {
-    const docRef = db.collection(collections.gameSessions).doc();
+    // Use the provided sessionId as the document ID
+    const sessionId = (sessionData as any).sessionId;
+    if (!sessionId) {
+      throw new Error('sessionId is required in sessionData');
+    }
+
+    const docRef = db.collection(collections.gameSessions).doc(sessionId);
     const session: GameSessionDocument = {
       ...sessionData,
-      id: docRef.id,
+      id: sessionId,
       startedAt: Timestamp.now(),
     };
-    
+
+    console.log('🎮 Creating session in Firestore:', sessionId);
     await docRef.set(session);
-    return docRef.id;
+    console.log('🎮 Session created successfully in Firestore');
+    return sessionId;
   }
 
   static async getSession(sessionId: string): Promise<GameSessionDocument | null> {
@@ -165,15 +173,22 @@ export class GameSessionService {
     discountCode?: string
   ): Promise<void> {
     console.log('🎮 completeSession called for:', sessionId);
-    console.log('🎮 Updating session with completed: true');
+    console.log('🎮 Updating session with completed: true, discountCode:', discountCode);
 
-    await db.collection(collections.gameSessions).doc(sessionId).update({
+    // Use set with merge to handle cases where document might not exist
+    const updateData: any = {
       endedAt: Timestamp.now(),
       finalScore,
       discountEarned,
-      discountCode,
       completed: true,
-    });
+    };
+
+    // Only add discountCode if it's not undefined (Firestore doesn't like undefined values)
+    if (discountCode !== undefined) {
+      updateData.discountCode = discountCode;
+    }
+
+    await db.collection(collections.gameSessions).doc(sessionId).set(updateData, { merge: true });
 
     console.log('🎮 Session update completed successfully');
   }
