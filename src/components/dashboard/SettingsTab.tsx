@@ -144,11 +144,6 @@ export function SettingsTab({ shop }: SettingsTabProps) {
       panelID: 'game-settings-panel',
     },
     {
-      id: 'widget',
-      content: 'Widget Settings',
-      panelID: 'widget-settings-panel',
-    },
-    {
       id: 'appearance',
       content: 'Appearance',
       panelID: 'appearance-settings-panel',
@@ -509,110 +504,7 @@ export function SettingsTab({ shop }: SettingsTabProps) {
     );
   };
 
-  const renderWidgetSettings = () => {
-    if (!widgetSettings) return null;
 
-    return (
-      <div style={{ display: 'grid', gap: '2rem' }}>
-        {/* Widget Display Mode Selection */}
-        <Card>
-          <div style={{ padding: '2rem' }}>
-            <Stack vertical spacing="loose">
-              <Text variant="headingLg" as="h3">
-                🎮 Widget Display Mode
-              </Text>
-              <Text variant="bodyMd" color="subdued">
-                Choose how your game widget appears to customers
-              </Text>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
-                {/* Popup Modal Option */}
-                <div
-                  onClick={() => setWidgetSettings({...widgetSettings, displayMode: 'popup'})}
-                  style={{
-                    border: widgetSettings.displayMode === 'popup' ? '2px solid #008060' : '2px solid #e1e3e5',
-                    borderRadius: '8px',
-                    padding: '1.5rem',
-                    cursor: 'pointer',
-                    backgroundColor: widgetSettings.displayMode === 'popup' ? '#f6f6f7' : 'white',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                    <span style={{ fontSize: '1.5rem' }}>🪟</span>
-                    <Text variant="headingMd" as="h4">Popup Modal</Text>
-                    {widgetSettings.displayMode === 'popup' && <span style={{ color: '#008060' }}>✓</span>}
-                  </div>
-                  <Text variant="bodyMd" color="subdued">
-                    Game opens in a modal overlay. Appears automatically after page load.
-                  </Text>
-                  <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: '#6d7175' }}>
-                    Best for: High engagement, immediate attention
-                  </div>
-                </div>
-
-                {/* Side Tab Option */}
-                <div
-                  onClick={() => setWidgetSettings({...widgetSettings, displayMode: 'tab'})}
-                  style={{
-                    border: widgetSettings.displayMode === 'tab' ? '2px solid #008060' : '2px solid #e1e3e5',
-                    borderRadius: '8px',
-                    padding: '1.5rem',
-                    cursor: 'pointer',
-                    backgroundColor: widgetSettings.displayMode === 'tab' ? '#f6f6f7' : 'white',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                    <span style={{ fontSize: '1.5rem' }}>📑</span>
-                    <Text variant="headingMd" as="h4">Side Tab</Text>
-                    {widgetSettings.displayMode === 'tab' && <span style={{ color: '#008060' }}>✓</span>}
-                  </div>
-                  <Text variant="bodyMd" color="subdued">
-                    Persistent tab on the side of the screen. Always visible but not intrusive.
-                  </Text>
-                  <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: '#6d7175' }}>
-                    Best for: Constant visibility, moderate engagement
-                  </div>
-                </div>
-
-                {/* Floating Button Option */}
-                <div
-                  onClick={() => setWidgetSettings({...widgetSettings, displayMode: 'floating_button'})}
-                  style={{
-                    border: widgetSettings.displayMode === 'floating_button' ? '2px solid #008060' : '2px solid #e1e3e5',
-                    borderRadius: '8px',
-                    padding: '1.5rem',
-                    cursor: 'pointer',
-                    backgroundColor: widgetSettings.displayMode === 'floating_button' ? '#f6f6f7' : 'white',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                    <span style={{ fontSize: '1.5rem' }}>🎯</span>
-                    <Text variant="headingMd" as="h4">Floating Button</Text>
-                    {widgetSettings.displayMode === 'floating_button' && <span style={{ color: '#008060' }}>✓</span>}
-                  </div>
-                  <Text variant="bodyMd" color="subdued">
-                    Modern floating button. Non-intrusive, users click when interested.
-                  </Text>
-                  <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: '#6d7175' }}>
-                    Best for: User choice, modern design, mobile-friendly
-                  </div>
-                </div>
-              </div>
-            </Stack>
-          </div>
-        </Card>
-
-        {/* Widget Targeting Settings */}
-        <Card>
-          <div style={{ padding: '2rem' }}>
-            <Stack vertical spacing="loose">
-              <Text variant="headingLg" as="h3">
-                🎯 Widget Targeting
-              </Text>
-              <FormLayout>
 
                 <Select
                   label="Show Widget On"
@@ -1230,10 +1122,9 @@ export function SettingsTab({ shop }: SettingsTabProps) {
         />
         <div style={{ padding: '2rem' }}>
           {selectedSettingsTab === 0 && renderGameSettings()}
-          {selectedSettingsTab === 1 && renderWidgetSettings()}
-          {selectedSettingsTab === 2 && renderAppearanceSettings()}
-          {selectedSettingsTab === 3 && renderBusinessRules()}
-          {selectedSettingsTab === 4 && renderIntroSettings()}
+          {selectedSettingsTab === 1 && renderAppearanceSettings()}
+          {selectedSettingsTab === 2 && renderBusinessRules()}
+          {selectedSettingsTab === 3 && renderIntroSettings()}
         </div>
       </Card>
     </div>

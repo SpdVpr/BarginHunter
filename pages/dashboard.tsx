@@ -21,6 +21,7 @@ import { OverviewTab } from '../src/components/dashboard/OverviewTab';
 import { AnalyticsTab } from '../src/components/dashboard/AnalyticsTab';
 
 import { DiscountsTab } from '../src/components/dashboard/DiscountsTab';
+import { WidgetDisplayTab } from '../src/components/dashboard/WidgetDisplayTab';
 import { SettingsTab } from '../src/components/dashboard/SettingsTab';
 import styles from '../src/styles/ModernDashboard.module.css';
 
@@ -55,6 +56,11 @@ export default function Dashboard() {
       panelID: 'discounts-panel',
     },
     {
+      id: 'widget',
+      content: 'Widget Display',
+      panelID: 'widget-panel',
+    },
+    {
       id: 'settings',
       content: 'Settings',
       panelID: 'settings-panel',
@@ -74,6 +80,8 @@ export default function Dashboard() {
       case 2:
         return <DiscountsTab shop={shop} />;
       case 3:
+        return <WidgetDisplayTab shop={shop} />;
+      case 4:
         return <SettingsTab shop={shop} />;
       default:
         return <OverviewTab shop={shop} />;
