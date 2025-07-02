@@ -163,18 +163,44 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
           return; // Don't create temp session for play limits!
         }
 
-        // Only use temp session for actual technical errors (network, database)
-        console.error('🎮 Technical error - using temp session as fallback');
-        const tempSessionId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        setSessionId(tempSessionId);
-        console.log('🎮 Using temp session for technical error:', tempSessionId);
+        // NO MORE TEMP SESSIONS - show error message instead
+        console.error('🎮 API error - showing error message');
+        setGameState('gameOver');
+        setGameResult({
+          score: 0,
+          discountEarned: 0,
+          discountCode: undefined,
+          isPlayLimitReached: false,
+          message: 'Unable to start game. Please try again later.',
+          gameData: {
+            duration: 0,
+            objectsCollected: 0,
+            obstaclesHit: 0,
+            maxCombo: 0,
+            distanceTraveled: 0
+          }
+        });
+        return;
       }
     } catch (error) {
       console.error('🎮 Network error starting game session:', error);
-      // For network errors, use temp session as fallback (these are genuine technical issues)
-      const tempSessionId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      setSessionId(tempSessionId);
-      console.log('🎮 Using temp session due to network error:', tempSessionId);
+      // NO MORE TEMP SESSIONS - show error message instead
+      setGameState('gameOver');
+      setGameResult({
+        score: 0,
+        discountEarned: 0,
+        discountCode: undefined,
+        isPlayLimitReached: false,
+        message: 'Network error. Please check your connection and try again.',
+        gameData: {
+          duration: 0,
+          objectsCollected: 0,
+          obstaclesHit: 0,
+          maxCombo: 0,
+          distanceTraveled: 0
+        }
+      });
+      return;
     }
   };
 

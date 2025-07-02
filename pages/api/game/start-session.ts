@@ -92,18 +92,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { shop } = req.body;
+    const { shop, shopDomain } = req.body;
+    const shopName = shop || shopDomain; // Accept both parameter names
     const ipAddress = getClientIP(req);
 
-    console.log('🎮 Start session request for shop:', shop, 'IP:', ipAddress);
+    console.log('🎮 Start session request for shop:', shopName, 'IP:', ipAddress);
 
-    if (!shop) {
+    if (!shopName) {
       return res.status(400).json({ error: 'Shop parameter is required' });
     }
 
     // Check discount code limit
-    const limitCheck = await checkDiscountCodeLimit(shop, ipAddress);
-    
+    const limitCheck = await checkDiscountCodeLimit(shopName, ipAddress);
+
     if (!limitCheck.canPlay) {
       console.log('🎮 Discount code limit reached, blocking session');
       return res.status(403).json({
@@ -121,7 +122,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Get game configuration
-    const gameConfig = await GameConfigService.getConfig(shop);
+    const gameConfig = await GameConfigService.getConfig(shopName);
     if (!gameConfig) {
       return res.status(404).json({ error: 'Game configuration not found' });
     }
@@ -132,7 +133,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     await GameSessionService.createSession({
       sessionId,
-      shopDomain: shop,
+      shopDomain: shopName,
       ipAddress,
       userAgent: req.headers['user-agent'] || '',
       startedAt: new Date(),
