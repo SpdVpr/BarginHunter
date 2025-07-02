@@ -358,11 +358,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   function createWidgetContainer() {
     const container = document.createElement('div');
     container.id = 'bargain-hunter-widget-container';
-    container.style.cssText = \`
-      position: fixed;
-      z-index: 999999;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    \`;
+    container.style.cssText =
+      'position: fixed;' +
+      'z-index: 999999;' +
+      'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;';
     
     document.body.appendChild(container);
     return container;
@@ -377,38 +376,36 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     const position = widgetConfig.position || 'bottom-right';
     switch (position) {
       case 'bottom-right':
-        tab.style.cssText = \`
-          position: fixed;
-          bottom: 0;
-          right: 20px;
-          background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-          color: white;
-          padding: 12px 20px;
-          border-radius: 8px 8px 0 0;
-          cursor: pointer;
-          font-weight: bold;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-          transition: all 0.3s ease;
-          font-size: 14px;
-          z-index: 999999;
-        \`;
+        tab.style.cssText =
+          'position: fixed;' +
+          'bottom: 0;' +
+          'right: 20px;' +
+          'background: linear-gradient(45deg, #ff6b6b, #4ecdc4);' +
+          'color: white;' +
+          'padding: 12px 20px;' +
+          'border-radius: 8px 8px 0 0;' +
+          'cursor: pointer;' +
+          'font-weight: bold;' +
+          'box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);' +
+          'transition: all 0.3s ease;' +
+          'font-size: 14px;' +
+          'z-index: 999999;';
         break;
       case 'bottom-left':
-        tab.style.cssText = \`
-          position: fixed;
-          bottom: 0;
-          left: 20px;
-          background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-          color: white;
-          padding: 12px 20px;
-          border-radius: 8px 8px 0 0;
-          cursor: pointer;
-          font-weight: bold;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-          transition: all 0.3s ease;
-          font-size: 14px;
-          z-index: 999999;
-        \`;
+        tab.style.cssText =
+          'position: fixed;' +
+          'bottom: 0;' +
+          'left: 20px;' +
+          'background: linear-gradient(45deg, #ff6b6b, #4ecdc4);' +
+          'color: white;' +
+          'padding: 12px 20px;' +
+          'border-radius: 8px 8px 0 0;' +
+          'cursor: pointer;' +
+          'font-weight: bold;' +
+          'box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);' +
+          'transition: all 0.3s ease;' +
+          'font-size: 14px;' +
+          'z-index: 999999;';
         break;
       // Add more positions as needed
     }
@@ -618,48 +615,45 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     // Create modal overlay
     const overlay = document.createElement('div');
     overlay.id = 'bargain-hunter-modal';
-    overlay.style.cssText = \`
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 999998;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    \`;
+    overlay.style.cssText =
+      'position: fixed;' +
+      'top: 0;' +
+      'left: 0;' +
+      'width: 100%;' +
+      'height: 100%;' +
+      'background: rgba(0, 0, 0, 0.5);' +
+      'z-index: 999998;' +
+      'display: flex;' +
+      'align-items: center;' +
+      'justify-content: center;';
 
     // Create modal content
     const modal = document.createElement('div');
-    modal.style.cssText = \`
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-      overflow: hidden;
-    \`;
+    modal.style.cssText =
+      'background: white;' +
+      'border-radius: 12px;' +
+      'box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);' +
+      'position: relative;' +
+      'display: flex;' +
+      'flex-direction: column;' +
+      'align-items: center;' +
+      'justify-content: center;' +
+      'padding: 0;' +
+      'overflow: hidden;';
 
     // Create iframe for the game
     const iframe = document.createElement('iframe');
     iframe.src = API_BASE.replace('/api', '') + '/widget/game?shop=' + encodeURIComponent(SHOP_DOMAIN);
-    iframe.style.cssText = \`
-      width: 100%;
-      height: auto;
-      min-width: 300px;
-      min-height: 400px;
-      max-width: 600px;
-      max-height: 90vh;
-      border: none;
-      display: block;
-      border-radius: 12px;
-    \`;
+    iframe.style.cssText =
+      'width: 100%;' +
+      'height: auto;' +
+      'min-width: 300px;' +
+      'min-height: 400px;' +
+      'max-width: 600px;' +
+      'max-height: 90vh;' +
+      'border: none;' +
+      'display: block;' +
+      'border-radius: 12px;';
 
     // Standardized sizing for consistent game experience with reliable mobile detection
     const isMobile = window.innerWidth < 768 ||
@@ -679,23 +673,22 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     // Close button
     const closeBtn = document.createElement('button');
     closeBtn.innerHTML = '×';
-    closeBtn.style.cssText = \`
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: none;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      color: #666;
-      z-index: 1;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    \`;
+    closeBtn.style.cssText =
+      'position: absolute;' +
+      'top: 10px;' +
+      'right: 10px;' +
+      'background: none;' +
+      'border: none;' +
+      'font-size: 24px;' +
+      'cursor: pointer;' +
+      'color: #666;' +
+      'z-index: 1;' +
+      'width: 30px;' +
+      'height: 30px;' +
+      'border-radius: 50%;' +
+      'display: flex;' +
+      'align-items: center;' +
+      'justify-content: center;';
 
     closeBtn.addEventListener('click', closeModal);
     overlay.addEventListener('click', function(e) {
