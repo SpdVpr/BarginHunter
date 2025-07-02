@@ -49,8 +49,8 @@ const defaultConfig = {
       borderRadius: 25,
       size: 'medium' as 'small' | 'medium' | 'large',
       position: {
-        desktop: 'bottom-right' as 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right',
-        mobile: 'bottom-right' as 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right',
+        desktop: 'bottom-right' as 'top-left' | 'top-right' | 'middle-left' | 'middle-right' | 'bottom-left' | 'bottom-right',
+        mobile: 'bottom-right' as 'top-left' | 'top-right' | 'middle-left' | 'middle-right' | 'bottom-left' | 'bottom-right',
       },
       offset: {
         desktop: { x: 20, y: 20 },

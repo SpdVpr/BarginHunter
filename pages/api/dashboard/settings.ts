@@ -128,8 +128,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           typeof fb.borderRadius !== 'number' ||
           !['small', 'medium', 'large'].includes(fb.size) ||
           !fb.position ||
-          !['top-left', 'top-right', 'bottom-left', 'bottom-right'].includes(fb.position.desktop) ||
-          !['top-left', 'top-right', 'bottom-left', 'bottom-right'].includes(fb.position.mobile) ||
+          !['top-left', 'top-right', 'middle-left', 'middle-right', 'bottom-left', 'bottom-right'].includes(fb.position.desktop) ||
+          !['top-left', 'top-right', 'middle-left', 'middle-right', 'bottom-left', 'bottom-right'].includes(fb.position.mobile) ||
           !fb.offset ||
           typeof fb.offset.desktop?.x !== 'number' ||
           typeof fb.offset.desktop?.y !== 'number' ||

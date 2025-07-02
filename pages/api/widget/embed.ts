@@ -395,6 +395,16 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         button.style.top = offset.y + 'px';
         button.style.right = offset.x + 'px';
         break;
+      case 'middle-left':
+        button.style.top = '50%';
+        button.style.left = offset.x + 'px';
+        button.style.transform = 'translateY(-50%)';
+        break;
+      case 'middle-right':
+        button.style.top = '50%';
+        button.style.right = offset.x + 'px';
+        button.style.transform = 'translateY(-50%)';
+        break;
       case 'bottom-left':
         button.style.bottom = offset.y + 'px';
         button.style.left = offset.x + 'px';

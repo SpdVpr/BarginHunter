@@ -101,8 +101,8 @@ export interface WidgetConfiguration {
     borderRadius: number;
     size: 'small' | 'medium' | 'large';
     position: {
-      desktop: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
-      mobile: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+      desktop: 'top-left' | 'top-right' | 'middle-left' | 'middle-right' | 'bottom-left' | 'bottom-right';
+      mobile: 'top-left' | 'top-right' | 'middle-left' | 'middle-right' | 'bottom-left' | 'bottom-right';
     };
     offset: {
       desktop: { x: number; y: number };

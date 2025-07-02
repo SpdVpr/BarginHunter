@@ -67,8 +67,8 @@ interface WidgetSettings {
     borderRadius: number;
     size: 'small' | 'medium' | 'large';
     position: {
-      desktop: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
-      mobile: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+      desktop: 'top-left' | 'top-right' | 'middle-left' | 'middle-right' | 'bottom-left' | 'bottom-right';
+      mobile: 'top-left' | 'top-right' | 'middle-left' | 'middle-right' | 'bottom-left' | 'bottom-right';
     };
     offset: {
       desktop: { x: number; y: number };
@@ -514,25 +514,105 @@ export function SettingsTab({ shop }: SettingsTabProps) {
 
     return (
       <div style={{ display: 'grid', gap: '2rem' }}>
+        {/* Widget Display Mode Selection */}
         <Card>
           <div style={{ padding: '2rem' }}>
             <Stack vertical spacing="loose">
               <Text variant="headingLg" as="h3">
-                Widget Display
+                🎮 Widget Display Mode
+              </Text>
+              <Text variant="bodyMd" color="subdued">
+                Choose how your game widget appears to customers
+              </Text>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
+                {/* Popup Modal Option */}
+                <div
+                  onClick={() => setWidgetSettings({...widgetSettings, displayMode: 'popup'})}
+                  style={{
+                    border: widgetSettings.displayMode === 'popup' ? '2px solid #008060' : '2px solid #e1e3e5',
+                    borderRadius: '8px',
+                    padding: '1.5rem',
+                    cursor: 'pointer',
+                    backgroundColor: widgetSettings.displayMode === 'popup' ? '#f6f6f7' : 'white',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '1.5rem' }}>🪟</span>
+                    <Text variant="headingMd" as="h4">Popup Modal</Text>
+                    {widgetSettings.displayMode === 'popup' && <span style={{ color: '#008060' }}>✓</span>}
+                  </div>
+                  <Text variant="bodyMd" color="subdued">
+                    Game opens in a modal overlay. Appears automatically after page load.
+                  </Text>
+                  <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: '#6d7175' }}>
+                    Best for: High engagement, immediate attention
+                  </div>
+                </div>
+
+                {/* Side Tab Option */}
+                <div
+                  onClick={() => setWidgetSettings({...widgetSettings, displayMode: 'tab'})}
+                  style={{
+                    border: widgetSettings.displayMode === 'tab' ? '2px solid #008060' : '2px solid #e1e3e5',
+                    borderRadius: '8px',
+                    padding: '1.5rem',
+                    cursor: 'pointer',
+                    backgroundColor: widgetSettings.displayMode === 'tab' ? '#f6f6f7' : 'white',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '1.5rem' }}>📑</span>
+                    <Text variant="headingMd" as="h4">Side Tab</Text>
+                    {widgetSettings.displayMode === 'tab' && <span style={{ color: '#008060' }}>✓</span>}
+                  </div>
+                  <Text variant="bodyMd" color="subdued">
+                    Persistent tab on the side of the screen. Always visible but not intrusive.
+                  </Text>
+                  <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: '#6d7175' }}>
+                    Best for: Constant visibility, moderate engagement
+                  </div>
+                </div>
+
+                {/* Floating Button Option */}
+                <div
+                  onClick={() => setWidgetSettings({...widgetSettings, displayMode: 'floating_button'})}
+                  style={{
+                    border: widgetSettings.displayMode === 'floating_button' ? '2px solid #008060' : '2px solid #e1e3e5',
+                    borderRadius: '8px',
+                    padding: '1.5rem',
+                    cursor: 'pointer',
+                    backgroundColor: widgetSettings.displayMode === 'floating_button' ? '#f6f6f7' : 'white',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '1.5rem' }}>🎯</span>
+                    <Text variant="headingMd" as="h4">Floating Button</Text>
+                    {widgetSettings.displayMode === 'floating_button' && <span style={{ color: '#008060' }}>✓</span>}
+                  </div>
+                  <Text variant="bodyMd" color="subdued">
+                    Modern floating button. Non-intrusive, users click when interested.
+                  </Text>
+                  <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: '#6d7175' }}>
+                    Best for: User choice, modern design, mobile-friendly
+                  </div>
+                </div>
+              </div>
+            </Stack>
+          </div>
+        </Card>
+
+        {/* Widget Targeting Settings */}
+        <Card>
+          <div style={{ padding: '2rem' }}>
+            <Stack vertical spacing="loose">
+              <Text variant="headingLg" as="h3">
+                🎯 Widget Targeting
               </Text>
               <FormLayout>
-                <Select
-                  label="Display Mode"
-                  options={[
-                    { label: 'Popup Modal', value: 'popup' },
-                    { label: 'Side Tab', value: 'tab' },
-                    { label: 'Floating Button', value: 'floating_button' },
-                    { label: 'Inline Widget', value: 'inline' },
-                  ]}
-                  value={widgetSettings.displayMode}
-                  onChange={(value) => setWidgetSettings({...widgetSettings, displayMode: value as any})}
-                  helpText="Floating Button: Non-intrusive button that users can click when interested"
-                />
 
                 <Select
                   label="Show Widget On"
@@ -778,6 +858,8 @@ export function SettingsTab({ shop }: SettingsTabProps) {
                     options={[
                       { label: 'Top Left', value: 'top-left' },
                       { label: 'Top Right', value: 'top-right' },
+                      { label: 'Middle Left', value: 'middle-left' },
+                      { label: 'Middle Right', value: 'middle-right' },
                       { label: 'Bottom Left', value: 'bottom-left' },
                       { label: 'Bottom Right', value: 'bottom-right' },
                     ]}
@@ -800,6 +882,8 @@ export function SettingsTab({ shop }: SettingsTabProps) {
                     options={[
                       { label: 'Top Left', value: 'top-left' },
                       { label: 'Top Right', value: 'top-right' },
+                      { label: 'Middle Left', value: 'middle-left' },
+                      { label: 'Middle Right', value: 'middle-right' },
                       { label: 'Bottom Left', value: 'bottom-left' },
                       { label: 'Bottom Right', value: 'bottom-right' },
                     ]}
