@@ -63,6 +63,29 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
           appearance: config.appearance,
           success: config.success
         };
+
+        // Add default floating button config if not present
+        if (widgetConfig.displayMode === 'floating_button' && !widgetConfig.floatingButton) {
+          widgetConfig.floatingButton = {
+            text: 'Play Game',
+            icon: '🎮',
+            backgroundColor: '#ff6b6b',
+            textColor: '#ffffff',
+            borderRadius: 25,
+            size: 'medium',
+            position: {
+              desktop: 'bottom-right',
+              mobile: 'bottom-right'
+            },
+            offset: {
+              desktop: { x: 20, y: 20 },
+              mobile: { x: 15, y: 15 }
+            },
+            animation: 'pulse',
+            showOnHover: false
+          };
+        }
+
         console.log('🎮 Bargain Hunter: Widget config extracted:', widgetConfig);
         return config;
       })
@@ -424,10 +447,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     };
 
     const button = document.createElement('button');
-    button.innerHTML = \`
-      <span style="font-size: 1.2em;">\${floatingConfig.icon}</span>
-      <span>\${floatingConfig.text}</span>
-    \`;
+    button.innerHTML =
+      '<span style="font-size: 1.2em;">' + floatingConfig.icon + '</span>' +
+      '<span>' + floatingConfig.text + '</span>';
 
     // Detect if mobile
     const isMobile = window.innerWidth < 768 ||
@@ -438,27 +460,26 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     const offset = isMobile ? floatingConfig.offset.mobile : floatingConfig.offset.desktop;
 
     // Base styles
-    button.style.cssText = \`
-      position: fixed;
-      z-index: 999999;
-      cursor: pointer;
-      border: none;
-      outline: none;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-      backdrop-filter: blur(10px);
-      user-select: none;
-      -webkit-user-select: none;
-      -webkit-tap-highlight-color: transparent;
-      background: \${floatingConfig.backgroundColor};
-      color: \${floatingConfig.textColor};
-      border-radius: \${floatingConfig.borderRadius}px;
-    \`;
+    button.style.cssText =
+      'position: fixed;' +
+      'z-index: 999999;' +
+      'cursor: pointer;' +
+      'border: none;' +
+      'outline: none;' +
+      'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;' +
+      'font-weight: 600;' +
+      'display: flex;' +
+      'align-items: center;' +
+      'gap: 8px;' +
+      'transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);' +
+      'box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);' +
+      'backdrop-filter: blur(10px);' +
+      'user-select: none;' +
+      '-webkit-user-select: none;' +
+      '-webkit-tap-highlight-color: transparent;' +
+      'background: ' + floatingConfig.backgroundColor + ';' +
+      'color: ' + floatingConfig.textColor + ';' +
+      'border-radius: ' + floatingConfig.borderRadius + 'px;';
 
     // Size-specific styles
     switch (floatingConfig.size) {
@@ -539,22 +560,21 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     if (!document.getElementById('bargain-hunter-animations')) {
       const style = document.createElement('style');
       style.id = 'bargain-hunter-animations';
-      style.textContent = \`
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.05); }
-        }
-        @keyframes bounce {
-          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-          40% { transform: translateY(-10px); }
-          60% { transform: translateY(-5px); }
-        }
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
-          20%, 40%, 60%, 80% { transform: translateX(3px); }
-        }
-      \`;
+      style.textContent =
+        '@keyframes pulse {' +
+          '0%, 100% { transform: scale(1); }' +
+          '50% { transform: scale(1.05); }' +
+        '}' +
+        '@keyframes bounce {' +
+          '0%, 20%, 50%, 80%, 100% { transform: translateY(0); }' +
+          '40% { transform: translateY(-10px); }' +
+          '60% { transform: translateY(-5px); }' +
+        '}' +
+        '@keyframes shake {' +
+          '0%, 100% { transform: translateX(0); }' +
+          '10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }' +
+          '20%, 40%, 60%, 80% { transform: translateX(3px); }' +
+        '}';
       document.head.appendChild(style);
     }
 
