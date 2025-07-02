@@ -33,15 +33,15 @@ function getBrowserType(userAgent: string): string {
   return 'unknown';
 }
 
-async function validatePlayEligibility(
+async function validateDiscountCodeEligibility(
   shopDomain: string,
   ipAddress: string
 ): Promise<{
   canPlay: boolean;
   reason?: string;
   playsRemaining: number;
-  playsUsed?: number;
-  maxPlays?: number;
+  codesUsed?: number;
+  maxCodes?: number;
   nextResetTime?: string;
   resetHours?: number;
 }> {
@@ -50,125 +50,83 @@ async function validatePlayEligibility(
     console.log('🎮 Getting game config for shop:', shopDomain);
     const gameConfig = await GameConfigService.getConfig(shopDomain);
     console.log('🎮 Game config found:', !!gameConfig, gameConfig?.isEnabled);
-    console.log('🎮 Full game config:', JSON.stringify(gameConfig, null, 2));
 
     if (!gameConfig || !gameConfig.isEnabled) {
       console.log('🎮 Shop inactive or config not found');
-      return { canPlay: false, reason: 'shop_inactive', playsRemaining: 0, playsUsed: 0, maxPlays: 0 };
+      return { canPlay: false, reason: 'shop_inactive', playsRemaining: 0, codesUsed: 0, maxCodes: 0 };
     }
 
-    const maxPlaysPerCustomer = gameConfig.gameSettings.maxPlaysPerCustomer;
-    const maxPlaysPerDay = gameConfig.gameSettings.maxPlaysPerDay;
-    const playLimitResetHours = gameConfig.gameSettings.playLimitResetHours || 24;
+    const maxCodesPerCustomer = gameConfig.gameSettings.maxPlaysPerCustomer; // Reuse this field for max codes
+    const resetHours = gameConfig.gameSettings.playLimitResetHours || 24;
 
-    console.log('🎮 Loaded settings:');
-    console.log('🎮 - maxPlaysPerCustomer:', maxPlaysPerCustomer);
-    console.log('🎮 - maxPlaysPerDay:', maxPlaysPerDay);
-    console.log('🎮 - playLimitResetHours:', playLimitResetHours);
+    console.log('🎮 Discount code limit settings:');
+    console.log('🎮 - maxCodesPerCustomer:', maxCodesPerCustomer);
+    console.log('🎮 - resetHours:', resetHours);
 
-    // Check IP-based limits with time filtering
-    console.log('🎮 Checking IP-based play limits for:', ipAddress);
-    console.log('🎮 Max plays per customer setting:', maxPlaysPerCustomer);
-    console.log('🎮 Max plays per day setting:', maxPlaysPerDay);
-    console.log('🎮 Play limit reset hours:', playLimitResetHours);
+    // NEW SYSTEM: Check discount code limits instead of session limits
+    console.log('🎮 Checking discount code limits for IP:', ipAddress);
 
-    const allSessions = await GameSessionService.getSessionsByShop(shopDomain, 1000);
-    console.log('🎮 Total sessions in shop:', allSessions.length);
-
-    // Calculate time cutoff for play limit reset
+    // Calculate time cutoff for discount code reset
     const resetCutoff = new Date();
-    resetCutoff.setHours(resetCutoff.getHours() - playLimitResetHours);
-    console.log('🎮 Play limit reset cutoff time:', resetCutoff.toISOString());
+    resetCutoff.setHours(resetCutoff.getHours() - resetHours);
+    console.log('🎮 Discount code reset cutoff time:', resetCutoff.toISOString());
 
-    // Filter sessions by IP address and time
-    const ipSessions = allSessions.filter(session => {
-      const sessionTime = session.startedAt.toDate();
-      return session.ipAddress === ipAddress && sessionTime > resetCutoff;
-    });
-    console.log('🎮 Found', ipSessions.length, 'sessions for IP within reset period:', ipAddress);
+    // NEW SYSTEM: Get sessions with discount codes for this IP within time period
+    const sessionsWithCodes = await GameSessionService.getDiscountCodesByIP(shopDomain, ipAddress, resetCutoff);
 
-    // Also check completed sessions specifically within the time period
-    const completedIpSessions = ipSessions.filter(session => session.completed);
-    console.log('🎮 Found', completedIpSessions.length, 'completed sessions for IP within reset period:', ipAddress);
-    console.log('🎮 All IP sessions:', ipSessions.map(s => ({ id: s.id, completed: s.completed, startedAt: s.startedAt.toDate().toISOString() })));
-    console.log('🎮 Completed IP sessions:', completedIpSessions.map(s => ({ id: s.id, completed: s.completed, startedAt: s.startedAt.toDate().toISOString() })));
+    console.log('🎮 Sessions with discount codes:', sessionsWithCodes.map(s => ({
+      id: s.id,
+      discountCode: s.discountCode,
+      startedAt: s.startedAt.toDate().toISOString(),
+      finalScore: s.finalScore
+    })));
 
-    // Debug: Show some session details
-    if (ipSessions.length > 0) {
-      console.log('🎮 Recent IP sessions:', ipSessions.slice(0, 3).map(s => ({
-        id: s.id,
-        completed: s.completed,
-        startedAt: s.startedAt.toDate().toISOString(),
-        endedAt: s.endedAt?.toDate()?.toISOString(),
-        finalScore: s.finalScore
-      })));
-    }
+    const codesUsed = sessionsWithCodes.length;
+    const codesRemaining = Math.max(0, maxCodesPerCustomer - codesUsed);
 
-    // Check per-IP limit (using maxPlaysPerCustomer setting) - count completed sessions only
-    const playsRemaining = Math.max(0, maxPlaysPerCustomer - completedIpSessions.length);
+    // Check discount code limit
+    console.log('🎮 Checking discount code limit:', codesUsed, '>=', maxCodesPerCustomer);
+    if (codesUsed >= maxCodesPerCustomer) {
+      console.log('🎮 Discount code limit reached:', codesUsed, '>=', maxCodesPerCustomer);
 
-    if (completedIpSessions.length >= maxPlaysPerCustomer) {
-      console.log('🎮 IP limit reached:', completedIpSessions.length, '>=', maxPlaysPerCustomer);
-
-      // Calculate next reset time
+      // Calculate next reset time based on oldest discount code
       const nextResetTime = new Date();
-      if (completedIpSessions.length > 0) {
-        // Find the oldest completed session within the reset period
-        const oldestSession = completedIpSessions.reduce((oldest, session) => {
+      if (sessionsWithCodes.length > 0) {
+        // Find the oldest session with discount code within the reset period
+        const oldestSession = sessionsWithCodes.reduce((oldest, session) => {
           const sessionTime = session.startedAt.toDate();
           const oldestTime = oldest.startedAt.toDate();
           return sessionTime < oldestTime ? session : oldest;
         });
 
         const oldestTime = oldestSession.startedAt.toDate();
-        nextResetTime.setTime(oldestTime.getTime() + (playLimitResetHours * 60 * 60 * 1000));
+        nextResetTime.setTime(oldestTime.getTime() + (resetHours * 60 * 60 * 1000));
       }
 
       return {
         canPlay: false,
-        reason: 'ip_limit',
+        reason: 'code_limit',
         playsRemaining: 0,
-        playsUsed: completedIpSessions.length,
-        maxPlays: maxPlaysPerCustomer,
+        codesUsed: codesUsed,
+        maxCodes: maxCodesPerCustomer,
         nextResetTime: nextResetTime.toISOString(),
-        resetHours: playLimitResetHours
+        resetHours: resetHours
       };
     }
 
-    // Check daily limits by getting today's sessions
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const todaySessions = allSessions.filter(session => {
-      const sessionDate = session.startedAt.toDate();
-      return sessionDate >= today;
-    });
-
-    if (todaySessions.length >= maxPlaysPerDay) {
-      return {
-        canPlay: false,
-        reason: 'daily_limit',
-        playsRemaining: 0,
-        playsUsed: todaySessions.length,
-        maxPlays: maxPlaysPerDay
-      };
-    }
-
-    const ipPlaysRemaining = maxPlaysPerCustomer - completedIpSessions.length;
-    const dailyPlaysRemaining = maxPlaysPerDay - todaySessions.length;
-
-    console.log('🎮 IP plays remaining:', ipPlaysRemaining, 'Daily plays remaining:', dailyPlaysRemaining);
+    // User can play - they haven't reached discount code limit
+    console.log('🎮 User can play - codes remaining:', codesRemaining);
 
     return {
       canPlay: true,
-      playsRemaining: Math.min(ipPlaysRemaining, dailyPlaysRemaining),
-      playsUsed: completedIpSessions.length,
-      maxPlays: maxPlaysPerCustomer,
-      resetHours: playLimitResetHours
+      playsRemaining: codesRemaining,
+      codesUsed: codesUsed,
+      maxCodes: maxCodesPerCustomer,
+      resetHours: resetHours
     };
   } catch (error) {
-    console.error('Error validating play eligibility:', error);
-    return { canPlay: false, reason: 'validation_error', playsRemaining: 0, playsUsed: 0, maxPlays: 0 };
+    console.error('Error validating discount code eligibility:', error);
+    return { canPlay: false, reason: 'validation_error', playsRemaining: 0, codesUsed: 0, maxCodes: 0 };
   }
 }
 
@@ -223,9 +181,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Validate play eligibility based on IP address
-    console.log('🎮 Validating play eligibility for IP:', ipAddress);
-    const eligibility = await validatePlayEligibility(shopDomain, ipAddress);
+    // Validate discount code eligibility based on IP address
+    console.log('🎮 Validating discount code eligibility for IP:', ipAddress);
+    const eligibility = await validateDiscountCodeEligibility(shopDomain, ipAddress);
     console.log('🎮 Eligibility result:', JSON.stringify(eligibility, null, 2));
 
     if (!eligibility.canPlay) {
@@ -237,13 +195,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         playsRemaining: eligibility.playsRemaining,
         error: `Cannot play: ${eligibility.reason}`,
         reason: eligibility.reason,
-        // Include detailed play limit info for frontend
-        playsUsed: eligibility.playsUsed,
-        maxPlays: eligibility.maxPlays,
+        // Include detailed discount code limit info for frontend
+        codesUsed: eligibility.codesUsed,
+        maxCodes: eligibility.maxCodes,
         nextResetTime: eligibility.nextResetTime,
         resetHours: eligibility.resetHours
       };
-      console.log('🎮 Returning play limit response:', response);
+      console.log('🎮 Returning discount code limit response:', response);
       return res.status(403).json(response);
     }
 

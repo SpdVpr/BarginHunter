@@ -132,23 +132,23 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
       } else {
         console.error('🎮 Failed to start game session:', data.error);
 
-        // Check if this is a play limit error - DO NOT bypass with temp session
-        if (!data.canPlay && (data.reason === 'ip_limit' || data.reason === 'daily_limit' || (data.error && data.error.includes('limit')))) {
-          console.log('🎮 Play limit reached - blocking game start');
-          console.log('🎮 Play limit info received:', data);
-          console.log('🎮 playsUsed:', data.playsUsed, 'maxPlays:', data.maxPlays);
+        // Check if this is a discount code limit error - DO NOT bypass with temp session
+        if (!data.canPlay && (data.reason === 'code_limit' || data.reason === 'ip_limit' || data.reason === 'daily_limit' || (data.error && data.error.includes('limit')))) {
+          console.log('🎮 Discount code limit reached - blocking game start');
+          console.log('🎮 Discount code limit info received:', data);
+          console.log('🎮 codesUsed:', data.codesUsed, 'maxCodes:', data.maxCodes);
           console.log('🎮 nextResetTime:', data.nextResetTime, 'resetHours:', data.resetHours);
 
-          // Show play limit message to user
+          // Show discount code limit message to user
           setGameState('gameOver');
           setGameResult({
             score: 0,
             discountEarned: 0,
             discountCode: undefined,
-            isPlayLimitReached: true, // Special flag for play limit
+            isPlayLimitReached: true, // Special flag for discount code limit
             playLimitInfo: {
-              playsUsed: data.playsUsed || 0,
-              maxPlays: data.maxPlays || 1,
+              playsUsed: data.codesUsed || data.playsUsed || 0, // Use new codesUsed field, fallback to old
+              maxPlays: data.maxCodes || data.maxPlays || 1, // Use new maxCodes field, fallback to old
               nextResetTime: data.nextResetTime,
               resetHours: data.resetHours || 24
             },

@@ -415,18 +415,19 @@ export function SettingsTab({ shop }: SettingsTabProps) {
                 />
 
                 <TextField
-                  label="Max Plays per Customer"
+                  label="Max Discount Codes per Customer"
                   type="number"
                   value={gameSettings.maxPlaysPerCustomer.toString()}
                   onChange={(value) => setGameSettings({...gameSettings, maxPlaysPerCustomer: parseInt(value) || 0})}
+                  helpText="Maximum number of discount codes one customer (IP address) can generate within the reset period"
                 />
 
                 <TextField
-                  label="Play Limit Reset Hours"
+                  label="Discount Code Limit Reset Hours"
                   type="number"
                   value={gameSettings.playLimitResetHours.toString()}
                   onChange={(value) => setGameSettings({...gameSettings, playLimitResetHours: parseInt(value) || 24})}
-                  helpText="Hours after which play limit resets (default: 24 hours)"
+                  helpText="Hours after which discount code limit resets (default: 24 hours)"
                 />
 
                 <div style={{ marginTop: '1rem' }}>
@@ -436,7 +437,7 @@ export function SettingsTab({ shop }: SettingsTabProps) {
                       loading={resetting}
                       size="medium"
                     >
-                      {resetting ? 'Resetting...' : 'Reset My Play Limits'}
+                      {resetting ? 'Resetting...' : 'Reset My Discount Limits'}
                     </Button>
                     <Button
                       onClick={handleResetPlayLimits}
@@ -444,12 +445,12 @@ export function SettingsTab({ shop }: SettingsTabProps) {
                       destructive
                       size="medium"
                     >
-                      {resetting ? 'Resetting...' : 'Reset All Play Limits'}
+                      {resetting ? 'Resetting...' : 'Reset All Discount Limits'}
                     </Button>
                   </div>
                   <Text variant="bodySm" color="subdued" as="p">
-                    💡 <strong>Reset My Play Limits:</strong> Reset only for your IP (for testing)<br/>
-                    ⚠️ <strong>Reset All Play Limits:</strong> Delete all play history for everyone (use carefully)
+                    💡 <strong>Reset My Discount Limits:</strong> Reset discount code limits only for your IP (for testing)<br/>
+                    ⚠️ <strong>Reset All Discount Limits:</strong> Delete all discount code history for everyone (use carefully)
                   </Text>
                 </div>
 

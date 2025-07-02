@@ -74,11 +74,14 @@ export interface StartGameResponse {
   playsRemaining?: number;
   error?: string;
   reason?: string;
-  // Play limit details
-  playsUsed?: number;
-  maxPlays?: number;
+  // Discount code limit details (NEW SYSTEM)
+  codesUsed?: number;
+  maxCodes?: number;
   nextResetTime?: string;
   resetHours?: number;
+  // Legacy fields (for backward compatibility)
+  playsUsed?: number;
+  maxPlays?: number;
 }
 
 export interface FinishGameRequest {

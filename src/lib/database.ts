@@ -225,6 +225,27 @@ export class GameSessionService {
   static async deleteSession(sessionId: string): Promise<void> {
     await db.collection(collections.gameSessions).doc(sessionId).delete();
   }
+
+  // NEW: Get sessions with discount codes by IP address and time period
+  static async getDiscountCodesByIP(shopDomain: string, ipAddress: string, afterTime: Date): Promise<GameSessionDocument[]> {
+    console.log('🎮 Getting discount codes for IP:', ipAddress, 'after:', afterTime.toISOString());
+
+    const snapshot = await db.collection(collections.gameSessions)
+      .where('shopDomain', '==', shopDomain)
+      .where('ipAddress', '==', ipAddress)
+      .where('startedAt', '>', Timestamp.fromDate(afterTime))
+      .get();
+
+    const sessions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as GameSessionDocument));
+
+    // Filter only sessions that generated discount codes
+    const sessionsWithCodes = sessions.filter(session =>
+      session.discountCode && session.discountCode.trim() !== ''
+    );
+
+    console.log('🎮 Found', sessions.length, 'total sessions,', sessionsWithCodes.length, 'with discount codes');
+    return sessionsWithCodes;
+  }
 }
 
 // Game score operations

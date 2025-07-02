@@ -100,7 +100,7 @@ export default function GameOverScreen({
             color: '#ff6b6b',
             textAlign: 'center'
           }}>
-            Play Limit Reached! 🚫
+            Discount Limit Reached! 🚫
           </h2>
 
           {playLimitInfo && (
@@ -116,7 +116,7 @@ export default function GameOverScreen({
               border: '1px solid rgba(255, 255, 255, 0.2)'
             }}>
               <div style={{ marginBottom: '10px' }}>
-                <strong>Games played:</strong> {playLimitInfo.playsUsed} / {playLimitInfo.maxPlays}
+                <strong>Discount codes generated:</strong> {playLimitInfo.playsUsed} / {playLimitInfo.maxPlays}
               </div>
 
               {playLimitInfo.nextResetTime && timeUntilReset && (
@@ -150,7 +150,7 @@ export default function GameOverScreen({
             textAlign: 'center',
             lineHeight: '1.5'
           }}>
-            Come back after the reset for more chances to win discounts!
+            You've reached the maximum number of discount codes for this period. Come back after the reset for more chances to win discounts!
           </div>
 
           <div className="game-actions">
