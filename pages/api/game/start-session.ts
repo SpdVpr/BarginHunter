@@ -55,24 +55,41 @@ async function checkDiscountCodeLimit(shopDomain: string, ipAddress: string): Pr
 // Simple function to count discount codes by IP
 async function countDiscountCodesByIP(shopDomain: string, ipAddress: string, afterTime: Date): Promise<number> {
   try {
-    console.log('🎮 Counting discount codes for IP:', ipAddress);
-    
+    console.log('🎮 Counting discount codes for IP:', ipAddress, 'after:', afterTime.toISOString());
+
     // Get all sessions for this shop
     const allSessions = await GameSessionService.getSessionsByShop(shopDomain, 1000);
     console.log('🎮 Total sessions found:', allSessions.length);
-    
-    // Filter by IP, time, and discount code existence
-    const relevantSessions = allSessions.filter(session => {
-      const hasIP = session.ipAddress === ipAddress;
-      const hasTime = session.startedAt.toDate() > afterTime;
+
+    // Debug: Show some sessions
+    if (allSessions.length > 0) {
+      console.log('🎮 Sample sessions:', allSessions.slice(0, 3).map(s => ({
+        id: s.id,
+        ipAddress: s.ipAddress,
+        startedAt: s.startedAt.toDate().toISOString(),
+        discountCode: s.discountCode,
+        completed: s.completed
+      })));
+    }
+
+    // Filter by IP first
+    const ipSessions = allSessions.filter(session => session.ipAddress === ipAddress);
+    console.log('🎮 Sessions for this IP:', ipSessions.length);
+
+    // Filter by time
+    const timeSessions = ipSessions.filter(session => session.startedAt.toDate() > afterTime);
+    console.log('🎮 Sessions within time period:', timeSessions.length);
+
+    // Filter by discount code existence
+    const relevantSessions = timeSessions.filter(session => {
       const hasCode = session.discountCode && session.discountCode.trim() !== '';
-      
-      return hasIP && hasTime && hasCode;
+      console.log('🎮 Session', session.id, 'has discount code:', hasCode, 'code:', session.discountCode);
+      return hasCode;
     });
-    
-    console.log('🎮 Sessions with discount codes for this IP:', relevantSessions.length);
+
+    console.log('🎮 Final count - Sessions with discount codes for this IP:', relevantSessions.length);
     console.log('🎮 Discount codes found:', relevantSessions.map(s => s.discountCode));
-    
+
     return relevantSessions.length;
   } catch (error) {
     console.error('🎮 Error counting discount codes:', error);
