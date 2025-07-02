@@ -80,7 +80,7 @@ export interface ShopSettings {
 }
 
 export interface WidgetConfiguration {
-  displayMode: 'popup' | 'tab' | 'inline' | 'floating_button';
+  displayMode: 'popup' | 'floating_button';
   triggerEvent: 'immediate' | 'exit_intent' | 'time_delay' | 'scroll';
   triggerDelay?: number;
   position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';

@@ -40,7 +40,7 @@ interface FloatingButtonConfig {
 }
 
 interface WidgetSettings {
-  displayMode: 'popup' | 'tab' | 'floating_button' | 'inline';
+  displayMode: 'popup' | 'floating_button';
   triggerEvent: 'immediate' | 'time_delay' | 'exit_intent' | 'scroll';
   position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
   showOn: 'all_pages' | 'homepage' | 'product_pages' | 'collection_pages' | 'cart_page' | 'checkout_page' | 'custom';
@@ -116,23 +116,67 @@ export function WidgetDisplayTab({ shop }: WidgetDisplayTabProps) {
 
     try {
       setSaving(true);
+
+      // Load current settings first to preserve other settings
+      const configResponse = await fetch(`/api/game/config/${shop}`);
+      const currentConfig = configResponse.ok ? await configResponse.json() : {};
+
+      // Prepare complete settings data (same format as SettingsTab)
+      const settingsData = {
+        shop,
+        gameSettings: currentConfig.gameSettings || {
+          isEnabled: true,
+          gameType: 'dino',
+          minScoreForDiscount: 100,
+          maxPlaysPerCustomer: 5,
+          maxPlaysPerDay: 10,
+          gameSpeed: 1,
+          difficulty: 'medium',
+          discountTiers: [
+            { minScore: 100, discount: 5, message: 'Great job! You earned 5% off!' },
+            { minScore: 300, discount: 10, message: 'Amazing! You earned 10% off!' },
+            { minScore: 500, discount: 15, message: 'Incredible! You earned 15% off!' }
+          ]
+        },
+        widgetSettings,
+        appearanceSettings: currentConfig.appearanceSettings || {
+          primaryColor: '#ff6b6b',
+          secondaryColor: '#4ecdc4',
+          fontFamily: 'Arial, sans-serif',
+          borderRadius: 8,
+          customCSS: ''
+        },
+        businessRules: currentConfig.businessRules || {
+          maxDiscountPerCustomer: 50,
+          discountValidityDays: 30,
+          requireEmailForDiscount: false,
+          allowMultipleDiscounts: false,
+          minimumOrderValue: 0
+        },
+        introSettings: currentConfig.introSettings || {
+          title: 'Play & Win Discounts!',
+          description: 'Play our fun game and win amazing discounts on your order!',
+          buttonText: 'Start Game',
+          showInstructions: true,
+          customMessage: ''
+        }
+      };
+
       const response = await fetch('/api/dashboard/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          shop,
-          widgetSettings
-        }),
+        body: JSON.stringify(settingsData),
       });
 
       if (response.ok) {
         setMessage({ type: 'success', text: 'Widget display settings saved successfully!' });
       } else {
-        throw new Error('Failed to save settings');
+        const errorData = await response.text();
+        throw new Error(`Failed to save settings: ${errorData}`);
       }
     } catch (error) {
       console.error('Failed to save widget settings:', error);
-      setMessage({ type: 'error', text: 'Failed to save widget settings' });
+      setMessage({ type: 'error', text: `Failed to save widget settings: ${error.message}` });
     } finally {
       setSaving(false);
     }
@@ -173,9 +217,9 @@ export function WidgetDisplayTab({ shop }: WidgetDisplayTabProps) {
               Choose how your game widget appears to customers
             </Text>
             
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
               {/* Popup Modal Option */}
-              <div 
+              <div
                 onClick={() => setWidgetSettings({...widgetSettings, displayMode: 'popup'})}
                 style={{
                   border: widgetSettings.displayMode === 'popup' ? '2px solid #008060' : '2px solid #e1e3e5',
@@ -199,33 +243,8 @@ export function WidgetDisplayTab({ shop }: WidgetDisplayTabProps) {
                 </div>
               </div>
 
-              {/* Side Tab Option */}
-              <div 
-                onClick={() => setWidgetSettings({...widgetSettings, displayMode: 'tab'})}
-                style={{
-                  border: widgetSettings.displayMode === 'tab' ? '2px solid #008060' : '2px solid #e1e3e5',
-                  borderRadius: '8px',
-                  padding: '1.5rem',
-                  cursor: 'pointer',
-                  backgroundColor: widgetSettings.displayMode === 'tab' ? '#f6f6f7' : 'white',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                  <span style={{ fontSize: '1.5rem' }}>📑</span>
-                  <Text variant="headingMd" as="h4">Side Tab</Text>
-                  {widgetSettings.displayMode === 'tab' && <span style={{ color: '#008060' }}>✓</span>}
-                </div>
-                <Text variant="bodyMd" color="subdued">
-                  Persistent tab on the side of the screen. Always visible but not intrusive.
-                </Text>
-                <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: '#6d7175' }}>
-                  Best for: Constant visibility, moderate engagement
-                </div>
-              </div>
-
               {/* Floating Button Option */}
-              <div 
+              <div
                 onClick={() => setWidgetSettings({...widgetSettings, displayMode: 'floating_button'})}
                 style={{
                   border: widgetSettings.displayMode === 'floating_button' ? '2px solid #008060' : '2px solid #e1e3e5',
@@ -466,16 +485,25 @@ export function WidgetDisplayTab({ shop }: WidgetDisplayTabProps) {
         </Card>
       )}
 
-      {/* Save Button */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Button
-          primary
-          loading={saving}
-          onClick={saveWidgetSettings}
-        >
-          Save Widget Display Settings
-        </Button>
-      </div>
+      {/* Save Settings */}
+      <Card>
+        <div style={{ padding: '2rem' }}>
+          <Stack vertical spacing="loose">
+            <Text variant="headingLg" as="h3">
+              Save Changes
+            </Text>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Button
+                primary
+                loading={saving}
+                onClick={saveWidgetSettings}
+              >
+                Save Widget Display Settings
+              </Button>
+            </div>
+          </Stack>
+        </div>
+      </Card>
     </div>
   );
 }

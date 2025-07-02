@@ -75,7 +75,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       targetUrls: widgetSettings.targetUrls
     });
 
-    if (!['popup', 'tab', 'inline', 'floating_button'].includes(widgetSettings.displayMode) ||
+    if (!['popup', 'floating_button'].includes(widgetSettings.displayMode) ||
         !['immediate', 'scroll', 'exit_intent', 'time_delay'].includes(widgetSettings.triggerEvent) ||
         !['top-left', 'top-right', 'bottom-left', 'bottom-right', 'center'].includes(widgetSettings.position) ||
         !['all_pages', 'homepage', 'product_pages', 'cart_page', 'checkout_page', 'collection_pages', 'custom', 'url_targeting'].includes(widgetSettings.showOn)) {

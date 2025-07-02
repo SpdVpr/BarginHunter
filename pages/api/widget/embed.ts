@@ -269,51 +269,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     return container;
   }
 
-  function createTabWidget(container) {
-    var tab = document.createElement('div');
-    tab.className = 'bargain-hunter-tab';
-    tab.innerHTML = '🎮 Play for Discount!';
-    
-    // Position the tab
-    var position = widgetConfig.position || 'bottom-right';
-    switch (position) {
-      case 'bottom-right':
-        tab.style.cssText = 
-          'position: fixed;' +
-          'bottom: 0;' +
-          'right: 20px;' +
-          'background: linear-gradient(45deg, #ff6b6b, #4ecdc4);' +
-          'color: white;' +
-          'padding: 12px 20px;' +
-          'border-radius: 8px 8px 0 0;' +
-          'cursor: pointer;' +
-          'font-weight: bold;' +
-          'box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);' +
-          'transition: all 0.3s ease;' +
-          'font-size: 14px;' +
-          'z-index: 999999;';
-        break;
-      case 'bottom-left':
-        tab.style.cssText = 
-          'position: fixed;' +
-          'bottom: 0;' +
-          'left: 20px;' +
-          'background: linear-gradient(45deg, #ff6b6b, #4ecdc4);' +
-          'color: white;' +
-          'padding: 12px 20px;' +
-          'border-radius: 8px 8px 0 0;' +
-          'cursor: pointer;' +
-          'font-weight: bold;' +
-          'box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);' +
-          'transition: all 0.3s ease;' +
-          'font-size: 14px;' +
-          'z-index: 999999;';
-        break;
-    }
 
-    tab.addEventListener('click', openGameModal);
-    container.appendChild(tab);
-  }
 
   function createFloatingButtonWidget(container) {
     var floatingConfig = widgetConfig.floatingButton || {
@@ -661,10 +617,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         var container = createWidgetContainer();
 
         switch (widgetConfig.displayMode) {
-          case 'tab':
-            console.log('🎮 Bargain Hunter: Creating tab widget');
-            createTabWidget(container);
-            break;
           case 'popup':
             console.log('🎮 Bargain Hunter: Creating popup widget');
             createPopupWidget(container);
@@ -673,10 +625,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
             console.log('🎮 Bargain Hunter: Creating floating button widget');
             createFloatingButtonWidget(container);
             break;
-          case 'inline':
-            // Inline mode would need to be handled differently
-            // as it requires a specific container element
-            console.log('🎮 Bargain Hunter: Inline mode not implemented in embed script');
+          default:
+            console.log('🎮 Bargain Hunter: Unknown display mode, defaulting to popup');
+            createPopupWidget(container);
             break;
         }
 
