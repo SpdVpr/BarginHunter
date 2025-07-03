@@ -434,9 +434,11 @@ export function SettingsTab({ shop }: SettingsTabProps) {
                     { label: 'Tetris', value: 'tetris' },
                     { label: 'Snake', value: 'snake' },
                     { label: 'Space Invaders', value: 'space_invaders' },
+                    { label: '🎮 Game Library (Multiple Games)', value: 'library' },
                   ]}
                   value={gameSettings.gameType}
                   onChange={(value) => setGameSettings({...gameSettings, gameType: value as any})}
+                  helpText={gameSettings.gameType === 'library' ? 'Customers can choose from multiple games in our library' : 'Select a single game for all customers'}
                 />
 
                 <TextField

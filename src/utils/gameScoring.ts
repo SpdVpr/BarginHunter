@@ -1,4 +1,4 @@
-// Universal game scoring system for both Dino and Flappy Bird
+// Universal game scoring system for all games including external games
 
 export interface ScoringConfig {
   basePointsPerSecond: number;
@@ -144,4 +144,56 @@ export function formatScore(score: number): string {
 export function getDifficultyName(level: number): string {
   const names = ['Beginner', 'Easy', 'Medium', 'Hard', 'Expert', 'Master', 'Insane', 'Legendary'];
   return names[Math.min(level, names.length - 1)] || 'Unknown';
+}
+
+// External Game Scorer Class
+export class GameScorer {
+  private startTime: number = 0;
+  private currentScore: number = 0;
+  private gameEvents: Array<{
+    type: string;
+    timestamp: number;
+    value?: number;
+  }> = [];
+
+  constructor() {
+    this.reset();
+  }
+
+  reset(): void {
+    this.startTime = Date.now();
+    this.currentScore = 0;
+    this.gameEvents = [];
+  }
+
+  updateScore(score: number): void {
+    this.currentScore = score;
+    this.addEvent('score_update', score);
+  }
+
+  addEvent(type: string, value?: number): void {
+    this.gameEvents.push({
+      type,
+      timestamp: Date.now() - this.startTime,
+      value
+    });
+  }
+
+  getScore(): number {
+    return this.currentScore;
+  }
+
+  getDuration(): number {
+    return Math.floor((Date.now() - this.startTime) / 1000);
+  }
+
+  normalizeScore(maxPossibleScore?: number): number {
+    if (!maxPossibleScore) {
+      const duration = this.getDuration();
+      const scorePerSecond = duration > 0 ? this.currentScore / duration : 0;
+      return Math.min(Math.round(scorePerSecond * 10), 1000);
+    }
+    const normalized = (this.currentScore / maxPossibleScore) * 1000;
+    return Math.min(Math.round(normalized), 1000);
+  }
 }

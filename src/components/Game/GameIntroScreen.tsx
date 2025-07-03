@@ -30,6 +30,7 @@ interface IntroSettings {
 interface GameIntroScreenProps {
   gameConfig: GameConfig;
   onStartGame: () => void;
+  onShowLibrary?: () => void;
   onClose: () => void;
   attemptsUsed: number;
 }
@@ -51,6 +52,7 @@ const DEFAULT_INTRO_SETTINGS: IntroSettings = {
 export default function GameIntroScreen({
   gameConfig,
   onStartGame,
+  onShowLibrary,
   onClose,
   attemptsUsed
 }: GameIntroScreenProps) {
@@ -268,6 +270,40 @@ export default function GameIntroScreen({
         >
           {introSettings.showEmojis ? '🚀 ' : ''}Start
         </button>
+
+        {/* Game Library Button */}
+        {onShowLibrary && (
+          <button
+            onClick={onShowLibrary}
+            className="library-button"
+            style={{
+              background: 'linear-gradient(45deg, #4ecdc4, #44b3a8)',
+              color: 'white',
+              border: 'none',
+              padding: '15px 30px',
+              borderRadius: '12px',
+              fontSize: 'clamp(16px, 4vw, 20px)',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              boxShadow: '0 6px 15px rgba(0,0,0,0.2)',
+              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+              flex: '1',
+              maxWidth: '150px',
+              textShadow: '1px 1px 2px rgba(0,0,0,0.2)',
+              marginTop: '10px'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-3px)';
+              e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.3)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 6px 15px rgba(0,0,0,0.2)';
+            }}
+          >
+            {introSettings.showEmojis ? '🎮 ' : ''}More Games
+          </button>
+        )}
 
         <button
           onClick={onClose}

@@ -4,8 +4,11 @@ import FlappyBirdEngine from './FlappyBirdEngine';
 import TetrisEngine from './TetrisEngine';
 import SnakeEngine from './SnakeEngine';
 import SpaceInvadersEngine from './SpaceInvadersEngine';
+import ExternalGameEngine from './ExternalGameEngine';
+import GameLibrarySelector from './GameLibrarySelector';
 import GameIntroScreen from './GameIntroScreen';
 import GameOverScreen from './GameOverScreen';
+import { ExternalGame } from '../../lib/gameLibrary';
 
 interface GameProps {
   shopDomain: string;
@@ -37,12 +40,13 @@ const DEFAULT_DISCOUNT_TIERS = [
 ];
 
 export default function Game({ shopDomain, onGameComplete, onClose }: GameProps) {
-  const [gameState, setGameState] = useState<'loading' | 'intro' | 'playing' | 'gameOver'>('loading');
+  const [gameState, setGameState] = useState<'loading' | 'intro' | 'library' | 'playing' | 'gameOver'>('loading');
   const [gameConfig, setGameConfig] = useState<any>(null);
   const [gameResult, setGameResult] = useState<GameResult | null>(null);
   const [currentScore, setCurrentScore] = useState(0);
   const [sessionId, setSessionId] = useState<string>('');
   const [attemptsUsed, setAttemptsUsed] = useState(0);
+  const [selectedExternalGame, setSelectedExternalGame] = useState<ExternalGame | null>(null);
 
   // Load game configuration
   useEffect(() => {
@@ -338,12 +342,32 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
       <GameIntroScreen
         gameConfig={{...gameConfig, shopName: shopDomain}}
         onStartGame={() => {
-          setGameState('playing');
-          // Start game session immediately
-          startGameSession();
+          // If game type is library, go to library instead of playing
+          if (gameConfig.gameType === 'library') {
+            setGameState('library');
+          } else {
+            setGameState('playing');
+            // Start game session immediately
+            startGameSession();
+          }
         }}
+        onShowLibrary={gameConfig.gameType !== 'library' ? () => setGameState('library') : undefined}
         onClose={onClose}
         attemptsUsed={attemptsUsed}
+      />
+    );
+  }
+
+  if (gameState === 'library') {
+    return (
+      <GameLibrarySelector
+        onGameSelect={(game) => {
+          setSelectedExternalGame(game);
+          setGameState('playing');
+          startGameSession();
+        }}
+        onClose={() => setGameState('intro')}
+        gameConfig={gameConfig}
       />
     );
   }
@@ -383,7 +407,18 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
     }}>
       {/* Score display removed - EnhancedGameEngine draws its own score */}
 
-      {gameConfig.gameType === 'flappy_bird' ? (
+      {selectedExternalGame ? (
+        <ExternalGameEngine
+          game={selectedExternalGame}
+          onGameEnd={handleGameEnd}
+          onScoreUpdate={setCurrentScore}
+          gameConfig={gameConfig}
+          onShowIntro={() => {
+            setSelectedExternalGame(null);
+            setGameState('library');
+          }}
+        />
+      ) : gameConfig.gameType === 'flappy_bird' ? (
         <FlappyBirdEngine
           onGameEnd={handleGameEnd}
           onScoreUpdate={setCurrentScore}
