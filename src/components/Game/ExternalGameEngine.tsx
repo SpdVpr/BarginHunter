@@ -2,7 +2,7 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import TouchControlsHint from './TouchControlsHint';
 import { ExternalGame } from '../../lib/gameLibrary';
-import { GameScorer } from '../../utils/gameScoring';
+import { ExternalGameScorer } from '../../utils/gameScoring';
 
 interface ExternalGameEngineProps {
   game: ExternalGame;
@@ -25,7 +25,7 @@ export default function ExternalGameEngine({
   const [error, setError] = useState<string | null>(null);
   const [score, setScore] = useState(0);
   const [gameStartTime] = useState(Date.now());
-  const [gameScorer] = useState(() => new GameScorer());
+  const [gameScorer] = useState(() => new ExternalGameScorer());
 
   // Game state management
   const [gameState, setGameState] = useState<'loading' | 'playing' | 'ended'>('loading');

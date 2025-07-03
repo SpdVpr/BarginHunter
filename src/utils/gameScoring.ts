@@ -147,7 +147,7 @@ export function getDifficultyName(level: number): string {
 }
 
 // External Game Scorer Class
-export class GameScorer {
+export class ExternalGameScorer {
   private startTime: number = 0;
   private currentScore: number = 0;
   private gameEvents: Array<{
