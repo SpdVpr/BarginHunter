@@ -7,6 +7,9 @@ import MemoryCardsGame from './MiniGames/MemoryCardsGame';
 import ColorMatchGame from './MiniGames/ColorMatchGame';
 import ReactionTimeGame from './MiniGames/ReactionTimeGame';
 import NumberSequenceGame from './MiniGames/NumberSequenceGame';
+import BreakoutGame from './MiniGames/BreakoutGame';
+import SpaceShooterGame from './MiniGames/SpaceShooterGame';
+import PongGame from './MiniGames/PongGame';
 
 interface ExternalGameEngineProps {
   game: ExternalGame;
@@ -127,6 +130,12 @@ export default function ExternalGameEngine({
         return <ReactionTimeGame {...gameProps} />;
       case 'number-sequence':
         return <NumberSequenceGame {...gameProps} />;
+      case 'breakout-classic':
+        return <BreakoutGame {...gameProps} />;
+      case 'space-shooter':
+        return <SpaceShooterGame {...gameProps} />;
+      case 'pong-classic':
+        return <PongGame {...gameProps} />;
       default:
         return (
           <div style={{
