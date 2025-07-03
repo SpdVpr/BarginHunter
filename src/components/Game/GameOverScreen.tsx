@@ -312,7 +312,16 @@ export default function GameOverScreen({
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              console.log('Close button clicked!'); // Debug log
               onClose();
+            }}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
             }}
             style={{
               background: 'transparent',
@@ -323,7 +332,9 @@ export default function GameOverScreen({
               cursor: 'pointer',
               fontSize: '16px',
               fontWeight: 'bold',
-              transition: 'all 0.3s ease'
+              transition: 'all 0.3s ease',
+              zIndex: 9999,
+              position: 'relative'
             }}
             onMouseOver={(e) => {
               e.currentTarget.style.background = 'white';

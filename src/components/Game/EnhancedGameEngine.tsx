@@ -133,32 +133,122 @@ export default function EnhancedGameEngine({
   
   const [obstacles, setObstacles] = useState<Obstacle[]>([]);
 
-  // Draw simple character - Chrome Dino style
+  // Enhanced pixel art character with walking animation
   const drawPlayer = useCallback((ctx: CanvasRenderingContext2D, player: Player) => {
     const { x, y, width, height } = player;
 
-    // Simple character body
-    ctx.fillStyle = '#535353';
-    ctx.fillRect(x + 2, y + 4, width - 4, height - 8);
+    // Enhanced color palette
+    const colors = {
+      skin: '#FFDBAC',
+      skinShade: '#E6C4A0',
+      hair: '#8B4513',
+      hoodie: '#4ECDC4',
+      hoodieShade: '#3BA99C',
+      hoodieHighlight: '#5FE5D8',
+      pants: '#2F4F4F',
+      pantsShade: '#1C3A3A',
+      shoes: '#FFFFFF',
+      shoesShade: '#CCCCCC',
+      eyes: '#000000',
+      accent: '#FF6B6B'
+    };
 
-    // Character head
-    ctx.fillStyle = '#535353';
-    ctx.fillRect(x + 4, y, width - 8, 12);
+    // Animation frame for walking
+    const animFrame = Math.floor(Date.now() / 150) % 4;
+    const walkCycle = [0, 1, 0, -1]; // Walking animation cycle
+    const legOffset = player.isJumping ? 0 : walkCycle[animFrame];
+    const armSwing = player.isJumping ? 0 : walkCycle[animFrame] * 0.5;
 
-    // Eye
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(x + width - 12, y + 2, 6, 4);
-    ctx.fillStyle = '#000';
-    ctx.fillRect(x + width - 10, y + 3, 2, 2);
+    // Scale factor for better visibility
+    const scale = 1.5;
+    const pixelSize = 2;
 
-    // Simple legs animation
-    if (!player.isJumping) {
-      ctx.fillStyle = '#535353';
-      const legOffset = Math.floor(Date.now() / 100) % 2;
-      ctx.fillRect(x + 6, y + height - 4, 4, 4);
-      ctx.fillRect(x + width - 10, y + height - 4 + legOffset, 4, 4);
+    // Helper function to draw scaled pixel
+    const drawPixel = (px: number, py: number, color: string) => {
+      ctx.fillStyle = color;
+      ctx.fillRect(x + px * pixelSize * scale, y + py * pixelSize * scale, pixelSize * scale, pixelSize * scale);
+    };
+
+    // Helper function to draw scaled rectangle
+    const drawRect = (px: number, py: number, w: number, h: number, color: string) => {
+      ctx.fillStyle = color;
+      ctx.fillRect(x + px * pixelSize * scale, y + py * pixelSize * scale, w * pixelSize * scale, h * pixelSize * scale);
+    };
+
+    // Head (more detailed)
+    drawRect(6, 2, 8, 8, colors.skin);
+    drawRect(6, 2, 8, 2, colors.hair); // Hair
+    drawRect(6, 4, 8, 1, colors.skinShade); // Hair shadow
+
+    // Eyes with animation
+    drawPixel(8, 5, colors.eyes);
+    drawPixel(11, 5, colors.eyes);
+    if (animFrame === 0) { // Blink occasionally
+      drawPixel(8, 6, colors.skinShade);
+      drawPixel(11, 6, colors.skinShade);
     }
-  }, []);
+
+    // Nose and mouth
+    drawPixel(9, 7, colors.skinShade);
+    drawPixel(9, 8, colors.eyes);
+
+    // Body - Enhanced Hoodie
+    drawRect(5, 10, 10, 12, colors.hoodie);
+    drawRect(5, 10, 10, 1, colors.hoodieShade); // Hood shadow
+    drawRect(6, 11, 8, 1, colors.hoodieHighlight); // Highlight
+
+    // Hoodie details
+    drawRect(9, 12, 2, 8, colors.hoodieShade); // Zipper
+    drawPixel(10, 13, colors.accent); // Zipper pull
+
+    // Arms with swing animation
+    const leftArmY = 12 + armSwing;
+    const rightArmY = 12 - armSwing;
+    drawRect(2, leftArmY, 3, 8, colors.hoodie);
+    drawRect(15, rightArmY, 3, 8, colors.hoodie);
+
+    // Hands
+    drawRect(2, leftArmY + 8, 2, 2, colors.skin);
+    drawRect(16, rightArmY + 8, 2, 2, colors.skin);
+
+    // Pants
+    drawRect(6, 22, 8, 8, colors.pants);
+    drawRect(6, 22, 8, 1, colors.pantsShade); // Top shade
+    drawRect(9, 24, 2, 6, colors.pantsShade); // Center seam
+
+    // Legs with walking animation
+    if (player.isJumping) {
+      // Legs together when jumping
+      drawRect(7, 30, 2, 6, colors.pants);
+      drawRect(11, 30, 2, 6, colors.pants);
+    } else {
+      // Walking animation
+      const leftLegY = 30 + legOffset;
+      const rightLegY = 30 - legOffset;
+      drawRect(7, leftLegY, 2, 6, colors.pants);
+      drawRect(11, rightLegY, 2, 6, colors.pants);
+    }
+
+    // Shoes with walking animation
+    if (player.isJumping) {
+      drawRect(6, 36, 4, 3, colors.shoes);
+      drawRect(10, 36, 4, 3, colors.shoes);
+    } else {
+      const leftShoeY = 36 + legOffset;
+      const rightShoeY = 36 - legOffset;
+      drawRect(6, leftShoeY, 4, 3, colors.shoes);
+      drawRect(10, rightShoeY, 4, 3, colors.shoes);
+      drawRect(6, leftShoeY + 2, 4, 1, colors.shoesShade);
+      drawRect(10, rightShoeY + 2, 4, 1, colors.shoesShade);
+    }
+
+    // Add motion blur effect when running fast
+    if (!player.isJumping && score > 200) {
+      ctx.globalAlpha = 0.3;
+      drawRect(0, 10, 2, 20, colors.hoodie); // Motion trail
+      ctx.globalAlpha = 1.0;
+    }
+  }, [score]);
 
   // Draw simple obstacles - Chrome Dino style
   const drawObstacle = useCallback((ctx: CanvasRenderingContext2D, obstacle: Obstacle) => {
@@ -314,25 +404,85 @@ export default function EnhancedGameEngine({
     }
   }, []);
 
-  // Draw simple background - Chrome Dino style
+  // Enhanced background with clouds and better environment
   const drawBackground = useCallback((ctx: CanvasRenderingContext2D) => {
     const { width, height, groundY } = canvasSize;
 
-    // Simple sky
-    ctx.fillStyle = '#f7f7f7';
-    ctx.fillRect(0, 0, width, height);
+    // Beautiful gradient sky
+    const skyGradient = ctx.createLinearGradient(0, 0, 0, groundY);
+    skyGradient.addColorStop(0, '#87CEEB'); // Sky blue
+    skyGradient.addColorStop(0.7, '#B0E0E6'); // Powder blue
+    skyGradient.addColorStop(1, '#F0F8FF'); // Alice blue
+    ctx.fillStyle = skyGradient;
+    ctx.fillRect(0, 0, width, groundY);
 
-    // Simple ground line
-    ctx.fillStyle = '#535353';
-    ctx.fillRect(0, groundY, width, 2);
+    // Draw moving clouds
+    const cloudOffset = (Date.now() * 0.02) % (width + 200);
+    drawCloud(ctx, width - cloudOffset, 50, 80, 40);
+    drawCloud(ctx, width - cloudOffset + 300, 80, 60, 30);
+    drawCloud(ctx, width - cloudOffset + 600, 40, 100, 50);
+    drawCloud(ctx, width - cloudOffset + 900, 70, 70, 35);
 
-    // Moving ground dots for speed effect
-    ctx.fillStyle = '#535353';
-    const dotOffset = (Date.now() * 0.1) % 40;
-    for (let x = -dotOffset; x < width; x += 40) {
-      ctx.fillRect(x, groundY + 8, 2, 2);
+    // Enhanced ground with texture
+    const groundGradient = ctx.createLinearGradient(0, groundY, 0, height);
+    groundGradient.addColorStop(0, '#8B7355'); // Sandy brown
+    groundGradient.addColorStop(0.3, '#A0522D'); // Sienna
+    groundGradient.addColorStop(1, '#654321'); // Dark brown
+    ctx.fillStyle = groundGradient;
+    ctx.fillRect(0, groundY, width, height - groundY);
+
+    // Ground surface line
+    ctx.fillStyle = '#5D4E37';
+    ctx.fillRect(0, groundY, width, 3);
+
+    // Moving ground texture for speed effect
+    ctx.fillStyle = '#6B5B47';
+    const dotOffset = (Date.now() * 0.15) % 60;
+    for (let x = -dotOffset; x < width; x += 60) {
+      // Small rocks and debris
+      ctx.fillRect(x, groundY + 8, 3, 2);
+      ctx.fillRect(x + 20, groundY + 12, 2, 3);
+      ctx.fillRect(x + 40, groundY + 6, 4, 2);
     }
+
+    // Distant mountains/hills
+    ctx.fillStyle = '#9370DB';
+    ctx.globalAlpha = 0.3;
+    drawMountain(ctx, -100, groundY - 80, 200, 80);
+    drawMountain(ctx, 150, groundY - 60, 180, 60);
+    drawMountain(ctx, 400, groundY - 100, 250, 100);
+    drawMountain(ctx, 700, groundY - 70, 200, 70);
+    ctx.globalAlpha = 1.0;
   }, [canvasSize]);
+
+  // Helper function to draw fluffy clouds
+  const drawCloud = (ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number) => {
+    ctx.fillStyle = '#FFFFFF';
+    ctx.globalAlpha = 0.8;
+
+    // Main cloud body
+    ctx.beginPath();
+    ctx.arc(x, y + height/2, height/2, 0, Math.PI * 2);
+    ctx.arc(x + width/4, y + height/3, height/3, 0, Math.PI * 2);
+    ctx.arc(x + width/2, y + height/2, height/2.5, 0, Math.PI * 2);
+    ctx.arc(x + 3*width/4, y + height/3, height/3, 0, Math.PI * 2);
+    ctx.arc(x + width, y + height/2, height/2, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.globalAlpha = 1.0;
+  };
+
+  // Helper function to draw mountains
+  const drawMountain = (ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number) => {
+    ctx.beginPath();
+    ctx.moveTo(x, y + height);
+    ctx.lineTo(x + width/3, y);
+    ctx.lineTo(x + 2*width/3, y + height/3);
+    ctx.lineTo(x + width, y);
+    ctx.lineTo(x + width, y + height);
+    ctx.closePath();
+    ctx.fill();
+  };
 
   // Handle input
   const handleJump = useCallback(() => {

@@ -381,23 +381,7 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
       overflow: 'hidden',
       boxSizing: 'border-box'
     }}>
-      {/* Score display */}
-      <div style={{
-        position: 'absolute',
-        top: '15px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        background: 'rgba(255,255,255,0.9)',
-        padding: '10px 20px',
-        borderRadius: '25px',
-        fontWeight: 'bold',
-        fontSize: '20px',
-        color: '#333',
-        zIndex: 10,
-        boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
-      }}>
-        Score: {currentScore}
-      </div>
+      {/* Score display removed - EnhancedGameEngine draws its own score */}
 
       {gameConfig.gameType === 'flappy_bird' ? (
         <FlappyBirdEngine
