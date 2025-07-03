@@ -493,9 +493,12 @@ export default function EnhancedGameEngine({
     ctx.textAlign = 'left';
     ctx.fillText(`Score: ${formatScore(score)}`, 10, 30);
 
-    if (difficultyLevel > 0) {
+    // Show current discount instead of level
+    const currentDiscount = discountTiers.find(tier => score >= tier.minScore)?.discount || 0;
+    if (currentDiscount > 0) {
       ctx.font = 'bold 16px Arial';
-      ctx.fillText(`Level: ${difficultyLevel + 1}`, 10, 55);
+      ctx.fillStyle = '#4ecdc4';
+      ctx.fillText(`${currentDiscount}% OFF`, 10, 55);
     }
 
     // Continue game loop

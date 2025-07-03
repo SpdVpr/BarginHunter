@@ -45,54 +45,89 @@ export class PixelArtCharacter {
   private drawPixelCharacter() {
     const ctx = this.characterCtx;
     
-    // Color palette
+    // Enhanced color palette - more vibrant and detailed
     const colors = {
       skin: '#FFDBAC',
+      skinShade: '#E6C4A0',
       hair: '#8B4513',
+      hairShade: '#654321',
       hoodie: '#4ECDC4',
       hoodieShade: '#3BA99C',
+      hoodieHighlight: '#5FE5D8',
       pants: '#2F4F4F',
       pantsShade: '#1C3333',
       shoes: '#FFFFFF',
       shoesShade: '#DCDCDC',
+      shoesHighlight: '#F0F0F0',
       outline: '#000000',
-      eyes: '#000000'
+      eyes: '#000000',
+      eyeHighlight: '#333333',
+      accent: '#FF6B6B'
     };
 
-    // Head (8x8 pixels)
+    // Head (8x8 pixels) - more detailed
     this.drawPixelRect(ctx, 12, 4, 8, 8, colors.skin);
-    this.drawPixelRect(ctx, 12, 4, 8, 3, colors.hair); // Hair
-    
-    // Eyes (2 pixels)
+    this.drawPixelRect(ctx, 12, 4, 8, 2, colors.hair); // Hair top
+    this.drawPixelRect(ctx, 12, 6, 8, 1, colors.hairShade); // Hair shadow
+    this.drawPixelRect(ctx, 19, 4, 1, 4, colors.hairShade); // Hair side
+
+    // Eyes (more detailed)
     this.drawPixel(ctx, 14, 7, colors.eyes);
     this.drawPixel(ctx, 17, 7, colors.eyes);
-    
-    // Body - Hoodie (12x16 pixels)
+    this.drawPixel(ctx, 14, 8, colors.eyeHighlight); // Eye reflection
+    this.drawPixel(ctx, 17, 8, colors.eyeHighlight);
+
+    // Nose and mouth
+    this.drawPixel(ctx, 15, 9, colors.skinShade);
+    this.drawPixel(ctx, 15, 10, colors.outline); // Small mouth
+
+    // Body - Enhanced Hoodie (12x16 pixels)
     this.drawPixelRect(ctx, 10, 12, 12, 16, colors.hoodie);
     this.drawPixelRect(ctx, 10, 12, 12, 2, colors.hoodieShade); // Hood shadow
     this.drawPixelRect(ctx, 10, 26, 12, 2, colors.hoodieShade); // Bottom shade
+    this.drawPixelRect(ctx, 11, 13, 10, 1, colors.hoodieHighlight); // Highlight
+
+    // Hoodie details - zipper and pockets
+    this.drawPixelRect(ctx, 15, 14, 2, 12, colors.hoodieShade); // Zipper
+    this.drawPixel(ctx, 16, 15, colors.accent); // Zipper pull
+    this.drawPixelRect(ctx, 12, 20, 3, 3, colors.hoodieShade); // Left pocket
+    this.drawPixelRect(ctx, 17, 20, 3, 3, colors.hoodieShade); // Right pocket
     
-    // Arms (4x12 pixels each)
+    // Arms (4x12 pixels each) - more detailed
     this.drawPixelRect(ctx, 6, 14, 4, 12, colors.hoodie);
     this.drawPixelRect(ctx, 22, 14, 4, 12, colors.hoodie);
-    
-    // Hands (2x3 pixels each)
+    this.drawPixelRect(ctx, 6, 14, 1, 12, colors.hoodieShade); // Arm shadow
+    this.drawPixelRect(ctx, 25, 14, 1, 12, colors.hoodieShade);
+
+    // Hands (2x3 pixels each) - more detailed
     this.drawPixelRect(ctx, 7, 24, 2, 3, colors.skin);
     this.drawPixelRect(ctx, 23, 24, 2, 3, colors.skin);
-    
-    // Pants (10x12 pixels)
+    this.drawPixel(ctx, 7, 26, colors.skinShade); // Hand shadow
+    this.drawPixel(ctx, 24, 26, colors.skinShade);
+
+    // Pants (10x12 pixels) - more detailed
     this.drawPixelRect(ctx, 11, 28, 10, 12, colors.pants);
     this.drawPixelRect(ctx, 11, 28, 10, 2, colors.pantsShade); // Top shade
-    
-    // Legs (4x8 pixels each)
+    this.drawPixelRect(ctx, 11, 38, 10, 2, colors.pantsShade); // Bottom shade
+    this.drawPixelRect(ctx, 15, 30, 2, 8, colors.pantsShade); // Center seam
+
+    // Legs (4x8 pixels each) - more detailed
     this.drawPixelRect(ctx, 12, 32, 3, 8, colors.pants);
     this.drawPixelRect(ctx, 17, 32, 3, 8, colors.pants);
-    
-    // Shoes (5x4 pixels each)
+    this.drawPixelRect(ctx, 12, 32, 1, 8, colors.pantsShade); // Leg shadows
+    this.drawPixelRect(ctx, 19, 32, 1, 8, colors.pantsShade);
+
+    // Shoes (5x4 pixels each) - more detailed
     this.drawPixelRect(ctx, 11, 40, 5, 4, colors.shoes);
     this.drawPixelRect(ctx, 16, 40, 5, 4, colors.shoes);
     this.drawPixelRect(ctx, 11, 43, 5, 1, colors.shoesShade); // Shoe shade
     this.drawPixelRect(ctx, 16, 43, 5, 1, colors.shoesShade);
+    this.drawPixelRect(ctx, 11, 40, 5, 1, colors.shoesHighlight); // Shoe highlight
+    this.drawPixelRect(ctx, 16, 40, 5, 1, colors.shoesHighlight);
+
+    // Shoe laces
+    this.drawPixel(ctx, 13, 41, colors.outline);
+    this.drawPixel(ctx, 18, 41, colors.outline);
     
     // Outline (optional - for better visibility)
     this.drawOutline(ctx, colors.outline);

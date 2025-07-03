@@ -309,7 +309,11 @@ export default function GameOverScreen({
           </button>
           
           <button
-            onClick={onClose}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onClose();
+            }}
             style={{
               background: 'transparent',
               color: 'white',
@@ -334,34 +338,7 @@ export default function GameOverScreen({
           </button>
         </div>
 
-        {/* Tips for better score */}
-        <div className="tips-section" style={{ 
-          marginTop: '20px',
-          padding: '15px',
-          background: 'rgba(255,255,255,0.1)',
-          borderRadius: '8px',
-          maxWidth: '300px'
-        }}>
-          <p style={{ 
-            color: '#fff', 
-            fontSize: '12px', 
-            margin: '0 0 8px 0',
-            fontWeight: 'bold'
-          }}>
-            💡 Pro Tips:
-          </p>
-          <ul style={{ 
-            color: '#fff', 
-            fontSize: '11px', 
-            margin: 0,
-            paddingLeft: '15px'
-          }}>
-            <li>Collect golden discount tags for bonus points</li>
-            <li>Time your jumps and slides perfectly</li>
-            <li>Look for mystery boxes for mega bonuses</li>
-            <li>The game gets faster as you progress</li>
-          </ul>
-        </div>
+
       </div>
     </div>
   );
