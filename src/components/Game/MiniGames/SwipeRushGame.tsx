@@ -76,6 +76,60 @@ export default function SwipeRushGame({ onGameEnd, onScoreUpdate }: SwipeRushGam
   const LANES = [100, 200, 300]; // 3 lanes
   const SWIPE_THRESHOLD = 50;
 
+  // Handle keyboard input
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (gameState !== 'playing') return;
+
+      switch (e.key.toLowerCase()) {
+        case 'arrowleft':
+        case 'a':
+          if (player.lane > 0) {
+            setPlayer(prev => ({
+              ...prev,
+              lane: prev.lane - 1,
+              targetX: LANES[prev.lane - 1]
+            }));
+          }
+          break;
+        case 'arrowright':
+        case 'd':
+          if (player.lane < 2) {
+            setPlayer(prev => ({
+              ...prev,
+              lane: prev.lane + 1,
+              targetX: LANES[prev.lane + 1]
+            }));
+          }
+          break;
+        case 'arrowup':
+        case 'w':
+        case ' ':
+          setPlayer(prev => ({
+            ...prev,
+            targetY: Math.max(prev.targetY - 100, 200)
+          }));
+          setTimeout(() => {
+            setPlayer(prev => ({ ...prev, targetY: 450 }));
+          }, 300);
+          break;
+        case 'arrowdown':
+        case 's':
+          setPlayer(prev => ({
+            ...prev,
+            targetY: Math.min(prev.targetY + 50, 500)
+          }));
+          setTimeout(() => {
+            setPlayer(prev => ({ ...prev, targetY: 450 }));
+          }, 200);
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [gameState, player.lane]);
+
   // Handle touch/swipe input
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -91,6 +145,14 @@ export default function SwipeRushGame({ onGameEnd, onScoreUpdate }: SwipeRushGam
       });
     };
 
+    const handleMouseDown = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      setTouchStart({
+        x: (e.clientX - rect.left) * (CANVAS_WIDTH / rect.width),
+        y: (e.clientY - rect.top) * (CANVAS_HEIGHT / rect.height)
+      });
+    };
+
     const handleTouchEnd = (e: TouchEvent) => {
       e.preventDefault();
       if (!touchStart) return;
@@ -100,8 +162,22 @@ export default function SwipeRushGame({ onGameEnd, onScoreUpdate }: SwipeRushGam
       const endX = (touch.clientX - rect.left) * (CANVAS_WIDTH / rect.width);
       const endY = (touch.clientY - rect.top) * (CANVAS_HEIGHT / rect.height);
 
-      const deltaX = endX - touchStart.x;
-      const deltaY = endY - touchStart.y;
+      handleSwipe(endX, endY);
+    };
+
+    const handleMouseUp = (e: MouseEvent) => {
+      if (!touchStart) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const endX = (e.clientX - rect.left) * (CANVAS_WIDTH / rect.width);
+      const endY = (e.clientY - rect.top) * (CANVAS_HEIGHT / rect.height);
+
+      handleSwipe(endX, endY);
+    };
+
+    const handleSwipe = (endX: number, endY: number) => {
+      const deltaX = endX - touchStart!.x;
+      const deltaY = endY - touchStart!.y;
 
       // Determine swipe direction
       if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD) {
@@ -149,10 +225,14 @@ export default function SwipeRushGame({ onGameEnd, onScoreUpdate }: SwipeRushGam
 
     canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
     canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+    canvas.addEventListener('mousedown', handleMouseDown);
+    canvas.addEventListener('mouseup', handleMouseUp);
 
     return () => {
       canvas.removeEventListener('touchstart', handleTouchStart);
       canvas.removeEventListener('touchend', handleTouchEnd);
+      canvas.removeEventListener('mousedown', handleMouseDown);
+      canvas.removeEventListener('mouseup', handleMouseUp);
     };
   }, [touchStart, player.lane]);
 

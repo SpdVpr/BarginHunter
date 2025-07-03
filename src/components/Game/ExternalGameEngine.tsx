@@ -3,9 +3,11 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import TouchControlsHint from './TouchControlsHint';
 import { ExternalGame } from '../../lib/gameLibrary';
 import { ExternalGameScorer } from '../../utils/gameScoring';
-import StackTowerGame from './MiniGames/StackTowerGame';
 import TapDashGame from './MiniGames/TapDashGame';
 import SwipeRushGame from './MiniGames/SwipeRushGame';
+import ColorSwitchGame from './MiniGames/ColorSwitchGame';
+import HelixJumpGame from './MiniGames/HelixJumpGame';
+import KnifeHitGame from './MiniGames/KnifeHitGame';
 
 interface ExternalGameEngineProps {
   game: ExternalGame;
@@ -119,12 +121,16 @@ export default function ExternalGameEngine({
 
     switch (game.id) {
       // Mobile-optimized games
-      case 'stack-tower':
-        return <StackTowerGame {...gameProps} />;
       case 'tap-dash':
         return <TapDashGame {...gameProps} />;
       case 'swipe-rush':
         return <SwipeRushGame {...gameProps} />;
+      case 'color-switch':
+        return <ColorSwitchGame {...gameProps} />;
+      case 'helix-jump':
+        return <HelixJumpGame {...gameProps} />;
+      case 'knife-hit':
+        return <KnifeHitGame {...gameProps} />;
 
       default:
         return (
