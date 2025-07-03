@@ -251,8 +251,8 @@ export class GameLibraryManager {
   constructor(config?: Partial<GameLibraryConfig>) {
     this.config = {
       enabled: true,
-      allowedCategories: ['arcade', 'puzzle', 'casual'],
-      maxGamesPerCategory: 5,
+      allowedCategories: ['arcade', 'puzzle', 'casual', 'action', 'retro'],
+      maxGamesPerCategory: 10,
       autoUpdate: false,
       lastUpdated: new Date(),
       ...config
