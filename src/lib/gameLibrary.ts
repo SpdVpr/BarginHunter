@@ -182,6 +182,46 @@ export const CURATED_GAMES: ExternalGame[] = [
     keyboardControls: true,
     mouseControls: true
   },
+  {
+    id: 'stack-builder',
+    name: 'Stack Builder',
+    description: 'Build the highest tower by perfectly stacking moving blocks',
+    category: 'arcade',
+    difficulty: 'easy',
+    controls: 'Tap to Drop',
+    sourceUrl: '/games/stack-builder',
+    gameType: 'html5',
+    author: 'Mobile Games Pro',
+    license: 'MIT',
+    tags: ['stack', 'tower', 'timing', 'precision'],
+    minScore: 0,
+    maxScore: 1000,
+    estimatedPlayTime: 4,
+    mobileCompatible: true,
+    touchControls: true,
+    keyboardControls: true,
+    mouseControls: true
+  },
+  {
+    id: 'dodge-master',
+    name: 'Dodge Master',
+    description: 'Control a glowing orb and dodge increasingly fast obstacles',
+    category: 'action',
+    difficulty: 'hard',
+    controls: 'Mouse or Touch to Move',
+    sourceUrl: '/games/dodge-master',
+    gameType: 'html5',
+    author: 'Mobile Games Pro',
+    license: 'MIT',
+    tags: ['dodge', 'survival', 'speed', 'reflex'],
+    minScore: 0,
+    maxScore: 50000,
+    estimatedPlayTime: 3,
+    mobileCompatible: true,
+    touchControls: true,
+    keyboardControls: false,
+    mouseControls: true
+  },
 
 ];
 

@@ -8,6 +8,8 @@ import SwipeRushGame from './MiniGames/SwipeRushGame';
 import ColorSwitchGame from './MiniGames/ColorSwitchGame';
 import HelixJumpGame from './MiniGames/HelixJumpGame';
 import KnifeHitGame from './MiniGames/KnifeHitGame';
+import StackBuilderGame from './MiniGames/StackBuilderGame';
+import DodgeMasterGame from './MiniGames/DodgeMasterGame';
 
 interface ExternalGameEngineProps {
   game: ExternalGame;
@@ -131,6 +133,10 @@ export default function ExternalGameEngine({
         return <HelixJumpGame {...gameProps} />;
       case 'knife-hit':
         return <KnifeHitGame {...gameProps} />;
+      case 'stack-builder':
+        return <StackBuilderGame {...gameProps} />;
+      case 'dodge-master':
+        return <DodgeMasterGame {...gameProps} />;
 
       default:
         return (
