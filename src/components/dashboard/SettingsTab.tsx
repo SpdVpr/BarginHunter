@@ -23,7 +23,7 @@ interface SettingsTabProps {
 
 interface GameSettings {
   isEnabled: boolean;
-  gameType: 'dino' | 'flappy_bird' | 'tetris' | 'snake' | 'space_invaders';
+  gameType: 'dino' | 'flappy_bird' | 'tetris' | 'snake' | 'space_invaders' | 'library';
   minScoreForDiscount: number;
   maxPlaysPerCustomer: number;
   maxPlaysPerDay: number;

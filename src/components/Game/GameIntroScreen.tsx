@@ -10,7 +10,7 @@ interface GameConfig {
   minDiscount: number;
   maxDiscount: number;
   shopName?: string;
-  gameType?: 'dino' | 'flappy_bird' | 'tetris' | 'snake' | 'space_invaders';
+  gameType?: 'dino' | 'flappy_bird' | 'tetris' | 'snake' | 'space_invaders' | 'library';
 }
 
 interface IntroSettings {
