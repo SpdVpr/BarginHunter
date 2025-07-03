@@ -35,7 +35,7 @@ const getCanvasSize = () => {
   return {
     width: width,
     height: height,
-    groundY: height * 0.8, // Ground at 80% of height
+    groundY: height * 0.85, // Ground at 85% of height - lower for better positioning
   };
 };
 
@@ -43,9 +43,9 @@ const getCanvasSize = () => {
 const GRAVITY = 0.5; // Reduced gravity for better control
 const JUMP_FORCE = -12; // Adjusted for new gravity
 
-// Player constants - Chrome Dino style
-const PLAYER_WIDTH = 32;
-const PLAYER_HEIGHT = 32;
+// Player constants - Chrome Dino style (smaller size)
+const PLAYER_WIDTH = 24;
+const PLAYER_HEIGHT = 24;
 const PLAYER_X = 80;
 
 // Use universal difficulty progression from gameScoring.ts
@@ -159,9 +159,9 @@ export default function EnhancedGameEngine({
     const legOffset = player.isJumping ? 0 : walkCycle[animFrame];
     const armSwing = player.isJumping ? 0 : walkCycle[animFrame] * 0.5;
 
-    // Scale factor for better visibility
-    const scale = 1.5;
-    const pixelSize = 2;
+    // Scale factor for smaller character
+    const scale = 0.8;
+    const pixelSize = 1;
 
     // Helper function to draw scaled pixel
     const drawPixel = (px: number, py: number, color: string) => {
@@ -431,9 +431,13 @@ export default function EnhancedGameEngine({
     ctx.fillStyle = groundGradient;
     ctx.fillRect(0, groundY, width, height - groundY);
 
-    // Ground surface line
+    // Ground surface line - make it more visible for debugging
     ctx.fillStyle = '#5D4E37';
-    ctx.fillRect(0, groundY, width, 3);
+    ctx.fillRect(0, groundY, width, 4);
+
+    // Debug: Draw exact ground line
+    ctx.fillStyle = '#FF0000';
+    ctx.fillRect(0, groundY - 1, width, 2);
 
     // Moving ground texture for speed effect
     ctx.fillStyle = '#6B5B47';

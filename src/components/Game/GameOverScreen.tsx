@@ -156,7 +156,20 @@ export default function GameOverScreen({
           <div className="game-actions">
             <button
               className="close-button"
-              onClick={onClose}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Play limit Close button clicked!'); // Debug log
+                onClose();
+              }}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              onTouchStart={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
               style={{
                 background: '#ff6b6b',
                 color: 'white',
@@ -165,7 +178,9 @@ export default function GameOverScreen({
                 borderRadius: '8px',
                 fontSize: '16px',
                 cursor: 'pointer',
-                fontWeight: 'bold'
+                fontWeight: 'bold',
+                zIndex: 9999,
+                position: 'relative'
               }}
             >
               Close
