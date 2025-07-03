@@ -139,7 +139,7 @@ export function WidgetDisplayTab({ shop }: WidgetDisplayTabProps) {
           ]
         },
         widgetSettings,
-        appearanceSettings: currentConfig.appearanceSettings || {
+        appearance: currentConfig.appearance || {
           primaryColor: '#ff6b6b',
           secondaryColor: '#4ecdc4',
           fontFamily: 'Arial, sans-serif',
@@ -205,6 +205,26 @@ export function WidgetDisplayTab({ shop }: WidgetDisplayTabProps) {
           {message.text}
         </Banner>
       )}
+
+      {/* Save Settings */}
+      <Card>
+        <div style={{ padding: '2rem' }}>
+          <Stack vertical spacing="loose">
+            <Text variant="headingLg" as="h3">
+              Save Changes
+            </Text>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Button
+                primary
+                loading={saving}
+                onClick={saveWidgetSettings}
+              >
+                Save Widget Display Settings
+              </Button>
+            </div>
+          </Stack>
+        </div>
+      </Card>
 
       {/* Widget Display Mode Selection */}
       <Card>
@@ -485,25 +505,6 @@ export function WidgetDisplayTab({ shop }: WidgetDisplayTabProps) {
         </Card>
       )}
 
-      {/* Save Settings */}
-      <Card>
-        <div style={{ padding: '2rem' }}>
-          <Stack vertical spacing="loose">
-            <Text variant="headingLg" as="h3">
-              Save Changes
-            </Text>
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <Button
-                primary
-                loading={saving}
-                onClick={saveWidgetSettings}
-              >
-                Save Widget Display Settings
-              </Button>
-            </div>
-          </Stack>
-        </div>
-      </Card>
     </div>
   );
 }
