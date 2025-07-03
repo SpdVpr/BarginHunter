@@ -14,6 +14,8 @@ import JumpyBirdGame from './MiniGames/JumpyBirdGame';
 import BubblePopGame from './MiniGames/BubblePopGame';
 import NeonRunnerGame from './MiniGames/NeonRunnerGame';
 import GemCrusherGame from './MiniGames/GemCrusherGame';
+import AsteroidBlasterGame from './MiniGames/AsteroidBlasterGame';
+import NinjaDashGame from './MiniGames/NinjaDashGame';
 
 interface ExternalGameEngineProps {
   game: ExternalGame;
@@ -135,11 +137,16 @@ export default function ExternalGameEngine({
         return <NeonRunnerGame {...gameProps} />;
       case 'gem-crusher':
         return <GemCrusherGame {...gameProps} />;
+      case 'asteroid-blaster':
+        return <AsteroidBlasterGame {...gameProps} />;
+      case 'ninja-dash':
+        return <NinjaDashGame {...gameProps} />;
 
       // Classic games (updated)
       case 'memory-cards':
         return <MemoryCardsGame {...gameProps} />;
       case 'breakout-classic':
+      case 'neon-breakout':
         return <BreakoutGame {...gameProps} />;
 
       // Legacy games (still available)

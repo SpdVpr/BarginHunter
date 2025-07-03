@@ -183,13 +183,13 @@ export const CURATED_GAMES: ExternalGame[] = [
     mouseControls: true
   },
   {
-    id: 'breakout-classic',
+    id: 'neon-breakout',
     name: 'Neon Breakout',
     description: 'Classic brick-breaking with stunning neon effects',
     category: 'retro',
     difficulty: 'medium',
     controls: 'Mouse or Arrow Keys',
-    sourceUrl: '/games/breakout-classic',
+    sourceUrl: '/games/neon-breakout',
     gameType: 'html5',
     author: 'Premium Games',
     license: 'MIT',
@@ -201,6 +201,46 @@ export const CURATED_GAMES: ExternalGame[] = [
     touchControls: false,
     keyboardControls: true,
     mouseControls: true
+  },
+  {
+    id: 'asteroid-blaster',
+    name: 'Asteroid Blaster',
+    description: 'Destroy asteroids and survive as long as possible in space',
+    category: 'action',
+    difficulty: 'hard',
+    controls: 'Arrow Keys + Spacebar or Mouse',
+    sourceUrl: '/games/asteroid-blaster',
+    gameType: 'html5',
+    author: 'Premium Games',
+    license: 'MIT',
+    tags: ['space', 'shooter', 'asteroids', 'survival'],
+    minScore: 0,
+    maxScore: 200000,
+    estimatedPlayTime: 6,
+    mobileCompatible: true,
+    touchControls: true,
+    keyboardControls: true,
+    mouseControls: true
+  },
+  {
+    id: 'ninja-dash',
+    name: 'Ninja Dash',
+    description: 'Lightning-fast ninja parkour with wall jumping and combos',
+    category: 'action',
+    difficulty: 'medium',
+    controls: 'Arrow Keys or WASD',
+    sourceUrl: '/games/ninja-dash',
+    gameType: 'html5',
+    author: 'Premium Games',
+    license: 'MIT',
+    tags: ['ninja', 'parkour', 'fast', 'combo'],
+    minScore: 0,
+    maxScore: 150000,
+    estimatedPlayTime: 5,
+    mobileCompatible: true,
+    touchControls: true,
+    keyboardControls: true,
+    mouseControls: false
   }
 ];
 
