@@ -3,19 +3,9 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import TouchControlsHint from './TouchControlsHint';
 import { ExternalGame } from '../../lib/gameLibrary';
 import { ExternalGameScorer } from '../../utils/gameScoring';
-import MemoryCardsGame from './MiniGames/MemoryCardsGame';
-import ColorMatchGame from './MiniGames/ColorMatchGame';
-import ReactionTimeGame from './MiniGames/ReactionTimeGame';
-import NumberSequenceGame from './MiniGames/NumberSequenceGame';
-import BreakoutGame from './MiniGames/BreakoutGame';
-import SpaceShooterGame from './MiniGames/SpaceShooterGame';
-import PongGame from './MiniGames/PongGame';
-import JumpyBirdGame from './MiniGames/JumpyBirdGame';
-import BubblePopGame from './MiniGames/BubblePopGame';
-import NeonRunnerGame from './MiniGames/NeonRunnerGame';
-import GemCrusherGame from './MiniGames/GemCrusherGame';
-import AsteroidBlasterGame from './MiniGames/AsteroidBlasterGame';
-import NinjaDashGame from './MiniGames/NinjaDashGame';
+import StackTowerGame from './MiniGames/StackTowerGame';
+import TapDashGame from './MiniGames/TapDashGame';
+import SwipeRushGame from './MiniGames/SwipeRushGame';
 
 interface ExternalGameEngineProps {
   game: ExternalGame;
@@ -128,38 +118,13 @@ export default function ExternalGameEngine({
     };
 
     switch (game.id) {
-      // Premium new games
-      case 'jumpy-bird':
-        return <JumpyBirdGame {...gameProps} />;
-      case 'bubble-pop':
-        return <BubblePopGame {...gameProps} />;
-      case 'neon-runner':
-        return <NeonRunnerGame {...gameProps} />;
-      case 'gem-crusher':
-        return <GemCrusherGame {...gameProps} />;
-      case 'asteroid-blaster':
-        return <AsteroidBlasterGame {...gameProps} />;
-      case 'ninja-dash':
-        return <NinjaDashGame {...gameProps} />;
-
-      // Classic games (updated)
-      case 'memory-cards':
-        return <MemoryCardsGame {...gameProps} />;
-      case 'breakout-classic':
-      case 'neon-breakout':
-        return <BreakoutGame {...gameProps} />;
-
-      // Legacy games (still available)
-      case 'color-match':
-        return <ColorMatchGame {...gameProps} />;
-      case 'reaction-time':
-        return <ReactionTimeGame {...gameProps} />;
-      case 'number-sequence':
-        return <NumberSequenceGame {...gameProps} />;
-      case 'space-shooter':
-        return <SpaceShooterGame {...gameProps} />;
-      case 'pong-classic':
-        return <PongGame {...gameProps} />;
+      // Mobile-optimized games
+      case 'stack-tower':
+        return <StackTowerGame {...gameProps} />;
+      case 'tap-dash':
+        return <TapDashGame {...gameProps} />;
+      case 'swipe-rush':
+        return <SwipeRushGame {...gameProps} />;
 
       default:
         return (
