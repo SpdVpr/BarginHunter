@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { GameConfigService } from '../../src/lib/database';
+import { GameConfigService, SubscriptionService, UsageTrackingService } from '../../src/lib/database';
+import { Timestamp } from 'firebase-admin/firestore';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -79,6 +80,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         discountExpiryHours: 24,
       },
     });
+
+    // Initialize free subscription
+    try {
+      const existingSubscription = await SubscriptionService.getSubscription(shop);
+      if (!existingSubscription) {
+        console.log('🆓 Creating free subscription for new shop');
+        const planLimits = await SubscriptionService.getDefaultPlanLimits('free');
+
+        await SubscriptionService.createSubscription({
+          shopDomain: shop,
+          plan: 'free',
+          status: 'active',
+          billingCycle: 'monthly',
+          price: 0,
+          currency: 'USD',
+          currentPeriodStart: Timestamp.now(),
+          currentPeriodEnd: Timestamp.fromDate(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)), // 30 days
+          cancelAtPeriodEnd: false,
+          planLimits,
+        });
+
+        // Initialize usage tracking
+        await UsageTrackingService.initializeUsageTracking(shop, planLimits);
+        console.log('✅ Free subscription and usage tracking initialized');
+      }
+    } catch (subscriptionError) {
+      console.error('⚠️ Failed to initialize subscription (non-critical):', subscriptionError);
+      // Don't fail the shop initialization if subscription setup fails
+    }
 
     return res.json({
       success: true,

@@ -5,7 +5,8 @@ import {
   GameScoreService,
   DiscountService,
   CustomerService,
-  GameConfigService
+  GameConfigService,
+  UsageTrackingService
 } from '../../../src/lib/database';
 import { createDiscountCode, ShopifySessionManager } from '../../../src/lib/shopify';
 import { Timestamp } from 'firebase-admin/firestore';
@@ -161,12 +162,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let discountCode: string | undefined;
     let expiresAt: string | undefined;
 
-    // Create discount code if earned
+    // Create discount code if earned and within limits
     if (discountEarned > 0) {
-      discountCode = generateDiscountCode();
-      const expiryHours = gameConfig?.businessRules.discountExpiryHours || 24;
-      expiresAt = new Date(Date.now() + expiryHours * 60 * 60 * 1000).toISOString();
+      // Check discount code limits before creating
+      const limitCheck = await UsageTrackingService.incrementUsage(session.shopDomain, 'discountCodesGenerated', 1);
 
+      if (limitCheck.limitReached) {
+        console.log('⚠️ Discount code limit reached, not creating discount code');
+        // Still award points but no discount code
+        discountEarned = 0;
+        message = "Great score! You've reached your discount code limit for this month. Upgrade your plan for more discount codes.";
+      } else {
+        discountCode = generateDiscountCode();
+        const expiryHours = gameConfig?.businessRules.discountExpiryHours || 24;
+        expiresAt = new Date(Date.now() + expiryHours * 60 * 60 * 1000).toISOString();
+
+        if (limitCheck.warningTriggered) {
+          console.log('⚠️ Discount code warning triggered');
+        }
+      }
+    }
+
+    // Create discount code in Shopify if we have one
+    if (discountCode && discountEarned > 0) {
       try {
         // Get store data for Shopify API
         const store = await StoreService.getStore(session.shopDomain);
@@ -288,6 +306,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       } catch (dbError: any) {
         console.error('🎮 Failed to update customer stats:', dbError);
       }
+    }
+
+    // Track game session usage (for analytics, no limits)
+    try {
+      console.log('📊 Tracking game session for analytics...');
+      await UsageTrackingService.incrementUsage(session.shopDomain, 'gameSessions', 1);
+      console.log('📊 Game session usage tracked (unlimited)');
+    } catch (usageError: any) {
+      console.error('📊 Failed to track game session usage:', usageError);
+      // Don't fail the request if usage tracking fails
     }
 
     const response: FinishGameResponse = {

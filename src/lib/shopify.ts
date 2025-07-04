@@ -11,7 +11,8 @@ export const shopify = shopifyApi({
     'write_discounts',
     'read_customers',
     'write_script_tags',
-    'read_orders'
+    'read_orders',
+    'write_recurring_application_charges'
   ],
   hostName: process.env.HOST || 'localhost:3000',
   hostScheme: process.env.NODE_ENV === 'production' ? 'https' : 'http',
@@ -236,6 +237,11 @@ export async function installWebhooks(session: Session) {
       {
         topic: 'customers/create',
         address: `${baseUrl}/api/webhooks/customers/create`,
+        format: 'json'
+      },
+      {
+        topic: 'app_subscriptions/update',
+        address: `${baseUrl}/api/webhooks/billing/subscription-updated`,
         format: 'json'
       }
     ];

@@ -1,13 +1,19 @@
-import { 
-  db, 
-  collections, 
-  StoreDocument, 
-  GameConfigDocument, 
+import {
+  db,
+  collections,
+  StoreDocument,
+  GameConfigDocument,
   GameSessionDocument,
   GameScoreDocument,
   DiscountCodeDocument,
   AnalyticsDocument,
-  CustomerDocument 
+  CustomerDocument,
+  SubscriptionDocument,
+  UsageTrackingDocument,
+  BillingHistoryDocument,
+  NotificationDocument,
+  AdminAnalyticsDocument,
+  AdminUserDocument
 } from './firebase';
 import { Timestamp } from 'firebase-admin/firestore';
 
@@ -447,5 +453,522 @@ export class CustomerService {
     };
 
     await db.collection(collections.customers).doc(customer.id).update(updates);
+  }
+}
+
+// Subscription management service
+export class SubscriptionService {
+  static async createSubscription(subscriptionData: Omit<SubscriptionDocument, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    const docRef = db.collection(collections.subscriptions).doc();
+    const subscription: SubscriptionDocument = {
+      ...subscriptionData,
+      id: docRef.id,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+    };
+
+    await docRef.set(subscription);
+    return docRef.id;
+  }
+
+  static async getSubscription(shopDomain: string): Promise<SubscriptionDocument | null> {
+    const snapshot = await db.collection(collections.subscriptions)
+      .where('shopDomain', '==', shopDomain)
+      .where('status', 'in', ['active', 'trialing', 'past_due'])
+      .limit(1)
+      .get();
+
+    if (snapshot.empty) return null;
+    return snapshot.docs[0].data() as SubscriptionDocument;
+  }
+
+  static async updateSubscription(shopDomain: string, updates: Partial<SubscriptionDocument>): Promise<void> {
+    const subscription = await this.getSubscription(shopDomain);
+    if (!subscription) throw new Error('Subscription not found');
+
+    await db.collection(collections.subscriptions).doc(subscription.id).update({
+      ...updates,
+      updatedAt: Timestamp.now(),
+    });
+  }
+
+  static async cancelSubscription(shopDomain: string, cancelAtPeriodEnd: boolean = true): Promise<void> {
+    await this.updateSubscription(shopDomain, {
+      cancelAtPeriodEnd,
+      status: cancelAtPeriodEnd ? 'active' : 'cancelled',
+    });
+  }
+
+  static async getDefaultPlanLimits(plan: 'free' | 'starter' | 'pro' | 'enterprise') {
+    const planLimits = {
+      free: {
+        maxGameSessions: -1, // unlimited
+        maxDiscountCodes: 100,
+        analyticsRetentionDays: -1, // unlimited
+        customBranding: true,
+        advancedAnalytics: true,
+        prioritySupport: true,
+        webhookIntegrations: true,
+        abTesting: true,
+        multipleGameTypes: true,
+        fraudProtection: true,
+      },
+      starter: {
+        maxGameSessions: -1, // unlimited
+        maxDiscountCodes: 1000,
+        analyticsRetentionDays: -1, // unlimited
+        customBranding: true,
+        advancedAnalytics: true,
+        prioritySupport: true,
+        webhookIntegrations: true,
+        abTesting: true,
+        multipleGameTypes: true,
+        fraudProtection: true,
+      },
+      pro: {
+        maxGameSessions: -1, // unlimited
+        maxDiscountCodes: 10000,
+        analyticsRetentionDays: -1, // unlimited
+        customBranding: true,
+        advancedAnalytics: true,
+        prioritySupport: true,
+        webhookIntegrations: true,
+        abTesting: true,
+        multipleGameTypes: true,
+        fraudProtection: true,
+      },
+      enterprise: {
+        maxGameSessions: -1, // unlimited
+        maxDiscountCodes: 100000,
+        analyticsRetentionDays: -1, // unlimited
+        customBranding: true,
+        advancedAnalytics: true,
+        prioritySupport: true,
+        webhookIntegrations: true,
+        abTesting: true,
+        multipleGameTypes: true,
+        fraudProtection: true,
+      },
+    };
+
+    return planLimits[plan];
+  }
+}
+
+// Usage tracking service
+export class UsageTrackingService {
+  static async getCurrentUsage(shopDomain: string): Promise<UsageTrackingDocument | null> {
+    const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+    const currentYear = new Date().getFullYear();
+
+    const snapshot = await db.collection(collections.usageTracking)
+      .where('shopDomain', '==', shopDomain)
+      .where('month', '==', currentMonth)
+      .where('year', '==', currentYear)
+      .limit(1)
+      .get();
+
+    if (snapshot.empty) return null;
+    return snapshot.docs[0].data() as UsageTrackingDocument;
+  }
+
+  static async initializeUsageTracking(shopDomain: string, planLimits: any): Promise<string> {
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const currentYear = new Date().getFullYear();
+
+    const docRef = db.collection(collections.usageTracking).doc();
+    const usage: UsageTrackingDocument = {
+      id: docRef.id,
+      shopDomain,
+      month: currentMonth,
+      year: currentYear,
+      usage: {
+        gameSessions: 0, // Track but no limits (always unlimited)
+        discountCodesGenerated: 0, // This is the only limited resource
+        analyticsRequests: 0, // Track but no limits (always unlimited)
+        webhookCalls: 0, // Track but no limits (always unlimited)
+        abTestVariants: 0, // Track but no limits (always unlimited)
+      },
+      limits: {
+        maxGameSessions: -1, // Always unlimited for all plans
+        maxDiscountCodes: planLimits.maxDiscountCodes, // Only this varies by plan
+        maxAnalyticsRequests: -1, // Always unlimited for all plans
+        maxWebhookCalls: -1, // Always unlimited for all plans
+        maxAbTestVariants: -1, // Always unlimited for all plans
+      },
+      warnings: {
+        gameSessionsWarning80: false, // Not used since unlimited
+        gameSessionsWarning95: false, // Not used since unlimited
+        discountCodesWarning80: false, // Only discount codes have warnings
+        discountCodesWarning95: false, // Only discount codes have warnings
+      },
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+    };
+
+    await docRef.set(usage);
+    return docRef.id;
+  }
+
+  static async incrementUsage(
+    shopDomain: string,
+    usageType: 'gameSessions' | 'discountCodesGenerated' | 'analyticsRequests' | 'webhookCalls' | 'abTestVariants',
+    amount: number = 1
+  ): Promise<{ success: boolean; limitReached: boolean; warningTriggered?: boolean }> {
+    let usage = await this.getCurrentUsage(shopDomain);
+
+    if (!usage) {
+      // Initialize usage tracking if it doesn't exist
+      const subscription = await SubscriptionService.getSubscription(shopDomain);
+      const planLimits = await SubscriptionService.getDefaultPlanLimits(subscription?.plan || 'free');
+      await this.initializeUsageTracking(shopDomain, planLimits);
+      usage = await this.getCurrentUsage(shopDomain);
+      if (!usage) throw new Error('Failed to initialize usage tracking');
+    }
+
+    const currentUsage = usage.usage[usageType];
+    const limit = usage.limits[`max${usageType.charAt(0).toUpperCase() + usageType.slice(1)}` as keyof typeof usage.limits];
+
+    // Only check limits for discount codes - all other features are unlimited
+    if (usageType === 'discountCodesGenerated' && limit !== -1 && currentUsage + amount > limit) {
+      return { success: false, limitReached: true };
+    }
+
+    // Update usage
+    const newUsage = currentUsage + amount;
+    const updates: any = {
+      [`usage.${usageType}`]: newUsage,
+      updatedAt: Timestamp.now(),
+    };
+
+    // Check for warning thresholds - only for discount codes
+    let warningTriggered = false;
+    if (usageType === 'discountCodesGenerated' && limit !== -1) {
+      const percentage = (newUsage / limit) * 100;
+
+      if (percentage >= 80 && !usage.warnings[`${usageType}Warning80` as keyof typeof usage.warnings]) {
+        updates[`warnings.${usageType}Warning80`] = true;
+        warningTriggered = true;
+        // Trigger 80% warning notification
+        await NotificationService.createUsageWarning(shopDomain, usageType, newUsage, limit, 80);
+      }
+
+      if (percentage >= 95 && !usage.warnings[`${usageType}Warning95` as keyof typeof usage.warnings]) {
+        updates[`warnings.${usageType}Warning95`] = true;
+        warningTriggered = true;
+        // Trigger 95% warning notification
+        await NotificationService.createUsageWarning(shopDomain, usageType, newUsage, limit, 95);
+      }
+    }
+
+    await db.collection(collections.usageTracking).doc(usage.id).update(updates);
+
+    return { success: true, limitReached: false, warningTriggered };
+  }
+}
+
+// Billing history service
+export class BillingHistoryService {
+  static async createBillingRecord(billingData: Omit<BillingHistoryDocument, 'id' | 'createdAt'>): Promise<string> {
+    const docRef = db.collection(collections.billingHistory).doc();
+    const billing: BillingHistoryDocument = {
+      ...billingData,
+      id: docRef.id,
+      createdAt: Timestamp.now(),
+    };
+
+    await docRef.set(billing);
+    return docRef.id;
+  }
+
+  static async getBillingHistory(shopDomain: string, limit: number = 50): Promise<BillingHistoryDocument[]> {
+    const snapshot = await db.collection(collections.billingHistory)
+      .where('shopDomain', '==', shopDomain)
+      .orderBy('billingDate', 'desc')
+      .limit(limit)
+      .get();
+
+    return snapshot.docs.map(doc => doc.data() as BillingHistoryDocument);
+  }
+
+  static async updateBillingRecord(billingId: string, updates: Partial<BillingHistoryDocument>): Promise<void> {
+    await db.collection(collections.billingHistory).doc(billingId).update(updates);
+  }
+}
+
+// Notification service
+export class NotificationService {
+  static async createNotification(notificationData: Omit<NotificationDocument, 'id' | 'createdAt'>): Promise<string> {
+    const docRef = db.collection(collections.notifications).doc();
+    const notification: NotificationDocument = {
+      ...notificationData,
+      id: docRef.id,
+      createdAt: Timestamp.now(),
+    };
+
+    await docRef.set(notification);
+    return docRef.id;
+  }
+
+  static async getNotifications(shopDomain: string, unreadOnly: boolean = false): Promise<NotificationDocument[]> {
+    let query = db.collection(collections.notifications)
+      .where('shopDomain', '==', shopDomain);
+
+    if (unreadOnly) {
+      query = query.where('isRead', '==', false);
+    }
+
+    const snapshot = await query
+      .orderBy('createdAt', 'desc')
+      .limit(50)
+      .get();
+
+    return snapshot.docs.map(doc => doc.data() as NotificationDocument);
+  }
+
+  static async markAsRead(notificationId: string): Promise<void> {
+    await db.collection(collections.notifications).doc(notificationId).update({
+      isRead: true,
+      readAt: Timestamp.now(),
+    });
+  }
+
+  static async createUsageWarning(
+    shopDomain: string,
+    usageType: string,
+    currentUsage: number,
+    limit: number,
+    percentage: number
+  ): Promise<string> {
+    const title = `${percentage}% Usage Warning`;
+    const message = `You've used ${currentUsage} of ${limit} ${usageType} (${percentage}%). Consider upgrading to avoid service interruption.`;
+
+    return this.createNotification({
+      shopDomain,
+      type: 'usage_warning',
+      title,
+      message,
+      priority: percentage >= 95 ? 'high' : 'medium',
+      isRead: false,
+      actionRequired: percentage >= 95,
+      actionUrl: '/dashboard/billing',
+      actionText: 'Upgrade Plan',
+      metadata: {
+        usageType,
+        currentUsage,
+        limit,
+        suggestedPlan: 'pro',
+      },
+    });
+  }
+
+  static async createUpgradeSuggestion(shopDomain: string, reason: string): Promise<string> {
+    return this.createNotification({
+      shopDomain,
+      type: 'upgrade_suggestion',
+      title: 'Upgrade Recommended',
+      message: `Based on your usage patterns, we recommend upgrading to Pro plan. ${reason}`,
+      priority: 'medium',
+      isRead: false,
+      actionRequired: false,
+      actionUrl: '/dashboard/billing',
+      actionText: 'View Plans',
+      metadata: {
+        suggestedPlan: 'pro',
+        reason,
+      },
+    });
+  }
+}
+
+// Admin analytics service for business intelligence
+export class AdminAnalyticsService {
+  static async generateDailyAnalytics(date: string = new Date().toISOString().slice(0, 10)): Promise<string> {
+    console.log('📊 Generating admin analytics for date:', date);
+
+    try {
+      // Get all subscriptions
+      const subscriptionsSnapshot = await db.collection(collections.subscriptions).get();
+      const subscriptions = subscriptionsSnapshot.docs.map(doc => doc.data() as SubscriptionDocument);
+
+      // Get all usage tracking for the month
+      const currentMonth = date.slice(0, 7); // YYYY-MM
+      const usageSnapshot = await db.collection(collections.usageTracking)
+        .where('month', '==', currentMonth)
+        .get();
+      const usageData = usageSnapshot.docs.map(doc => doc.data() as UsageTrackingDocument);
+
+      // Get billing history for the month
+      const startOfMonth = new Date(date.slice(0, 7) + '-01');
+      const endOfMonth = new Date(startOfMonth.getFullYear(), startOfMonth.getMonth() + 1, 0);
+
+      const billingSnapshot = await db.collection(collections.billingHistory)
+        .where('billingDate', '>=', Timestamp.fromDate(startOfMonth))
+        .where('billingDate', '<=', Timestamp.fromDate(endOfMonth))
+        .get();
+      const billingData = billingSnapshot.docs.map(doc => doc.data() as BillingHistoryDocument);
+
+      // Calculate metrics
+      const metrics = this.calculateMetrics(subscriptions, usageData, billingData);
+
+      // Create analytics document
+      const docRef = db.collection(collections.adminAnalytics).doc();
+      const analytics: AdminAnalyticsDocument = {
+        id: docRef.id,
+        date,
+        metrics,
+        planMetrics: this.calculatePlanMetrics(subscriptions, usageData),
+        topCountries: [], // TODO: Implement geographic tracking
+        systemMetrics: {
+          apiCalls: 0, // TODO: Implement API tracking
+          errorRate: 0,
+          averageResponseTime: 0,
+          uptime: 99.9
+        },
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      };
+
+      await docRef.set(analytics);
+      console.log('✅ Admin analytics generated:', docRef.id);
+      return docRef.id;
+
+    } catch (error) {
+      console.error('❌ Failed to generate admin analytics:', error);
+      throw error;
+    }
+  }
+
+  private static calculateMetrics(
+    subscriptions: SubscriptionDocument[],
+    usageData: UsageTrackingDocument[],
+    billingData: BillingHistoryDocument[]
+  ) {
+    const activeShops = subscriptions.filter(s => s.status === 'active').length;
+    const totalRevenue = billingData
+      .filter(b => b.status === 'accepted')
+      .reduce((sum, b) => sum + b.amount, 0);
+
+    const planDistribution = {
+      free: subscriptions.filter(s => s.plan === 'free').length,
+      starter: subscriptions.filter(s => s.plan === 'starter').length,
+      pro: subscriptions.filter(s => s.plan === 'pro').length,
+      enterprise: subscriptions.filter(s => s.plan === 'enterprise').length,
+    };
+
+    const totalGameSessions = usageData.reduce((sum, u) => sum + u.usage.gameSessions, 0);
+    const totalDiscountCodes = usageData.reduce((sum, u) => sum + u.usage.discountCodesGenerated, 0);
+
+    return {
+      totalRevenue,
+      monthlyRecurringRevenue: totalRevenue, // Simplified for now
+      newRevenue: totalRevenue, // TODO: Calculate properly
+      churnedRevenue: 0, // TODO: Calculate properly
+
+      totalShops: subscriptions.length,
+      activeShops,
+      newShops: 0, // TODO: Calculate new shops this period
+      churnedShops: 0, // TODO: Calculate churned shops
+
+      planDistribution,
+
+      totalGameSessions,
+      totalDiscountCodes,
+      averageDiscountCodesPerShop: activeShops > 0 ? totalDiscountCodes / activeShops : 0,
+
+      freeToStarterConversion: 0, // TODO: Calculate conversion rates
+      starterToProConversion: 0,
+      proToEnterpriseConversion: 0,
+
+      totalNotifications: 0, // TODO: Count notifications
+      upgradeRecommendations: 0,
+      limitWarnings: 0,
+    };
+  }
+
+  private static calculatePlanMetrics(subscriptions: SubscriptionDocument[], usageData: UsageTrackingDocument[]) {
+    const plans = ['free', 'starter', 'pro', 'enterprise'];
+    const planMetrics: { [key: string]: any } = {};
+
+    plans.forEach(plan => {
+      const planSubs = subscriptions.filter(s => s.plan === plan);
+      const planUsage = usageData.filter(u => {
+        const sub = subscriptions.find(s => s.shopDomain === u.shopDomain);
+        return sub?.plan === plan;
+      });
+
+      planMetrics[plan] = {
+        count: planSubs.length,
+        revenue: planSubs.reduce((sum, s) => sum + s.price, 0),
+        averageUsage: planUsage.length > 0
+          ? planUsage.reduce((sum, u) => sum + u.usage.discountCodesGenerated, 0) / planUsage.length
+          : 0,
+        churnRate: 0, // TODO: Calculate churn rate
+      };
+    });
+
+    return planMetrics;
+  }
+
+  static async getAnalytics(startDate: string, endDate: string): Promise<AdminAnalyticsDocument[]> {
+    const snapshot = await db.collection(collections.adminAnalytics)
+      .where('date', '>=', startDate)
+      .where('date', '<=', endDate)
+      .orderBy('date', 'desc')
+      .get();
+
+    return snapshot.docs.map(doc => doc.data() as AdminAnalyticsDocument);
+  }
+
+  static async getLatestAnalytics(): Promise<AdminAnalyticsDocument | null> {
+    const snapshot = await db.collection(collections.adminAnalytics)
+      .orderBy('date', 'desc')
+      .limit(1)
+      .get();
+
+    if (snapshot.empty) return null;
+    return snapshot.docs[0].data() as AdminAnalyticsDocument;
+  }
+}
+
+// Admin user management service
+export class AdminUserService {
+  static async createAdminUser(userData: Omit<AdminUserDocument, 'id' | 'createdAt'>): Promise<string> {
+    const docRef = db.collection(collections.adminUsers).doc();
+    const adminUser: AdminUserDocument = {
+      ...userData,
+      id: docRef.id,
+      createdAt: Timestamp.now(),
+    };
+
+    await docRef.set(adminUser);
+    return docRef.id;
+  }
+
+  static async getAdminUser(email: string): Promise<AdminUserDocument | null> {
+    const snapshot = await db.collection(collections.adminUsers)
+      .where('email', '==', email)
+      .where('isActive', '==', true)
+      .limit(1)
+      .get();
+
+    if (snapshot.empty) return null;
+    return snapshot.docs[0].data() as AdminUserDocument;
+  }
+
+  static async updateLastLogin(email: string): Promise<void> {
+    const user = await this.getAdminUser(email);
+    if (!user) return;
+
+    await db.collection(collections.adminUsers).doc(user.id).update({
+      lastLoginAt: Timestamp.now(),
+    });
+  }
+
+  static async hasPermission(email: string, permission: keyof AdminUserDocument['permissions']): Promise<boolean> {
+    const user = await this.getAdminUser(email);
+    if (!user) return false;
+
+    return user.permissions[permission] || false;
   }
 }

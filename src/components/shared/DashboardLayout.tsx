@@ -8,12 +8,13 @@ import {
   CustomersMinor,
   DiscountsMajor,
   ViewMinor,
+  BillingStatementDollarMajor,
 } from '@shopify/polaris-icons';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
   shop: string;
-  currentPage: 'dashboard' | 'analytics' | 'customers' | 'discounts' | 'settings' | 'intro-settings';
+  currentPage: 'dashboard' | 'analytics' | 'customers' | 'discounts' | 'settings' | 'intro-settings' | 'billing';
 }
 
 export function DashboardLayout({ children, shop, currentPage }: DashboardLayoutProps) {
@@ -50,6 +51,12 @@ export function DashboardLayout({ children, shop, currentPage }: DashboardLayout
             label: 'Discounts',
             icon: DiscountsMajor,
             selected: currentPage === 'discounts',
+          },
+          {
+            url: `/dashboard/billing?shop=${shop}`,
+            label: 'Billing & Usage',
+            icon: BillingStatementDollarMajor,
+            selected: currentPage === 'billing',
           },
           {
             url: `/dashboard/intro-settings?shop=${shop}`,

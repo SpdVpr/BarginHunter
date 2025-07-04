@@ -19,7 +19,7 @@ import {
 import { ModernDashboardLayout } from '../src/components/dashboard/ModernDashboardLayout';
 import { OverviewTab } from '../src/components/dashboard/OverviewTab';
 import { AnalyticsTab } from '../src/components/dashboard/AnalyticsTab';
-
+import { NotificationBanner } from '../src/components/NotificationBanner';
 import { DiscountsTab } from '../src/components/dashboard/DiscountsTab';
 import { WidgetDisplayTab } from '../src/components/dashboard/WidgetDisplayTab';
 import { SettingsTab } from '../src/components/dashboard/SettingsTab';
@@ -135,6 +135,9 @@ export default function Dashboard() {
             </Stack>
           </div>
         </div>
+
+        {/* Notifications */}
+        <NotificationBanner shop={typeof shop === 'string' ? shop : ''} />
 
         {/* Modern Tabs */}
         <div className={styles.modernTabsContainer}>

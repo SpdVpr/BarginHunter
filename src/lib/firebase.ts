@@ -60,6 +60,12 @@ export const collections = {
   discountCodes: 'discountCodes',
   analytics: 'analytics',
   customers: 'customers',
+  subscriptions: 'subscriptions',
+  usageTracking: 'usageTracking',
+  billingHistory: 'billingHistory',
+  notifications: 'notifications',
+  adminAnalytics: 'adminAnalytics',
+  adminUsers: 'adminUsers',
 } as const;
 
 // Database interfaces
@@ -80,11 +86,9 @@ export interface StoreDocument {
     planName: string;
   };
   scriptTagId?: number;
-  subscription?: {
-    plan: 'free' | 'basic' | 'premium';
-    status: 'active' | 'cancelled' | 'past_due';
-    currentPeriodEnd: FirebaseFirestore.Timestamp;
-  };
+  // Basic subscription info - detailed info in subscriptions collection
+  currentPlan: 'free' | 'starter' | 'pro' | 'enterprise';
+  subscriptionStatus: 'active' | 'cancelled' | 'past_due' | 'trialing';
 }
 
 export interface GameConfigDocument {
@@ -263,4 +267,196 @@ export interface CustomerDocument {
     difficulty?: string;
     notifications: boolean;
   };
+}
+
+// Subscription management
+export interface SubscriptionDocument {
+  id: string;
+  shopDomain: string;
+  shopifyChargeId?: string; // Shopify recurring charge ID
+  plan: 'free' | 'starter' | 'pro' | 'enterprise';
+  status: 'active' | 'cancelled' | 'past_due' | 'trialing' | 'pending';
+  billingCycle: 'monthly' | 'yearly';
+  price: number;
+  currency: string;
+  trialEndsAt?: FirebaseFirestore.Timestamp;
+  currentPeriodStart: FirebaseFirestore.Timestamp;
+  currentPeriodEnd: FirebaseFirestore.Timestamp;
+  cancelAtPeriodEnd: boolean;
+  createdAt: FirebaseFirestore.Timestamp;
+  updatedAt: FirebaseFirestore.Timestamp;
+  planLimits: {
+    maxGameSessions: number; // -1 for unlimited
+    maxDiscountCodes: number; // -1 for unlimited
+    analyticsRetentionDays: number;
+    customBranding: boolean;
+    advancedAnalytics: boolean;
+    prioritySupport: boolean;
+    webhookIntegrations: boolean;
+    abTesting: boolean;
+    multipleGameTypes: boolean;
+    fraudProtection: boolean;
+  };
+}
+
+// Usage tracking for billing limits
+export interface UsageTrackingDocument {
+  id: string;
+  shopDomain: string;
+  month: string; // YYYY-MM format
+  year: number;
+  usage: {
+    gameSessions: number;
+    discountCodesGenerated: number;
+    analyticsRequests: number;
+    webhookCalls: number;
+    abTestVariants: number;
+  };
+  limits: {
+    maxGameSessions: number;
+    maxDiscountCodes: number;
+    maxAnalyticsRequests: number;
+    maxWebhookCalls: number;
+    maxAbTestVariants: number;
+  };
+  warnings: {
+    gameSessionsWarning80: boolean;
+    gameSessionsWarning95: boolean;
+    discountCodesWarning80: boolean;
+    discountCodesWarning95: boolean;
+  };
+  createdAt: FirebaseFirestore.Timestamp;
+  updatedAt: FirebaseFirestore.Timestamp;
+}
+
+// Billing history and transactions
+export interface BillingHistoryDocument {
+  id: string;
+  shopDomain: string;
+  shopifyChargeId?: string;
+  type: 'subscription' | 'upgrade' | 'downgrade' | 'cancellation' | 'refund';
+  amount: number;
+  currency: string;
+  status: 'pending' | 'accepted' | 'declined' | 'cancelled';
+  description: string;
+  billingDate: FirebaseFirestore.Timestamp;
+  periodStart: FirebaseFirestore.Timestamp;
+  periodEnd: FirebaseFirestore.Timestamp;
+  invoiceUrl?: string;
+  metadata?: {
+    previousPlan?: string;
+    newPlan?: string;
+    reason?: string;
+  };
+  createdAt: FirebaseFirestore.Timestamp;
+}
+
+// Notifications for billing and usage
+export interface NotificationDocument {
+  id: string;
+  shopDomain: string;
+  type: 'usage_warning' | 'usage_limit' | 'billing_reminder' | 'upgrade_suggestion' | 'payment_failed';
+  title: string;
+  message: string;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  isRead: boolean;
+  actionRequired: boolean;
+  actionUrl?: string;
+  actionText?: string;
+  metadata?: {
+    usageType?: string;
+    currentUsage?: number;
+    limit?: number;
+    suggestedPlan?: string;
+  };
+  createdAt: FirebaseFirestore.Timestamp;
+  readAt?: FirebaseFirestore.Timestamp;
+  expiresAt?: FirebaseFirestore.Timestamp;
+}
+
+// Admin analytics for business intelligence
+export interface AdminAnalyticsDocument {
+  id: string;
+  date: string; // YYYY-MM-DD format
+  metrics: {
+    // Revenue metrics
+    totalRevenue: number;
+    monthlyRecurringRevenue: number;
+    newRevenue: number;
+    churnedRevenue: number;
+
+    // Customer metrics
+    totalShops: number;
+    activeShops: number;
+    newShops: number;
+    churnedShops: number;
+
+    // Plan distribution
+    planDistribution: {
+      free: number;
+      starter: number;
+      pro: number;
+      enterprise: number;
+    };
+
+    // Usage metrics
+    totalGameSessions: number;
+    totalDiscountCodes: number;
+    averageDiscountCodesPerShop: number;
+
+    // Conversion metrics
+    freeToStarterConversion: number;
+    starterToProConversion: number;
+    proToEnterpriseConversion: number;
+
+    // Support metrics
+    totalNotifications: number;
+    upgradeRecommendations: number;
+    limitWarnings: number;
+  };
+
+  // Detailed breakdowns
+  planMetrics: {
+    [planId: string]: {
+      count: number;
+      revenue: number;
+      averageUsage: number;
+      churnRate: number;
+    };
+  };
+
+  // Geographic data
+  topCountries: Array<{
+    country: string;
+    shops: number;
+    revenue: number;
+  }>;
+
+  // Performance metrics
+  systemMetrics: {
+    apiCalls: number;
+    errorRate: number;
+    averageResponseTime: number;
+    uptime: number;
+  };
+
+  createdAt: FirebaseFirestore.Timestamp;
+  updatedAt: FirebaseFirestore.Timestamp;
+}
+
+// Admin users for access control
+export interface AdminUserDocument {
+  id: string;
+  email: string;
+  role: 'super_admin' | 'admin' | 'support';
+  permissions: {
+    viewAnalytics: boolean;
+    manageShops: boolean;
+    manageBilling: boolean;
+    viewSupport: boolean;
+    systemAdmin: boolean;
+  };
+  lastLoginAt?: FirebaseFirestore.Timestamp;
+  createdAt: FirebaseFirestore.Timestamp;
+  isActive: boolean;
 }
