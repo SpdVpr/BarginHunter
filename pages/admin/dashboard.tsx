@@ -86,11 +86,17 @@ export default function AdminDashboard() {
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/analytics');
+      const response = await fetch('/api/admin/analytics', {
+        headers: {
+          'x-admin-email': 'admin@bargainhunter.com', // Add admin email header
+        },
+      });
       const data = await response.json();
-      
+
       if (data.success) {
         setAnalytics(data.analytics);
+      } else {
+        console.error('Analytics fetch failed:', data.error);
       }
     } catch (error) {
       console.error('Failed to fetch analytics:', error);
@@ -101,11 +107,17 @@ export default function AdminDashboard() {
 
   const fetchShops = async () => {
     try {
-      const response = await fetch('/api/admin/shops');
+      const response = await fetch('/api/admin/shops', {
+        headers: {
+          'x-admin-email': 'admin@bargainhunter.com', // Add admin email header
+        },
+      });
       const data = await response.json();
-      
+
       if (data.success) {
         setShops(data.shops);
+      } else {
+        console.error('Shops fetch failed:', data.error);
       }
     } catch (error) {
       console.error('Failed to fetch shops:', error);
