@@ -66,28 +66,38 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Validate widget settings
-    console.log('🔧 Settings API: Validating widget settings:', {
-      displayMode: widgetSettings.displayMode,
-      triggerEvent: widgetSettings.triggerEvent,
-      position: widgetSettings.position,
-      showOn: widgetSettings.showOn,
-      userPercentage: widgetSettings.userPercentage,
-      targetUrls: widgetSettings.targetUrls
-    });
+    console.log('🔧 Settings API: Validating widget settings:', JSON.stringify(widgetSettings, null, 2));
 
-    if (!['popup', 'floating_button'].includes(widgetSettings.displayMode) ||
-        !['immediate', 'scroll', 'exit_intent', 'time_delay'].includes(widgetSettings.triggerEvent) ||
-        !['top-left', 'top-right', 'bottom-left', 'bottom-right', 'center'].includes(widgetSettings.position) ||
-        !['all_pages', 'homepage', 'product_pages', 'cart_page', 'checkout_page', 'collection_pages', 'custom', 'url_targeting'].includes(widgetSettings.showOn)) {
-      console.log('🔧 Settings API: Widget validation failed for:', {
-        displayMode: widgetSettings.displayMode,
-        triggerEvent: widgetSettings.triggerEvent,
-        position: widgetSettings.position,
-        showOn: widgetSettings.showOn
-      });
+    // Only validate if the properties exist (make validation more flexible)
+    if (widgetSettings.displayMode && !['popup', 'tab', 'inline', 'floating_button'].includes(widgetSettings.displayMode)) {
+      console.log('🔧 Settings API: Invalid displayMode:', widgetSettings.displayMode);
       return res.status(400).json({
         success: false,
-        error: 'Invalid widget settings'
+        error: `Invalid displayMode: ${widgetSettings.displayMode}`
+      });
+    }
+
+    if (widgetSettings.triggerEvent && !['immediate', 'scroll', 'exit_intent', 'time_delay'].includes(widgetSettings.triggerEvent)) {
+      console.log('🔧 Settings API: Invalid triggerEvent:', widgetSettings.triggerEvent);
+      return res.status(400).json({
+        success: false,
+        error: `Invalid triggerEvent: ${widgetSettings.triggerEvent}`
+      });
+    }
+
+    if (widgetSettings.position && !['top-left', 'top-right', 'bottom-left', 'bottom-right', 'center'].includes(widgetSettings.position)) {
+      console.log('🔧 Settings API: Invalid position:', widgetSettings.position);
+      return res.status(400).json({
+        success: false,
+        error: `Invalid position: ${widgetSettings.position}`
+      });
+    }
+
+    if (widgetSettings.showOn && !['all_pages', 'product_pages', 'cart_page', 'checkout_page', 'collection_pages', 'custom', 'url_targeting'].includes(widgetSettings.showOn)) {
+      console.log('🔧 Settings API: Invalid showOn:', widgetSettings.showOn);
+      return res.status(400).json({
+        success: false,
+        error: `Invalid showOn: ${widgetSettings.showOn}`
       });
     }
 
