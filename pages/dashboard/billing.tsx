@@ -346,17 +346,7 @@ export default function BillingPage() {
                               </Text>
                             </div>
 
-                            <Stack vertical spacing="extraTight">
-                              <Text variant="bodyMd" fontWeight="semibold">✨ All plans include:</Text>
-                              <Text variant="bodyMd">• Unlimited game sessions</Text>
-                              <Text variant="bodyMd">• Advanced analytics & reporting</Text>
-                              <Text variant="bodyMd">• Custom branding & themes</Text>
-                              <Text variant="bodyMd">• A/B testing capabilities</Text>
-                              <Text variant="bodyMd">• Priority support</Text>
-                              <Text variant="bodyMd">• Webhook integrations</Text>
-                              <Text variant="bodyMd">• Multiple game types</Text>
-                              <Text variant="bodyMd">• Advanced fraud protection</Text>
-                            </Stack>
+
 
                             <div style={{ marginTop: '1.5rem' }}>
                               {!isCurrent && plan.price > 0 ? (
