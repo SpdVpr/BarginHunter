@@ -155,9 +155,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     ];
 
     // Calculate discount earned
-    const discountEarned = calculateDiscountEarned(finalScore, discountTiers);
+    let discountEarned = calculateDiscountEarned(finalScore, discountTiers);
     const nextTierScore = getNextTierScore(finalScore);
-    const message = getScoreMessage(finalScore, discountEarned);
+    let message = getScoreMessage(finalScore, discountEarned);
 
     let discountCode: string | undefined;
     let expiresAt: string | undefined;

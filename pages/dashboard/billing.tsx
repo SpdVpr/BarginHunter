@@ -14,7 +14,7 @@ import {
   Modal,
   TextContainer,
 } from '@shopify/polaris';
-import { DashboardLayout } from '../../src/components/DashboardLayout';
+import { DashboardLayout } from '../../src/components/shared/DashboardLayout';
 
 interface BillingData {
   subscription: {

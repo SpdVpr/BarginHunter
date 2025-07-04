@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { ShopifySessionManager } from '../../../src/lib/session-manager';
+import { ShopifySessionManager } from '../../../src/lib/shopify';
 import { ShopifyBillingService } from '../../../src/lib/shopify-billing';
 import { StoreService, SubscriptionService, UsageTrackingService } from '../../../src/lib/database';
 
