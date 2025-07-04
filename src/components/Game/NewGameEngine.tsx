@@ -16,11 +16,11 @@ const GRAVITY = 0.6;
 const JUMP_FORCE = -14;
 const GAME_SPEED = 4;
 
-// Character constants
-const CHAR_WIDTH = 32;
-const CHAR_HEIGHT = 48;
-const CHAR_HITBOX_WIDTH = 20;
-const CHAR_HITBOX_HEIGHT = 36;
+// Character constants - Increased size for better visibility
+const CHAR_WIDTH = 48;  // Increased from 32
+const CHAR_HEIGHT = 64; // Increased from 48
+const CHAR_HITBOX_WIDTH = 30; // Increased from 20
+const CHAR_HITBOX_HEIGHT = 48; // Increased from 36
 
 interface GameObject {
   x: number;
@@ -131,7 +131,7 @@ export default function NewGameEngine({ onGameEnd, onScoreUpdate, discountTiers,
       outline: '#000000'
     };
 
-    const scale = 2;
+    const scale = 2.5; // Increased scale for better visibility
     const drawX = x - (CHAR_WIDTH * scale) / 2;
     const drawY = y - (CHAR_HEIGHT * scale) / 2;
 
