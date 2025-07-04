@@ -283,43 +283,112 @@ export default function BillingPage() {
           <Layout.Section>
             <Card>
               <div style={{ padding: '1.5rem' }}>
-                <Text variant="headingMd" as="h3" marginBottom="4">Available Plans</Text>
-                
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem' }}>
-                  {billingData.availablePlans.map((plan) => (
-                    <Card key={plan.id} subdued={plan.id === billingData.subscription.plan}>
-                      <div style={{ padding: '1rem' }}>
-                        <Stack vertical spacing="tight">
-                          <Stack distribution="equalSpacing" alignment="center">
-                            <Text variant="headingMd">{plan.name}</Text>
-                            {plan.id === billingData.subscription.plan && (
-                              <Badge status="success">Current</Badge>
+                <Stack vertical spacing="loose">
+                  <Text variant="headingMd" as="h3">Choose Your Plan</Text>
+                  <Text variant="bodyMd" color="subdued">
+                    All plans include the same features. Only the number of discount codes per month differs.
+                  </Text>
+                </Stack>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginTop: '2rem' }}>
+                  {billingData.availablePlans.map((plan) => {
+                    const isCurrent = plan.id === billingData.subscription.plan;
+                    const isRecommended = plan.id === 'pro';
+
+                    return (
+                      <Card key={plan.id} subdued={isCurrent}>
+                        <div style={{
+                          padding: '1.5rem',
+                          border: isRecommended ? '2px solid #008060' : isCurrent ? '2px solid #637381' : '1px solid #e1e3e5',
+                          borderRadius: '8px',
+                          position: 'relative'
+                        }}>
+                          {isRecommended && (
+                            <div style={{
+                              position: 'absolute',
+                              top: '-10px',
+                              left: '50%',
+                              transform: 'translateX(-50%)',
+                              background: '#008060',
+                              color: 'white',
+                              padding: '4px 12px',
+                              borderRadius: '12px',
+                              fontSize: '12px',
+                              fontWeight: 'bold'
+                            }}>
+                              RECOMMENDED
+                            </div>
+                          )}
+
+                          <Stack vertical spacing="tight">
+                            <Stack distribution="equalSpacing" alignment="center">
+                              <Text variant="headingMd" fontWeight="bold">{plan.name}</Text>
+                              {isCurrent && (
+                                <Badge status="success">Current Plan</Badge>
+                              )}
+                            </Stack>
+
+                            <Stack vertical spacing="extraTight">
+                              <Text variant="headingXl" as="h2" color={plan.price === 0 ? 'subdued' : 'success'}>
+                                {plan.price === 0 ? 'Free' : `$${plan.price}`}
+                              </Text>
+                              {plan.price > 0 && (
+                                <Text variant="bodyMd" color="subdued">per month</Text>
+                              )}
+                            </Stack>
+
+                            <div style={{ padding: '1rem 0' }}>
+                              <Text variant="bodyMd" fontWeight="semibold" color="success">
+                                {plan.limits?.maxDiscountCodes === -1
+                                  ? '∞ Unlimited discount codes'
+                                  : `${plan.limits?.maxDiscountCodes?.toLocaleString()} discount codes/month`
+                                }
+                              </Text>
+                            </div>
+
+                            <Stack vertical spacing="extraTight">
+                              <Text variant="bodyMd" fontWeight="semibold">✨ All plans include:</Text>
+                              <Text variant="bodyMd">• Unlimited game sessions</Text>
+                              <Text variant="bodyMd">• Advanced analytics & reporting</Text>
+                              <Text variant="bodyMd">• Custom branding & themes</Text>
+                              <Text variant="bodyMd">• A/B testing capabilities</Text>
+                              <Text variant="bodyMd">• Priority support</Text>
+                              <Text variant="bodyMd">• Webhook integrations</Text>
+                              <Text variant="bodyMd">• Multiple game types</Text>
+                              <Text variant="bodyMd">• Advanced fraud protection</Text>
+                            </Stack>
+
+                            <div style={{ marginTop: '1.5rem' }}>
+                              {!isCurrent && plan.price > 0 ? (
+                                <Button
+                                  primary={isRecommended}
+                                  onClick={() => handleUpgrade(plan.id)}
+                                  fullWidth
+                                  size="large"
+                                >
+                                  Upgrade to {plan.name}
+                                </Button>
+                              ) : isCurrent ? (
+                                <Button disabled fullWidth size="large">
+                                  Current Plan
+                                </Button>
+                              ) : (
+                                <Button disabled fullWidth size="large">
+                                  Free Plan
+                                </Button>
+                              )}
+                            </div>
+
+                            {plan.trialDays && !isCurrent && (
+                              <Text variant="bodyMd" color="subdued" alignment="center">
+                                {plan.trialDays} days free trial
+                              </Text>
                             )}
                           </Stack>
-                          
-                          <Text variant="headingLg" as="h3">
-                            {plan.price === 0 ? 'Free' : `$${plan.price}/month`}
-                          </Text>
-                          
-                          <Stack vertical spacing="extraTight">
-                            {plan.features.map((feature: string, index: number) => (
-                              <Text key={index} variant="bodyMd">• {feature}</Text>
-                            ))}
-                          </Stack>
-                          
-                          {plan.id !== billingData.subscription.plan && plan.price > 0 && (
-                            <Button 
-                              primary={plan.id === 'pro'} 
-                              onClick={() => handleUpgrade(plan.id)}
-                              fullWidth
-                            >
-                              Upgrade to {plan.name}
-                            </Button>
-                          )}
-                        </Stack>
-                      </div>
-                    </Card>
-                  ))}
+                        </div>
+                      </Card>
+                    );
+                  })}
                 </div>
               </div>
             </Card>

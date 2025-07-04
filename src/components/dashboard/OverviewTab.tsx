@@ -8,12 +8,23 @@ import {
   DataTable,
   Spinner,
   Layout,
+  Button,
+  ProgressBar,
+  Banner,
 } from '@shopify/polaris';
 import { useSharedStats } from '../../hooks/useSharedStats';
 import { ModernStatsCards } from './ModernStatsCards';
 
 interface OverviewTabProps {
   shop: string | string[] | undefined;
+}
+
+interface BillingInfo {
+  currentPlan: string;
+  discountCodesUsed: number;
+  discountCodesLimit: number;
+  usagePercentage: number;
+  canUpgrade: boolean;
 }
 
 interface RecentSession {
@@ -29,10 +40,13 @@ export function OverviewTab({ shop }: OverviewTabProps) {
   const { stats, isLoading, error } = useSharedStats(shop);
   const [recentSessions, setRecentSessions] = useState<RecentSession[]>([]);
   const [sessionsLoading, setSessionsLoading] = useState(true);
+  const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
+  const [billingLoading, setBillingLoading] = useState(true);
 
   useEffect(() => {
     if (shop) {
       loadRecentSessions();
+      loadBillingInfo();
     }
   }, [shop]);
 
@@ -62,6 +76,55 @@ export function OverviewTab({ shop }: OverviewTabProps) {
     }
   };
 
+  const loadBillingInfo = async () => {
+    try {
+      setBillingLoading(true);
+      const response = await fetch(`/api/usage/check-limits?shop=${shop}&action=discountCode`);
+      if (response.ok) {
+        const data = await response.json();
+        setBillingInfo({
+          currentPlan: data.plan || 'free',
+          discountCodesUsed: data.usage?.current || 0,
+          discountCodesLimit: data.usage?.limit === 'unlimited' ? -1 : (data.usage?.limit || 100),
+          usagePercentage: data.usage?.percentage || 0,
+          canUpgrade: data.plan !== 'enterprise',
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load billing info:', error);
+      // Fallback to free plan
+      setBillingInfo({
+        currentPlan: 'free',
+        discountCodesUsed: 0,
+        discountCodesLimit: 100,
+        usagePercentage: 0,
+        canUpgrade: true,
+      });
+    } finally {
+      setBillingLoading(false);
+    }
+  };
+
+  const handleUpgrade = () => {
+    window.location.href = `/dashboard/billing?shop=${shop}`;
+  };
+
+  const getPlanDisplayName = (plan: string) => {
+    const planNames = {
+      free: '🆓 Free Tier',
+      starter: '💼 Starter',
+      pro: '🚀 Pro',
+      enterprise: '🏢 Enterprise'
+    };
+    return planNames[plan as keyof typeof planNames] || plan;
+  };
+
+  const getUsageColor = (percentage: number) => {
+    if (percentage >= 95) return 'critical';
+    if (percentage >= 80) return 'warning';
+    return 'success';
+  };
+
   const recentSessionsRows = recentSessions.map((session) => [
     session.customerEmail || 'Anonymous',
     session.score.toString(),
@@ -83,6 +146,92 @@ export function OverviewTab({ shop }: OverviewTabProps) {
 
   return (
     <div style={{ display: 'grid', gap: '2rem' }}>
+      {/* Billing Status Card - Most Important */}
+      {billingLoading ? (
+        <Card>
+          <div style={{ padding: '2rem', textAlign: 'center' }}>
+            <Spinner size="small" />
+            <Text variant="bodyMd">Loading billing information...</Text>
+          </div>
+        </Card>
+      ) : billingInfo ? (
+        <Card>
+          <div style={{ padding: '1.5rem' }}>
+            <Stack distribution="equalSpacing" alignment="center">
+              <Stack vertical spacing="tight">
+                <Stack spacing="tight" alignment="center">
+                  <Text variant="headingMd" as="h3">Current Plan</Text>
+                  <Badge status={billingInfo.currentPlan === 'free' ? 'info' : 'success'}>
+                    {getPlanDisplayName(billingInfo.currentPlan)}
+                  </Badge>
+                </Stack>
+
+                <Stack vertical spacing="tight">
+                  <Stack distribution="equalSpacing" alignment="center">
+                    <Text variant="bodyMd" fontWeight="semibold">Discount Codes This Month</Text>
+                    <Text variant="bodyMd">
+                      {billingInfo.discountCodesUsed} / {billingInfo.discountCodesLimit === -1 ? '∞' : billingInfo.discountCodesLimit.toLocaleString()}
+                    </Text>
+                  </Stack>
+
+                  {billingInfo.discountCodesLimit !== -1 && (
+                    <ProgressBar
+                      progress={billingInfo.usagePercentage}
+                      size="small"
+                      color={getUsageColor(billingInfo.usagePercentage)}
+                    />
+                  )}
+
+                  {billingInfo.usagePercentage >= 80 && billingInfo.discountCodesLimit !== -1 && (
+                    <Text variant="bodyMd" color={billingInfo.usagePercentage >= 95 ? 'critical' : 'warning'}>
+                      {billingInfo.usagePercentage >= 95
+                        ? '⚠️ Almost at limit! Upgrade to avoid interruption.'
+                        : '📈 High usage detected. Consider upgrading.'
+                      }
+                    </Text>
+                  )}
+                </Stack>
+              </Stack>
+
+              {billingInfo.canUpgrade && (
+                <Stack vertical spacing="tight">
+                  <Button
+                    primary={billingInfo.usagePercentage >= 80}
+                    size="large"
+                    onClick={handleUpgrade}
+                  >
+                    {billingInfo.usagePercentage >= 95 ? 'Upgrade Now!' : 'Upgrade Plan'}
+                  </Button>
+                  <Text variant="bodyMd" color="subdued" alignment="center">
+                    Get more discount codes
+                  </Text>
+                </Stack>
+              )}
+            </Stack>
+          </div>
+        </Card>
+      ) : null}
+
+      {/* Usage Warning Banner */}
+      {billingInfo && billingInfo.usagePercentage >= 95 && billingInfo.discountCodesLimit !== -1 && (
+        <Banner status="critical">
+          <Stack vertical spacing="tight">
+            <Text variant="bodyMd" fontWeight="semibold">
+              🚨 Discount Code Limit Almost Reached!
+            </Text>
+            <Text variant="bodyMd">
+              You've used {billingInfo.discountCodesUsed} of {billingInfo.discountCodesLimit} discount codes this month.
+              Upgrade your plan to continue generating codes for your customers.
+            </Text>
+            <div>
+              <Button primary onClick={handleUpgrade}>
+                View Upgrade Options
+              </Button>
+            </div>
+          </Stack>
+        </Banner>
+      )}
+
       {/* Modern Stats Grid */}
       <ModernStatsCards stats={stats} variant="grid" />
 
