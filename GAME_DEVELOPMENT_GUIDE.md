@@ -283,13 +283,16 @@ interface GameSettings {
     { label: '🐦 Flappy Bird (Tap to fly)', value: 'flappy_bird' },
     { label: '🧩 Tetris (Click to rotate)', value: 'tetris' },
     { label: '🐍 Snake (Arrow keys or click)', value: 'snake' },
+    { label: '🚀 Space Invaders (Auto-fire shooter)', value: 'space_invaders' },
+    { label: '🎯 Arkanoid (Paddle & ball brick breaker)', value: 'arkanoid' },
+    { label: '🍎 Fruit Ninja (Slice fruits with touch)', value: 'fruit_ninja' },
     { label: '🎮 Your Game Name (Description)', value: 'your_game_name' },
   ]}
   value={gameSettings.gameType}
   onChange={(value) =>
     setGameSettings({
       ...gameSettings,
-      gameType: value as 'dino' | 'flappy_bird' | 'tetris' | 'snake' | 'your_game_name'
+      gameType: value as 'dino' | 'flappy_bird' | 'tetris' | 'snake' | 'space_invaders' | 'arkanoid' | 'fruit_ninja' | 'your_game_name'
     })
   }
 />

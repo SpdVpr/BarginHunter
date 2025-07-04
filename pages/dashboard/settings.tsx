@@ -21,7 +21,7 @@ import { DashboardLayout } from '../../src/components/shared/DashboardLayout';
 
 interface GameSettings {
   isEnabled: boolean;
-  gameType: 'dino' | 'flappy_bird' | 'tetris' | 'snake' | 'space_invaders';
+  gameType: 'dino' | 'flappy_bird' | 'tetris' | 'snake' | 'space_invaders' | 'arkanoid' | 'fruit_ninja';
   minScoreForDiscount: number;
   maxPlaysPerCustomer: number;
   maxPlaysPerDay: number;
@@ -299,15 +299,17 @@ export default function Settings() {
                       { label: '🧩 Tetris (Click to rotate)', value: 'tetris' },
                       { label: '🐍 Snake (Arrow keys or click)', value: 'snake' },
                       { label: '🚀 Space Invaders (Auto-fire shooter)', value: 'space_invaders' },
+                      { label: '🎯 Arkanoid (Paddle & ball brick breaker)', value: 'arkanoid' },
+                      { label: '🍎 Fruit Ninja (Slice fruits with touch)', value: 'fruit_ninja' },
                     ]}
                     value={gameSettings.gameType}
                     onChange={(value) =>
                       setGameSettings({
                         ...gameSettings,
-                        gameType: value as 'dino' | 'flappy_bird' | 'tetris' | 'snake' | 'space_invaders'
+                        gameType: value as 'dino' | 'flappy_bird' | 'tetris' | 'snake' | 'space_invaders' | 'arkanoid' | 'fruit_ninja'
                       })
                     }
-                    helpText="Choose which game your customers will play"
+                    helpText="Choose which game your customers will play to earn discounts"
                   />
                   
                   <TextField

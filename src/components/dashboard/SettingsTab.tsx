@@ -23,7 +23,7 @@ interface SettingsTabProps {
 
 interface GameSettings {
   isEnabled: boolean;
-  gameType: 'dino' | 'flappy_bird' | 'tetris' | 'snake' | 'space_invaders' | 'library';
+  gameType: 'dino' | 'flappy_bird' | 'tetris' | 'snake' | 'space_invaders' | 'arkanoid' | 'fruit_ninja';
   minScoreForDiscount: number;
   maxPlaysPerCustomer: number;
   maxPlaysPerDay: number;
@@ -429,16 +429,17 @@ export function SettingsTab({ shop }: SettingsTabProps) {
                 <Select
                   label="Game Type"
                   options={[
-                    { label: 'Chrome Dino Runner', value: 'dino' },
-                    { label: 'Flappy Bird', value: 'flappy_bird' },
-                    { label: 'Tetris', value: 'tetris' },
-                    { label: 'Snake', value: 'snake' },
-                    { label: 'Space Invaders', value: 'space_invaders' },
-                    { label: '🎮 Game Library (Multiple Games)', value: 'library' },
+                    { label: '🦕 Chrome Dino Runner', value: 'dino' },
+                    { label: '🐦 Flappy Bird', value: 'flappy_bird' },
+                    { label: '🧩 Tetris', value: 'tetris' },
+                    { label: '🐍 Snake', value: 'snake' },
+                    { label: '🚀 Space Invaders', value: 'space_invaders' },
+                    { label: '🎯 Arkanoid', value: 'arkanoid' },
+                    { label: '🍎 Fruit Ninja', value: 'fruit_ninja' },
                   ]}
                   value={gameSettings.gameType}
                   onChange={(value) => setGameSettings({...gameSettings, gameType: value as any})}
-                  helpText={gameSettings.gameType === 'library' ? 'Customers can choose from multiple games in our library' : 'Select a single game for all customers'}
+                  helpText="Select which game your customers will play to earn discounts"
                 />
 
                 <TextField
