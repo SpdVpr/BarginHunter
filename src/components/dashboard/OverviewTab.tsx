@@ -17,6 +17,7 @@ import { ModernStatsCards } from './ModernStatsCards';
 
 interface OverviewTabProps {
   shop: string | string[] | undefined;
+  onTabChange?: (tabIndex: number) => void;
 }
 
 interface BillingInfo {
@@ -36,7 +37,7 @@ interface RecentSession {
   status: 'completed' | 'abandoned';
 }
 
-export function OverviewTab({ shop }: OverviewTabProps) {
+export function OverviewTab({ shop, onTabChange }: OverviewTabProps) {
   const { stats, isLoading, error } = useSharedStats(shop);
   const [recentSessions, setRecentSessions] = useState<RecentSession[]>([]);
   const [sessionsLoading, setSessionsLoading] = useState(true);
@@ -106,7 +107,12 @@ export function OverviewTab({ shop }: OverviewTabProps) {
   };
 
   const handleUpgrade = () => {
-    window.location.href = `/dashboard/billing?shop=${shop}`;
+    if (onTabChange) {
+      onTabChange(3); // Switch to billing tab (index 3)
+    } else {
+      // Fallback for standalone usage
+      window.location.href = `/dashboard/billing?shop=${shop}`;
+    }
   };
 
   const getPlanDisplayName = (plan: string) => {

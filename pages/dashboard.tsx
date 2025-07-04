@@ -21,6 +21,7 @@ import { OverviewTab } from '../src/components/dashboard/OverviewTab';
 import { AnalyticsTab } from '../src/components/dashboard/AnalyticsTab';
 import { NotificationBanner } from '../src/components/NotificationBanner';
 import { DiscountsTab } from '../src/components/dashboard/DiscountsTab';
+import { BillingTab } from '../src/components/dashboard/BillingTab';
 import { WidgetDisplayTab } from '../src/components/dashboard/WidgetDisplayTab';
 import { SettingsTab } from '../src/components/dashboard/SettingsTab';
 import styles from '../src/styles/ModernDashboard.module.css';
@@ -56,6 +57,11 @@ export default function Dashboard() {
       panelID: 'discounts-panel',
     },
     {
+      id: 'billing',
+      content: 'Billing & Usage',
+      panelID: 'billing-panel',
+    },
+    {
       id: 'widget',
       content: 'Widget Display',
       panelID: 'widget-panel',
@@ -74,17 +80,19 @@ export default function Dashboard() {
   const renderTabContent = () => {
     switch (selectedTab) {
       case 0:
-        return <OverviewTab shop={shop} />;
+        return <OverviewTab shop={shop} onTabChange={setSelectedTab} />;
       case 1:
         return <AnalyticsTab shop={shop} />;
       case 2:
         return <DiscountsTab shop={shop} />;
       case 3:
-        return <WidgetDisplayTab shop={shop} />;
+        return <BillingTab shop={shop} />;
       case 4:
+        return <WidgetDisplayTab shop={shop} />;
+      case 5:
         return <SettingsTab shop={shop} />;
       default:
-        return <OverviewTab shop={shop} />;
+        return <OverviewTab shop={shop} onTabChange={setSelectedTab} />;
     }
   };
 
