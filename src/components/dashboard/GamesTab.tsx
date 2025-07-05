@@ -10,8 +10,6 @@ import {
   Banner,
   Spinner,
   Badge,
-  Modal,
-  Frame,
 } from '@shopify/polaris';
 import Game from '../Game/Game';
 
@@ -407,33 +405,14 @@ export function GamesTab({ shop }: GamesTabProps) {
         </Card>
       </Layout.Section>
 
-      {/* Game Test Modal */}
+      {/* Game Test Fullscreen Popup - Same as frontend */}
       {showGameModal && testGameConfig && (
-        <Modal
-          open={showGameModal}
+        <Game
+          shopDomain={shop}
+          onGameComplete={handleGameComplete}
           onClose={closeGameModal}
-          title={`Testing: ${AVAILABLE_GAMES.find(g => g.id === selectedGameForTest)?.name}`}
-        >
-          <Modal.Section>
-            <div style={{
-              width: '600px',
-              height: '450px',
-              position: 'relative',
-              margin: '0 auto',
-              border: '2px solid #e1e3e5',
-              borderRadius: '8px',
-              overflow: 'hidden'
-            }}>
-              <Game
-                shopDomain={shop}
-                onGameComplete={handleGameComplete}
-                onClose={closeGameModal}
-                gameConfig={testGameConfig}
-                adminMode={true}
-              />
-            </div>
-          </Modal.Section>
-        </Modal>
+          gameConfig={testGameConfig}
+        />
       )}
     </Layout>
   );
