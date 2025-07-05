@@ -21,7 +21,7 @@ interface FruitNinjaEngineProps {
 }
 
 // Game constants
-const GRAVITY = 0.5;
+const GRAVITY = 0.3; // Reduced from 0.5 for easier fruit slicing
 const FRUIT_SIZE = 60;
 const BOMB_SIZE = 50;
 
@@ -98,7 +98,7 @@ export default function FruitNinjaEngine({
   // Spawn fruit
   const spawnFruit = useCallback(() => {
     const now = Date.now();
-    if (now - lastSpawnTime.current < 1000 + Math.random() * 1500) return;
+    if (now - lastSpawnTime.current < 1500 + Math.random() * 1000) return; // Slower spawn for easier gameplay
     
     lastSpawnTime.current = now;
     
@@ -112,8 +112,8 @@ export default function FruitNinjaEngine({
         id: nextFruitId.current++,
         x: Math.random() * (canvasSize.width - BOMB_SIZE),
         y: canvasSize.height + BOMB_SIZE,
-        vx: (Math.random() - 0.5) * 4,
-        vy: -12 - Math.random() * 8,
+        vx: (Math.random() - 0.5) * 3,
+        vy: -10 - Math.random() * 5,
         type: 'bomb',
         sliced: false,
         emoji: '💣',
@@ -125,8 +125,8 @@ export default function FruitNinjaEngine({
         id: nextFruitId.current++,
         x: Math.random() * (canvasSize.width - FRUIT_SIZE),
         y: canvasSize.height + FRUIT_SIZE,
-        vx: (Math.random() - 0.5) * 6,
-        vy: -15 - Math.random() * 10,
+        vx: (Math.random() - 0.5) * 4,
+        vy: -12 - Math.random() * 6,
         type: fruitType.type,
         sliced: false,
         emoji: fruitType.emoji,
@@ -158,11 +158,12 @@ export default function FruitNinjaEngine({
         if (fruit.sliced) return fruit;
         
         const distance = Math.sqrt(
-          Math.pow(x - (fruit.x + FRUIT_SIZE/2), 2) + 
+          Math.pow(x - (fruit.x + FRUIT_SIZE/2), 2) +
           Math.pow(y - (fruit.y + FRUIT_SIZE/2), 2)
         );
-        
-        if (distance < FRUIT_SIZE/2) {
+
+        // Increased hit area for easier slicing (was FRUIT_SIZE/2)
+        if (distance < FRUIT_SIZE * 0.8) {
           if (fruit.type === 'bomb') {
             // Hit bomb - lose life
             setLives(prev => {

@@ -28,7 +28,7 @@ const BRICK_WIDTH = 60;
 const BRICK_HEIGHT = 20;
 const BRICK_ROWS = 8;
 const BRICK_COLS = 10;
-const BALL_SPEED = 6;
+const BALL_SPEED = 4; // Reduced from 6 for better playability
 
 interface Ball {
   x: number;
