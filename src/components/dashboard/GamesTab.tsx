@@ -112,12 +112,47 @@ export function GamesTab({ shop }: GamesTabProps) {
       setLoading(true);
       const response = await fetch(`/api/dashboard/settings?shop=${shop}`);
       const data = await response.json();
-      
-      if (data.success) {
+
+      if (data.success && data.settings.gameSettings) {
         setGameSettings(data.settings.gameSettings);
+      } else {
+        // Set default game settings if none exist
+        setGameSettings({
+          isEnabled: true,
+          gameType: 'dino',
+          minScoreForDiscount: 100,
+          maxPlaysPerCustomer: 5,
+          maxPlaysPerDay: 10,
+          playLimitResetHours: 24,
+          gameSpeed: 1,
+          difficulty: 'medium',
+          testMode: false,
+          discountTiers: [
+            { minScore: 100, discount: 5, message: 'Great job! You earned 5% off!' },
+            { minScore: 300, discount: 10, message: 'Amazing! You earned 10% off!' },
+            { minScore: 500, discount: 15, message: 'Excellent! You earned 15% off!' }
+          ]
+        });
       }
     } catch (error) {
       console.error('Error loading settings:', error);
+      // Set default settings on error
+      setGameSettings({
+        isEnabled: true,
+        gameType: 'dino',
+        minScoreForDiscount: 100,
+        maxPlaysPerCustomer: 5,
+        maxPlaysPerDay: 10,
+        playLimitResetHours: 24,
+        gameSpeed: 1,
+        difficulty: 'medium',
+        testMode: false,
+        discountTiers: [
+          { minScore: 100, discount: 5, message: 'Great job! You earned 5% off!' },
+          { minScore: 300, discount: 10, message: 'Amazing! You earned 10% off!' },
+          { minScore: 500, discount: 15, message: 'Excellent! You earned 15% off!' }
+        ]
+      });
     } finally {
       setLoading(false);
     }
@@ -128,6 +163,11 @@ export function GamesTab({ shop }: GamesTabProps) {
 
     try {
       setSaving(true);
+
+      // First load current settings to preserve other settings
+      const currentResponse = await fetch(`/api/dashboard/settings?shop=${shop}`);
+      const currentData = await currentResponse.json();
+
       const response = await fetch(`/api/dashboard/settings?shop=${shop}`, {
         method: 'POST',
         headers: {
@@ -135,9 +175,9 @@ export function GamesTab({ shop }: GamesTabProps) {
         },
         body: JSON.stringify({
           gameSettings,
-          // Keep other settings unchanged
-          widgetSettings: {},
-          targetingSettings: {}
+          // Preserve existing settings
+          widgetSettings: currentData.success ? currentData.settings.widgetSettings : {},
+          targetingSettings: currentData.success ? currentData.settings.targetingSettings : {}
         }),
       });
 
@@ -145,6 +185,9 @@ export function GamesTab({ shop }: GamesTabProps) {
       if (!data.success) {
         throw new Error(data.error || 'Failed to save settings');
       }
+
+      // Show success message
+      alert('Game settings saved successfully!');
     } catch (error) {
       console.error('Error saving settings:', error);
       alert('Failed to save game settings. Please try again.');
@@ -353,10 +396,17 @@ export function GamesTab({ shop }: GamesTabProps) {
           open={showGameModal}
           onClose={closeGameModal}
           title={`Testing: ${AVAILABLE_GAMES.find(g => g.id === selectedGameForTest)?.name}`}
-          large
         >
           <Modal.Section>
-            <div style={{ height: '600px', position: 'relative' }}>
+            <div style={{
+              width: '600px',
+              height: '450px',
+              position: 'relative',
+              margin: '0 auto',
+              border: '2px solid #e1e3e5',
+              borderRadius: '8px',
+              overflow: 'hidden'
+            }}>
               <Game
                 shopDomain={shop}
                 onGameComplete={handleGameComplete}
