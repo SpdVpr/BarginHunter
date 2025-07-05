@@ -426,21 +426,12 @@ export function SettingsTab({ shop }: SettingsTabProps) {
                   helpText="When enabled, the game widget will only be visible to you for testing and configuration. Disable this to make the widget visible to all customers according to your targeting settings."
                 />
                 
-                <Select
-                  label="Game Type"
-                  options={[
-                    { label: '🦕 Chrome Dino Runner', value: 'dino' },
-                    { label: '🐦 Flappy Bird', value: 'flappy_bird' },
-                    { label: '🧩 Tetris', value: 'tetris' },
-                    { label: '🐍 Snake', value: 'snake' },
-                    { label: '🚀 Space Invaders', value: 'space_invaders' },
-                    { label: '🎯 Arkanoid', value: 'arkanoid' },
-                    { label: '🍎 Fruit Ninja', value: 'fruit_ninja' },
-                  ]}
-                  value={gameSettings.gameType}
-                  onChange={(value) => setGameSettings({...gameSettings, gameType: value as any})}
-                  helpText="Select which game your customers will play to earn discounts"
-                />
+                <Banner status="info">
+                  <p>
+                    <strong>Game Selection:</strong> Game type is now configured in the
+                    <strong> 🎮 Games</strong> tab. Use that tab to select and test games.
+                  </p>
+                </Banner>
 
                 <TextField
                   label="Minimum Score for Discount"

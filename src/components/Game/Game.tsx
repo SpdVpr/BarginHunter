@@ -13,6 +13,7 @@ interface GameProps {
   shopDomain: string;
   onGameComplete: (result: GameResult) => void;
   onClose: () => void;
+  gameConfig?: any; // Optional: if provided, skip API loading
 }
 
 interface GameResult {
@@ -38,7 +39,7 @@ const DEFAULT_DISCOUNT_TIERS = [
   { minScore: 1000, discount: 25, message: "LEGENDARY HUNTER! 🏆" }
 ];
 
-export default function Game({ shopDomain, onGameComplete, onClose }: GameProps) {
+export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: providedGameConfig }: GameProps) {
   const [gameState, setGameState] = useState<'loading' | 'intro' | 'playing' | 'gameOver'>('loading');
   const [gameConfig, setGameConfig] = useState<any>(null);
   const [gameResult, setGameResult] = useState<GameResult | null>(null);
@@ -49,6 +50,13 @@ export default function Game({ shopDomain, onGameComplete, onClose }: GameProps)
   // Load game configuration
   useEffect(() => {
     const loadGameConfig = async () => {
+      // If gameConfig is provided as prop, use it directly (for admin testing)
+      if (providedGameConfig) {
+        setGameConfig(providedGameConfig);
+        setGameState('intro');
+        return;
+      }
+
       try {
         // TODO: Replace with actual API call
         const response = await fetch(`/api/game/config/${shopDomain}`);

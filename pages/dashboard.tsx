@@ -19,6 +19,7 @@ import {
 import { ModernDashboardLayout } from '../src/components/dashboard/ModernDashboardLayout';
 import { OverviewTab } from '../src/components/dashboard/OverviewTab';
 import { AnalyticsTab } from '../src/components/dashboard/AnalyticsTab';
+import { GamesTab } from '../src/components/dashboard/GamesTab';
 import { NotificationBanner } from '../src/components/NotificationBanner';
 import { DiscountsTab } from '../src/components/dashboard/DiscountsTab';
 import { BillingTab } from '../src/components/dashboard/BillingTab';
@@ -50,6 +51,11 @@ export default function Dashboard() {
       id: 'analytics',
       content: 'Analytics',
       panelID: 'analytics-panel',
+    },
+    {
+      id: 'games',
+      content: '🎮 Games',
+      panelID: 'games-panel',
     },
     {
       id: 'discounts',
@@ -84,12 +90,14 @@ export default function Dashboard() {
       case 1:
         return <AnalyticsTab shop={shop} />;
       case 2:
-        return <DiscountsTab shop={shop} />;
+        return <GamesTab shop={shop} />;
       case 3:
-        return <BillingTab shop={shop} />;
+        return <DiscountsTab shop={shop} />;
       case 4:
-        return <WidgetDisplayTab shop={shop} />;
+        return <BillingTab shop={shop} />;
       case 5:
+        return <WidgetDisplayTab shop={shop} />;
+      case 6:
         return <SettingsTab shop={shop} />;
       default:
         return <OverviewTab shop={shop} onTabChange={setSelectedTab} />;
