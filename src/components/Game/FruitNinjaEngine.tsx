@@ -44,11 +44,12 @@ interface SliceTrail {
   time: number;
 }
 
-export default function FruitNinjaEngine({ 
-  onGameEnd, 
-  onScoreUpdate, 
-  gameConfig, 
-  onShowIntro 
+export default function FruitNinjaEngine({
+  onGameEnd,
+  onScoreUpdate,
+  gameConfig,
+  onShowIntro,
+  adminTest = false
 }: FruitNinjaEngineProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();

@@ -20,22 +20,31 @@ interface SpaceInvadersEngineProps {
   onShowIntro: () => void;
 }
 
-// Fullscreen game canvas that fills entire iframe space
-const getCanvasSize = () => {
-  // Use full viewport dimensions to eliminate white space
-  const width = window.innerWidth;
-  let height = window.innerHeight;
+// Game canvas that adapts to context (iframe or fullscreen)
+const getCanvasSize = (adminTest = false) => {
+  if (adminTest) {
+    // Use iframe dimensions for admin testing
+    const isMobile = window.innerWidth < 768;
+    return {
+      width: isMobile ? 370 : 540,
+      height: isMobile ? 600 : 700,
+    };
+  } else {
+    // Use full viewport dimensions for normal widget
+    const width = window.innerWidth;
+    let height = window.innerHeight;
 
-  // Reduce height by 20% on mobile devices for better usability
-  const isMobile = width <= 768;
-  if (isMobile) {
-    height = height * 0.8; // 20% reduction
+    // Reduce height by 20% on mobile devices for better usability
+    const isMobile = width <= 768;
+    if (isMobile) {
+      height = height * 0.8; // 20% reduction
+    }
+
+    return {
+      width: width,
+      height: height,
+    };
   }
-
-  return {
-    width: width,
-    height: height,
-  };
 };
 
 // Game objects interfaces
@@ -75,11 +84,12 @@ interface Particle {
   color: string;
 }
 
-export default function SpaceInvadersEngine({ 
-  onGameEnd, 
-  onScoreUpdate, 
+export default function SpaceInvadersEngine({
+  onGameEnd,
+  onScoreUpdate,
   gameConfig,
-  onShowIntro 
+  onShowIntro,
+  adminTest = false
 }: SpaceInvadersEngineProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
@@ -88,7 +98,7 @@ export default function SpaceInvadersEngine({
   const [isRunning, setIsRunning] = useState(false);
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
-  const [canvasSize, setCanvasSize] = useState(getCanvasSize());
+  const [canvasSize, setCanvasSize] = useState(getCanvasSize(adminTest));
   const [gameScorer] = useState(() => new GameScorer());
   const [difficultyLevel, setDifficultyLevel] = useState(0);
 
@@ -114,7 +124,7 @@ export default function SpaceInvadersEngine({
   // Handle window resize
   useEffect(() => {
     const handleResize = () => {
-      const newSize = getCanvasSize();
+      const newSize = getCanvasSize(adminTest);
       setCanvasSize(newSize);
     };
 

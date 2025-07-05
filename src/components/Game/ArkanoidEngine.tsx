@@ -50,11 +50,12 @@ interface Brick {
   points: number;
 }
 
-export default function ArkanoidEngine({ 
-  onGameEnd, 
-  onScoreUpdate, 
-  gameConfig, 
-  onShowIntro 
+export default function ArkanoidEngine({
+  onGameEnd,
+  onScoreUpdate,
+  gameConfig,
+  onShowIntro,
+  adminTest = false
 }: ArkanoidEngineProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
