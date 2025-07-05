@@ -53,7 +53,7 @@ export default function FruitNinjaEngine({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
   const gameStartTime = useRef<number>(0);
-  const gameScorer = useRef(new GameScorer());
+  const [gameScorer] = useState(() => new GameScorer());
   const lastSpawnTime = useRef<number>(0);
   const nextFruitId = useRef<number>(1);
   
@@ -183,7 +183,7 @@ export default function FruitNinjaEngine({
             const newScore = score + fruit.points + (combo * 5);
             setScore(newScore);
             onScoreUpdate(newScore);
-            gameScorer.current.addScore(fruit.points + (combo * 5));
+            gameScorer.addScore(fruit.points + (combo * 5));
             setCombo(prev => prev + 1);
           }
           
@@ -407,7 +407,7 @@ export default function FruitNinjaEngine({
 
   // Start game
   const startGame = useCallback(() => {
-    gameScorer.current.reset();
+    gameScorer.reset();
     setIsRunning(true);
     setScore(0);
     setLives(3);

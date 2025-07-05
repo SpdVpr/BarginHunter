@@ -59,7 +59,7 @@ export default function ArkanoidEngine({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
   const gameStartTime = useRef<number>(0);
-  const gameScorer = useRef(new GameScorer());
+  const [gameScorer] = useState(() => new GameScorer());
   
   const [isRunning, setIsRunning] = useState(false);
   const [score, setScore] = useState(0);
@@ -274,7 +274,7 @@ export default function ArkanoidEngine({
             const newScore = score + brick.points;
             setScore(newScore);
             onScoreUpdate(newScore);
-            gameScorer.current.addScore(brick.points);
+            gameScorer.addScore(brick.points);
           }
         });
         
@@ -336,7 +336,7 @@ export default function ArkanoidEngine({
 
   // Start game
   const startGame = useCallback(() => {
-    gameScorer.current.reset();
+    gameScorer.reset();
     setIsRunning(true);
     setScore(0);
     setLives(3);
