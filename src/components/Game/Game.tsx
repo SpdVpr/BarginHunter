@@ -14,6 +14,7 @@ interface GameProps {
   onGameComplete: (result: GameResult) => void;
   onClose: () => void;
   gameConfig?: any; // Optional: if provided, skip API loading
+  adminMode?: boolean; // Optional: for admin testing with constrained size
 }
 
 interface GameResult {
@@ -39,7 +40,7 @@ const DEFAULT_DISCOUNT_TIERS = [
   { minScore: 1000, discount: 25, message: "LEGENDARY HUNTER! 🏆" }
 ];
 
-export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: providedGameConfig }: GameProps) {
+export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: providedGameConfig, adminMode = false }: GameProps) {
   const [gameState, setGameState] = useState<'loading' | 'intro' | 'playing' | 'gameOver'>('loading');
   const [gameConfig, setGameConfig] = useState<any>(null);
   const [gameResult, setGameResult] = useState<GameResult | null>(null);
@@ -376,23 +377,38 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
     );
   }
 
+  const containerStyle = adminMode ? {
+    padding: 0,
+    margin: 0,
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    width: '600px',
+    height: '450px',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    position: 'relative' as const,
+    overflow: 'hidden',
+    boxSizing: 'border-box' as const
+  } : {
+    padding: 0,
+    margin: 0,
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    width: '100vw',
+    height: '100vh',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    position: 'fixed' as const,
+    top: 0,
+    left: 0,
+    overflow: 'hidden',
+    boxSizing: 'border-box' as const
+  };
+
   return (
-    <div style={{
-      padding: 0,
-      margin: 0,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      width: '100vw',
-      height: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      overflow: 'hidden',
-      boxSizing: 'border-box'
-    }}>
+    <div style={containerStyle}>
       {/* Score display removed - EnhancedGameEngine draws its own score */}
 
       {gameConfig.gameType === 'flappy_bird' ? (

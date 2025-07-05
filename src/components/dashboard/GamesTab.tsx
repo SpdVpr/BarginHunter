@@ -110,11 +110,11 @@ export function GamesTab({ shop }: GamesTabProps) {
   const loadSettings = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/dashboard/settings?shop=${shop}`);
+      const response = await fetch(`/api/game/config/${shop}`);
       const data = await response.json();
 
-      if (data.success && data.settings.gameSettings) {
-        setGameSettings(data.settings.gameSettings);
+      if (data.success && data.gameSettings) {
+        setGameSettings(data.gameSettings);
       } else {
         // Set default game settings if none exist
         setGameSettings({
@@ -165,19 +165,36 @@ export function GamesTab({ shop }: GamesTabProps) {
       setSaving(true);
 
       // First load current settings to preserve other settings
-      const currentResponse = await fetch(`/api/dashboard/settings?shop=${shop}`);
+      const currentResponse = await fetch(`/api/game/config/${shop}`);
       const currentData = await currentResponse.json();
 
-      const response = await fetch(`/api/dashboard/settings?shop=${shop}`, {
+      const response = await fetch(`/api/dashboard/settings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          shop: shop,
           gameSettings,
           // Preserve existing settings
-          widgetSettings: currentData.success ? currentData.settings.widgetSettings : {},
-          targetingSettings: currentData.success ? currentData.settings.targetingSettings : {}
+          widgetSettings: currentData.success ? currentData.widgetSettings : {
+            displayMode: 'popup',
+            triggerEvent: 'immediate',
+            position: 'center',
+            showOn: 'all_pages',
+            userPercentage: 100,
+            testMode: false
+          },
+          appearance: currentData.success ? currentData.appearance : {
+            primaryColor: '#667eea',
+            secondaryColor: '#764ba2',
+            backgroundTheme: 'default'
+          },
+          businessRules: currentData.success ? currentData.businessRules : {
+            excludeDiscountedProducts: false,
+            allowStackingDiscounts: false,
+            discountExpiryHours: 24
+          }
         }),
       });
 
@@ -412,6 +429,7 @@ export function GamesTab({ shop }: GamesTabProps) {
                 onGameComplete={handleGameComplete}
                 onClose={closeGameModal}
                 gameConfig={testGameConfig}
+                adminMode={true}
               />
             </div>
           </Modal.Section>
