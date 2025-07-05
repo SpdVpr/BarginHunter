@@ -72,8 +72,14 @@ export class GameScorer {
     this.obstaclesClearedCount++;
     const basePoints = UNIVERSAL_SCORING.bonusPointsPerObstacle;
     const difficultyBonus = basePoints * (this.currentDifficultyLevel * 0.2);
-    
+
     this.currentScore += Math.floor(basePoints + difficultyBonus);
+    return this.currentScore;
+  }
+
+  // Add custom points (for new games like Arkanoid, Fruit Ninja)
+  addScore(points: number): number {
+    this.currentScore += points;
     return this.currentScore;
   }
 
