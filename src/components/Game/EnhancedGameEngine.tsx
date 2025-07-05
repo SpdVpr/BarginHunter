@@ -18,25 +18,39 @@ interface EnhancedGameEngineProps {
   onScoreUpdate: (score: number) => void;
   gameConfig: GameConfig;
   onShowIntro: () => void;
+  adminTest?: boolean;
 }
 
-// Fullscreen game canvas that fills entire iframe space
-const getCanvasSize = () => {
-  // Use full viewport dimensions to eliminate white space
-  const width = window.innerWidth;
-  let height = window.innerHeight;
+// Game canvas that adapts to context (iframe or fullscreen)
+const getCanvasSize = (adminTest = false) => {
+  if (adminTest) {
+    // Use iframe dimensions for admin testing
+    const isMobile = window.innerWidth < 768;
+    const width = isMobile ? 370 : 540;
+    const height = isMobile ? 600 : 700;
 
-  // Reduce height by 20% on mobile devices for better usability
-  const isMobile = width <= 768;
-  if (isMobile) {
-    height = height * 0.8; // 20% reduction
+    return {
+      width: width,
+      height: height,
+      groundY: height * 0.85,
+    };
+  } else {
+    // Use full viewport dimensions for normal widget
+    const width = window.innerWidth;
+    let height = window.innerHeight;
+
+    // Reduce height by 20% on mobile devices for better usability
+    const isMobile = width <= 768;
+    if (isMobile) {
+      height = height * 0.8; // 20% reduction
+    }
+
+    return {
+      width: width,
+      height: height,
+      groundY: height * 0.85, // Ground at 85% of height - lower for better positioning
+    };
   }
-
-  return {
-    width: width,
-    height: height,
-    groundY: height * 0.85, // Ground at 85% of height - lower for better positioning
-  };
 };
 
 // Chrome Dino physics
@@ -91,7 +105,8 @@ export default function EnhancedGameEngine({
   onGameEnd,
   onScoreUpdate,
   gameConfig,
-  onShowIntro
+  onShowIntro,
+  adminTest = false
 }: EnhancedGameEngineProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
@@ -101,7 +116,7 @@ export default function EnhancedGameEngine({
   const [score, setScore] = useState(0);
   const [difficultyLevel, setDifficultyLevel] = useState(0);
   const [lastObstacleSpawn, setLastObstacleSpawn] = useState(0);
-  const [canvasSize, setCanvasSize] = useState(getCanvasSize());
+  const [canvasSize, setCanvasSize] = useState(getCanvasSize(adminTest));
   const [gameScorer] = useState(() => new GameScorer());
   
   const [player, setPlayer] = useState<Player>({
@@ -116,7 +131,7 @@ export default function EnhancedGameEngine({
   // Handle window resize
   useEffect(() => {
     const handleResize = () => {
-      const newSize = getCanvasSize();
+      const newSize = getCanvasSize(adminTest);
       setCanvasSize(newSize);
 
       // Update player position proportionally

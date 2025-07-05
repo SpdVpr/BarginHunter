@@ -18,24 +18,34 @@ interface SnakeEngineProps {
   onScoreUpdate: (score: number) => void;
   gameConfig: GameConfig;
   onShowIntro: () => void;
+  adminTest?: boolean;
 }
 
-// Fullscreen game canvas that fills entire iframe space
-const getCanvasSize = () => {
-  // Use full viewport dimensions to eliminate white space
-  const width = window.innerWidth;
-  let height = window.innerHeight;
+// Game canvas that adapts to context (iframe or fullscreen)
+const getCanvasSize = (adminTest = false) => {
+  if (adminTest) {
+    // Use iframe dimensions for admin testing
+    const isMobile = window.innerWidth < 768;
+    return {
+      width: isMobile ? 370 : 540,
+      height: isMobile ? 600 : 700,
+    };
+  } else {
+    // Use full viewport dimensions for normal widget
+    const width = window.innerWidth;
+    let height = window.innerHeight;
 
-  // Reduce height by 20% on mobile devices for better usability
-  const isMobile = width <= 768;
-  if (isMobile) {
-    height = height * 0.8; // 20% reduction
+    // Reduce height by 20% on mobile devices for better usability
+    const isMobile = width <= 768;
+    if (isMobile) {
+      height = height * 0.8; // 20% reduction
+    }
+
+    return {
+      width: width,
+      height: height,
+    };
   }
-
-  return {
-    width: width,
-    height: height,
-  };
 };
 
 // Snake game constants - smaller grid for more manageable gameplay

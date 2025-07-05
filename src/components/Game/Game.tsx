@@ -14,6 +14,7 @@ interface GameProps {
   onGameComplete: (result: GameResult) => void;
   onClose: () => void;
   gameConfig?: any; // Optional: if provided, skip API loading
+  adminTest?: boolean; // Optional: for admin testing with iframe dimensions
 }
 
 interface GameResult {
@@ -39,7 +40,7 @@ const DEFAULT_DISCOUNT_TIERS = [
   { minScore: 1000, discount: 25, message: "LEGENDARY HUNTER! 🏆" }
 ];
 
-export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: providedGameConfig }: GameProps) {
+export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: providedGameConfig, adminTest = false }: GameProps) {
   const [gameState, setGameState] = useState<'loading' | 'intro' | 'playing' | 'gameOver'>('loading');
   const [gameConfig, setGameConfig] = useState<any>(null);
   const [gameResult, setGameResult] = useState<GameResult | null>(null);
@@ -376,24 +377,55 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
     );
   }
 
+  // Calculate container style based on admin test mode
+  const getContainerStyle = () => {
+    if (adminTest) {
+      // Use iframe dimensions for admin testing
+      const isMobile = window.innerWidth < 768;
+      return {
+        padding: 0,
+        margin: 0,
+        display: 'flex',
+        flexDirection: 'column' as const,
+        alignItems: 'center' as const,
+        justifyContent: 'center' as const,
+        width: isMobile ? '370px' : '540px',
+        height: isMobile ? '600px' : '700px',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        position: 'fixed' as const,
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        overflow: 'hidden',
+        boxSizing: 'border-box' as const,
+        zIndex: 9999,
+        borderRadius: '12px',
+        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
+      };
+    } else {
+      // Fullscreen for normal widget
+      return {
+        padding: 0,
+        margin: 0,
+        display: 'flex',
+        flexDirection: 'column' as const,
+        alignItems: 'center' as const,
+        justifyContent: 'center' as const,
+        width: '100vw',
+        height: '100vh',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        position: 'fixed' as const,
+        top: 0,
+        left: 0,
+        overflow: 'hidden',
+        boxSizing: 'border-box' as const,
+        zIndex: 9999
+      };
+    }
+  };
+
   return (
-    <div style={{
-      padding: 0,
-      margin: 0,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      width: '100vw',
-      height: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      overflow: 'hidden',
-      boxSizing: 'border-box',
-      zIndex: 9999 // Ensure it's on top in admin
-    }}>
+    <div style={getContainerStyle()}>
       {/* Score display removed - EnhancedGameEngine draws its own score */}
 
       {gameConfig.gameType === 'flappy_bird' ? (
@@ -402,6 +434,7 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
           onScoreUpdate={setCurrentScore}
           gameConfig={gameConfig}
           onShowIntro={() => setGameState('intro')}
+          adminTest={adminTest}
         />
       ) : gameConfig.gameType === 'tetris' ? (
         <TetrisEngine
@@ -409,6 +442,7 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
           onScoreUpdate={setCurrentScore}
           gameConfig={gameConfig}
           onShowIntro={() => setGameState('intro')}
+          adminTest={adminTest}
         />
       ) : gameConfig.gameType === 'snake' ? (
         <SnakeEngine
@@ -416,6 +450,7 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
           onScoreUpdate={setCurrentScore}
           gameConfig={gameConfig}
           onShowIntro={() => setGameState('intro')}
+          adminTest={adminTest}
         />
       ) : gameConfig.gameType === 'space_invaders' ? (
         <SpaceInvadersEngine
@@ -423,6 +458,7 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
           onScoreUpdate={setCurrentScore}
           gameConfig={gameConfig}
           onShowIntro={() => setGameState('intro')}
+          adminTest={adminTest}
         />
       ) : gameConfig.gameType === 'arkanoid' ? (
         <ArkanoidEngine
@@ -430,6 +466,7 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
           onScoreUpdate={setCurrentScore}
           gameConfig={gameConfig}
           onShowIntro={() => setGameState('intro')}
+          adminTest={adminTest}
         />
       ) : gameConfig.gameType === 'fruit_ninja' ? (
         <FruitNinjaEngine
@@ -437,6 +474,7 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
           onScoreUpdate={setCurrentScore}
           gameConfig={gameConfig}
           onShowIntro={() => setGameState('intro')}
+          adminTest={adminTest}
         />
       ) : (
         <EnhancedGameEngine
@@ -444,6 +482,7 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
           onScoreUpdate={setCurrentScore}
           gameConfig={gameConfig}
           onShowIntro={() => setGameState('intro')}
+          adminTest={adminTest}
         />
       )}
     </div>

@@ -405,13 +405,14 @@ export function GamesTab({ shop }: GamesTabProps) {
         </Card>
       </Layout.Section>
 
-      {/* Game Test Fullscreen Popup - Same as frontend */}
+      {/* Game Test Popup - Same dimensions as frontend iframe */}
       {showGameModal && testGameConfig && (
         <Game
           shopDomain={shop}
           onGameComplete={handleGameComplete}
           onClose={closeGameModal}
           gameConfig={testGameConfig}
+          adminTest={true}
         />
       )}
     </Layout>
