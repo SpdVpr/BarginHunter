@@ -431,10 +431,23 @@ export default function FlappyBirdEngine({
         ref={canvasRef}
         width={canvasSize.width}
         height={canvasSize.height}
-        style={{
+        style={adminTest ? {
           display: 'block',
           cursor: 'pointer',
-          background: '#87CEEB',
+          background: '#000',
+          margin: 0,
+          padding: 0,
+          border: 'none',
+          borderRadius: 0,
+          boxShadow: 'none',
+          width: `${canvasSize.width}px`,
+          height: `${canvasSize.height}px`,
+          position: 'relative',
+          zIndex: 1
+        } : {
+          display: 'block',
+          cursor: 'pointer',
+          background: '#000',
           margin: 0,
           padding: 0,
           border: 'none',

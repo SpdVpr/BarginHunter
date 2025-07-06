@@ -54,7 +54,8 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
       // If gameConfig is provided as prop, use it directly (for admin testing)
       if (providedGameConfig) {
         setGameConfig(providedGameConfig);
-        setGameState('intro');
+        // Skip intro for admin testing, go directly to game
+        setGameState(adminTest ? 'playing' : 'intro');
         return;
       }
 

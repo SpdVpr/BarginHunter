@@ -598,7 +598,21 @@ export default function SpaceInvadersEngine({
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        style={{
+        style={adminTest ? {
+          display: 'block',
+          backgroundColor: '#000',
+          cursor: 'pointer',
+          touchAction: 'none',
+          margin: 0,
+          padding: 0,
+          border: 'none',
+          borderRadius: 0,
+          boxShadow: 'none',
+          width: `${canvasSize.width}px`,
+          height: `${canvasSize.height}px`,
+          position: 'relative',
+          zIndex: 1
+        } : {
           display: 'block',
           backgroundColor: '#000',
           cursor: 'pointer',
