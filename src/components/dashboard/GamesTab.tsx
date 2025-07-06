@@ -53,7 +53,9 @@ const AVAILABLE_GAMES = [
     controls: 'Spacebar/Click to Jump',
     category: 'Arcade',
     defaultScoreRanges: [
+      { minScore: 25, discount: 3, message: 'First steps! 🦕' },
       { minScore: 50, discount: 5, message: 'Good start! 🎯' },
+      { minScore: 100, discount: 8, message: 'Getting better! 🏃' },
       { minScore: 150, discount: 10, message: 'Nice jumping! 🦕' },
       { minScore: 300, discount: 15, message: 'Dino master! 🏆' }
     ]
@@ -66,9 +68,11 @@ const AVAILABLE_GAMES = [
     controls: 'Spacebar/Click to Flap',
     category: 'Arcade',
     defaultScoreRanges: [
-      { minScore: 3, discount: 5, message: 'First flight! 🐦' },
-      { minScore: 10, discount: 10, message: 'Flying high! ✈️' },
-      { minScore: 20, discount: 15, message: 'Bird master! 🏆' }
+      { minScore: 1, discount: 3, message: 'First flight! 🐦' },
+      { minScore: 3, discount: 5, message: 'Learning to fly! 🪶' },
+      { minScore: 7, discount: 8, message: 'Steady flight! ✈️' },
+      { minScore: 15, discount: 12, message: 'Flying high! 🚁' },
+      { minScore: 25, discount: 15, message: 'Bird master! 🏆' }
     ]
   },
   {
@@ -79,9 +83,11 @@ const AVAILABLE_GAMES = [
     controls: 'Arrow Keys/Touch',
     category: 'Puzzle',
     defaultScoreRanges: [
-      { minScore: 500, discount: 5, message: 'Line clearer! 🧩' },
-      { minScore: 1500, discount: 10, message: 'Block master! 🎯' },
-      { minScore: 3000, discount: 15, message: 'Tetris legend! 🏆' }
+      { minScore: 200, discount: 3, message: 'First lines! 🧩' },
+      { minScore: 500, discount: 5, message: 'Line clearer! 📏' },
+      { minScore: 1000, discount: 8, message: 'Block stacker! 🎯' },
+      { minScore: 2000, discount: 12, message: 'Tetris pro! 🎮' },
+      { minScore: 4000, discount: 15, message: 'Tetris legend! 🏆' }
     ]
   },
   {
@@ -92,9 +98,11 @@ const AVAILABLE_GAMES = [
     controls: 'Arrow Keys/Swipe',
     category: 'Arcade',
     defaultScoreRanges: [
-      { minScore: 5, discount: 5, message: 'Growing snake! 🐍' },
-      { minScore: 15, discount: 10, message: 'Long snake! 📏' },
-      { minScore: 30, discount: 15, message: 'Snake champion! 🏆' }
+      { minScore: 3, discount: 3, message: 'Baby snake! 🐍' },
+      { minScore: 8, discount: 5, message: 'Growing snake! 🐛' },
+      { minScore: 15, discount: 8, message: 'Long snake! 📏' },
+      { minScore: 25, discount: 12, message: 'Giant snake! 🐲' },
+      { minScore: 40, discount: 15, message: 'Snake champion! 🏆' }
     ]
   },
   {
@@ -105,9 +113,11 @@ const AVAILABLE_GAMES = [
     controls: 'Arrow Keys + Spacebar/Touch',
     category: 'Arcade',
     defaultScoreRanges: [
-      { minScore: 200, discount: 5, message: 'Space defender! 🚀' },
-      { minScore: 800, discount: 10, message: 'Alien hunter! 👽' },
-      { minScore: 1500, discount: 15, message: 'Galaxy hero! 🏆' }
+      { minScore: 100, discount: 3, message: 'Space cadet! 🚀' },
+      { minScore: 300, discount: 5, message: 'Space defender! 🛡️' },
+      { minScore: 600, discount: 8, message: 'Alien hunter! 👽' },
+      { minScore: 1200, discount: 12, message: 'Space commander! 🎖️' },
+      { minScore: 2000, discount: 15, message: 'Galaxy hero! 🏆' }
     ]
   },
   {
@@ -118,9 +128,11 @@ const AVAILABLE_GAMES = [
     controls: 'Mouse/Touch to Move Paddle',
     category: 'Arcade',
     defaultScoreRanges: [
-      { minScore: 300, discount: 5, message: 'Brick breaker! 🎯' },
-      { minScore: 1000, discount: 10, message: 'Paddle master! 🏓' },
-      { minScore: 2500, discount: 15, message: 'Arkanoid legend! 🏆' }
+      { minScore: 150, discount: 3, message: 'First bricks! 🧱' },
+      { minScore: 400, discount: 5, message: 'Brick breaker! 🎯' },
+      { minScore: 800, discount: 8, message: 'Paddle pro! 🏓' },
+      { minScore: 1500, discount: 12, message: 'Block destroyer! 💥' },
+      { minScore: 3000, discount: 15, message: 'Arkanoid legend! 🏆' }
     ]
   },
   {
@@ -131,9 +143,11 @@ const AVAILABLE_GAMES = [
     controls: 'Mouse/Touch to Slice',
     category: 'Action',
     defaultScoreRanges: [
-      { minScore: 50, discount: 5, message: 'Fruit slicer! 🍎' },
-      { minScore: 150, discount: 10, message: 'Ninja skills! 🥷' },
-      { minScore: 300, discount: 15, message: 'Fruit master! 🏆' }
+      { minScore: 25, discount: 3, message: 'Fruit apprentice! 🍎' },
+      { minScore: 60, discount: 5, message: 'Fruit slicer! 🔪' },
+      { minScore: 120, discount: 8, message: 'Ninja skills! 🥷' },
+      { minScore: 200, discount: 12, message: 'Slice master! ⚔️' },
+      { minScore: 350, discount: 15, message: 'Fruit legend! 🏆' }
     ]
   }
 ];
@@ -273,16 +287,17 @@ export function GamesTab({ shop }: GamesTabProps) {
   };
 
   const testGame = (gameType: string) => {
+    // Get game-specific settings from admin panel or use defaults
+    const gameSpecificTiers = gameSettings?.gameSpecificSettings?.[gameType]?.discountTiers;
+    const defaultTiers = AVAILABLE_GAMES.find(g => g.id === gameType)?.defaultScoreRanges || [];
+    const discountTiers = gameSpecificTiers || defaultTiers;
+
     const gameConfig = {
       gameType,
-      discountTiers: [
-        { minScore: 100, discount: 5, message: "Great job! 5% off!" },
-        { minScore: 500, discount: 10, message: "Awesome! 10% off!" },
-        { minScore: 1000, discount: 15, message: "Amazing! 15% off!" }
-      ],
+      discountTiers: discountTiers,
       maxAttempts: 999,
-      minDiscount: 5,
-      maxDiscount: 15,
+      minDiscount: Math.min(...discountTiers.map(t => t.discount)),
+      maxDiscount: Math.max(...discountTiers.map(t => t.discount)),
       testMode: true
     };
 

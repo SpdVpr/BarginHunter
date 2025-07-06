@@ -187,6 +187,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ];
     }
 
+    // Ensure game-specific settings are properly formatted
+    if (!gameSettings.gameSpecificSettings || typeof gameSettings.gameSpecificSettings !== 'object') {
+      gameSettings.gameSpecificSettings = {};
+    }
+
     // Update or create game configuration
     console.log('🔧 Settings API: Updating Firebase configuration...');
     console.log('🔧 Game settings received:', JSON.stringify(gameSettings, null, 2));
@@ -205,6 +210,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         gameSpeed: Math.max(0.1, Math.min(3, gameSettings.gameSpeed)),
         difficulty: gameSettings.difficulty,
         testMode: gameSettings.testMode ?? false, // Moved from widget settings
+        gameSpecificSettings: gameSettings.gameSpecificSettings || {}, // Add game-specific settings
       },
       widgetSettings: {
         displayMode: widgetSettings.displayMode,

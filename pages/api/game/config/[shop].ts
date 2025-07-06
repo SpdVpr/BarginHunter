@@ -124,12 +124,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Always return config - let the widget decide based on isEnabled
     // This allows admin panel to always load settings
 
+    // Get game-specific discount tiers if available
+    const currentGameType = shopConfig.gameSettings?.gameType || 'dino';
+    let discountTiers = shopConfig.gameSettings?.discountTiers || defaultConfig.gameSettings.discountTiers;
+
+    // Check if there are game-specific settings
+    if (shopConfig.gameSettings?.gameSpecificSettings?.[currentGameType]?.discountTiers) {
+      discountTiers = shopConfig.gameSettings.gameSpecificSettings[currentGameType].discountTiers;
+    }
+
     // Return the configuration
     res.status(200).json({
       success: true,
       gameSettings: {
         ...shopConfig.gameSettings,
         isEnabled: shopConfig.isEnabled, // Add isEnabled to gameSettings
+        discountTiers: discountTiers, // Use game-specific discount tiers
       },
       widgetSettings: shopConfig.widgetSettings,
       appearance: shopConfig.appearance,
