@@ -436,6 +436,7 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
           gameConfig={gameConfig}
           onShowIntro={() => setGameState('intro')}
           adminTest={adminTest}
+          onClose={adminTest ? onClose : undefined}
         />
       ) : gameConfig.gameType === 'tetris' ? (
         <TetrisEngine
@@ -444,6 +445,7 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
           gameConfig={gameConfig}
           onShowIntro={() => setGameState('intro')}
           adminTest={adminTest}
+          onClose={adminTest ? onClose : undefined}
         />
       ) : gameConfig.gameType === 'snake' ? (
         <SnakeEngine
@@ -452,6 +454,7 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
           gameConfig={gameConfig}
           onShowIntro={() => setGameState('intro')}
           adminTest={adminTest}
+          onClose={adminTest ? onClose : undefined}
         />
       ) : gameConfig.gameType === 'space_invaders' ? (
         <SpaceInvadersEngine
@@ -460,6 +463,7 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
           gameConfig={gameConfig}
           onShowIntro={() => setGameState('intro')}
           adminTest={adminTest}
+          onClose={adminTest ? onClose : undefined}
         />
       ) : gameConfig.gameType === 'arkanoid' ? (
         <ArkanoidEngine
@@ -468,6 +472,7 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
           gameConfig={gameConfig}
           onShowIntro={() => setGameState('intro')}
           adminTest={adminTest}
+          onClose={adminTest ? onClose : undefined}
         />
       ) : gameConfig.gameType === 'fruit_ninja' ? (
         <FruitNinjaEngine
@@ -476,6 +481,7 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
           gameConfig={gameConfig}
           onShowIntro={() => setGameState('intro')}
           adminTest={adminTest}
+          onClose={adminTest ? onClose : undefined}
         />
       ) : (
         <EnhancedGameEngine
@@ -484,6 +490,7 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
           gameConfig={gameConfig}
           onShowIntro={() => setGameState('intro')}
           adminTest={adminTest}
+          onClose={adminTest ? onClose : undefined}
         />
       )}
     </div>

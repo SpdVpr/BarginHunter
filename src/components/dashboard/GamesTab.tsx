@@ -32,6 +32,16 @@ interface GameSettings {
     discount: number;
     message: string;
   }>;
+  // Game-specific score ranges
+  gameSpecificSettings?: {
+    [gameId: string]: {
+      discountTiers: Array<{
+        minScore: number;
+        discount: number;
+        message: string;
+      }>;
+    };
+  };
 }
 
 const AVAILABLE_GAMES = [
@@ -41,7 +51,12 @@ const AVAILABLE_GAMES = [
     description: 'Classic endless runner inspired by Chrome\'s offline game. Jump over obstacles to score points.',
     difficulty: 'Medium',
     controls: 'Spacebar/Click to Jump',
-    category: 'Arcade'
+    category: 'Arcade',
+    defaultScoreRanges: [
+      { minScore: 50, discount: 5, message: 'Good start! 🎯' },
+      { minScore: 150, discount: 10, message: 'Nice jumping! 🦕' },
+      { minScore: 300, discount: 15, message: 'Dino master! 🏆' }
+    ]
   },
   {
     id: 'flappy_bird',
@@ -49,7 +64,12 @@ const AVAILABLE_GAMES = [
     description: 'Navigate through pipes by tapping to flap. Timing is everything!',
     difficulty: 'Hard',
     controls: 'Spacebar/Click to Flap',
-    category: 'Arcade'
+    category: 'Arcade',
+    defaultScoreRanges: [
+      { minScore: 3, discount: 5, message: 'First flight! 🐦' },
+      { minScore: 10, discount: 10, message: 'Flying high! ✈️' },
+      { minScore: 20, discount: 15, message: 'Bird master! 🏆' }
+    ]
   },
   {
     id: 'tetris',
@@ -57,7 +77,12 @@ const AVAILABLE_GAMES = [
     description: 'Classic block-stacking puzzle game. Clear lines to score points.',
     difficulty: 'Medium',
     controls: 'Arrow Keys/Touch',
-    category: 'Puzzle'
+    category: 'Puzzle',
+    defaultScoreRanges: [
+      { minScore: 500, discount: 5, message: 'Line clearer! 🧩' },
+      { minScore: 1500, discount: 10, message: 'Block master! 🎯' },
+      { minScore: 3000, discount: 15, message: 'Tetris legend! 🏆' }
+    ]
   },
   {
     id: 'snake',
@@ -65,7 +90,12 @@ const AVAILABLE_GAMES = [
     description: 'Grow your snake by eating food, avoid walls and yourself.',
     difficulty: 'Easy',
     controls: 'Arrow Keys/Swipe',
-    category: 'Arcade'
+    category: 'Arcade',
+    defaultScoreRanges: [
+      { minScore: 5, discount: 5, message: 'Growing snake! 🐍' },
+      { minScore: 15, discount: 10, message: 'Long snake! 📏' },
+      { minScore: 30, discount: 15, message: 'Snake champion! 🏆' }
+    ]
   },
   {
     id: 'space_invaders',
@@ -73,7 +103,12 @@ const AVAILABLE_GAMES = [
     description: 'Defend Earth from alien invasion. Shoot enemies to score points.',
     difficulty: 'Medium',
     controls: 'Arrow Keys + Spacebar/Touch',
-    category: 'Arcade'
+    category: 'Arcade',
+    defaultScoreRanges: [
+      { minScore: 200, discount: 5, message: 'Space defender! 🚀' },
+      { minScore: 800, discount: 10, message: 'Alien hunter! 👽' },
+      { minScore: 1500, discount: 15, message: 'Galaxy hero! 🏆' }
+    ]
   },
   {
     id: 'arkanoid',
@@ -81,7 +116,12 @@ const AVAILABLE_GAMES = [
     description: 'Break all bricks with your paddle and ball. Classic brick breaker game.',
     difficulty: 'Medium',
     controls: 'Mouse/Touch to Move Paddle',
-    category: 'Arcade'
+    category: 'Arcade',
+    defaultScoreRanges: [
+      { minScore: 300, discount: 5, message: 'Brick breaker! 🎯' },
+      { minScore: 1000, discount: 10, message: 'Paddle master! 🏓' },
+      { minScore: 2500, discount: 15, message: 'Arkanoid legend! 🏆' }
+    ]
   },
   {
     id: 'fruit_ninja',
@@ -89,7 +129,12 @@ const AVAILABLE_GAMES = [
     description: 'Slice fruits with your finger, avoid bombs. Fast-paced action game.',
     difficulty: 'Easy',
     controls: 'Mouse/Touch to Slice',
-    category: 'Action'
+    category: 'Action',
+    defaultScoreRanges: [
+      { minScore: 50, discount: 5, message: 'Fruit slicer! 🍎' },
+      { minScore: 150, discount: 10, message: 'Ninja skills! 🥷' },
+      { minScore: 300, discount: 15, message: 'Fruit master! 🏆' }
+    ]
   }
 ];
 
@@ -115,6 +160,13 @@ export function GamesTab({ shop }: GamesTabProps) {
         setGameSettings(data.gameSettings);
       } else {
         // Set default game settings if none exist
+        const defaultGameSpecificSettings: { [key: string]: { discountTiers: any[] } } = {};
+        AVAILABLE_GAMES.forEach(game => {
+          defaultGameSpecificSettings[game.id] = {
+            discountTiers: game.defaultScoreRanges
+          };
+        });
+
         setGameSettings({
           isEnabled: true,
           gameType: 'dino',
@@ -129,12 +181,20 @@ export function GamesTab({ shop }: GamesTabProps) {
             { minScore: 100, discount: 5, message: 'Great job! You earned 5% off!' },
             { minScore: 300, discount: 10, message: 'Amazing! You earned 10% off!' },
             { minScore: 500, discount: 15, message: 'Excellent! You earned 15% off!' }
-          ]
+          ],
+          gameSpecificSettings: defaultGameSpecificSettings
         });
       }
     } catch (error) {
       console.error('Error loading settings:', error);
       // Set default settings on error
+      const defaultGameSpecificSettings: { [key: string]: { discountTiers: any[] } } = {};
+      AVAILABLE_GAMES.forEach(game => {
+        defaultGameSpecificSettings[game.id] = {
+          discountTiers: game.defaultScoreRanges
+        };
+      });
+
       setGameSettings({
         isEnabled: true,
         gameType: 'dino',
@@ -149,7 +209,8 @@ export function GamesTab({ shop }: GamesTabProps) {
           { minScore: 100, discount: 5, message: 'Great job! You earned 5% off!' },
           { minScore: 300, discount: 10, message: 'Amazing! You earned 10% off!' },
           { minScore: 500, discount: 15, message: 'Excellent! You earned 15% off!' }
-        ]
+        ],
+        gameSpecificSettings: defaultGameSpecificSettings
       });
     } finally {
       setLoading(false);
@@ -234,6 +295,32 @@ export function GamesTab({ shop }: GamesTabProps) {
     setShowGameModal(false);
     setSelectedGameForTest('');
     setTestGameConfig(null);
+  };
+
+  const updateGameSpecificSettings = (gameId: string, tierIndex: number, field: 'minScore' | 'discount', value: number) => {
+    if (!gameSettings) return;
+
+    const currentGameSettings = gameSettings.gameSpecificSettings || {};
+    const currentGameTiers = currentGameSettings[gameId]?.discountTiers ||
+      AVAILABLE_GAMES.find(g => g.id === gameId)?.defaultScoreRanges || [];
+
+    const updatedTiers = [...currentGameTiers];
+    if (updatedTiers[tierIndex]) {
+      updatedTiers[tierIndex] = {
+        ...updatedTiers[tierIndex],
+        [field]: value
+      };
+    }
+
+    setGameSettings({
+      ...gameSettings,
+      gameSpecificSettings: {
+        ...currentGameSettings,
+        [gameId]: {
+          discountTiers: updatedTiers
+        }
+      }
+    });
   };
 
   const handleGameComplete = (result: any) => {
@@ -369,7 +456,45 @@ export function GamesTab({ shop }: GamesTabProps) {
                           <strong>Controls:</strong> {game.controls}
                         </Text>
                       </Stack>
-                      
+
+                      {/* Score Settings for this game */}
+                      <div style={{ marginTop: '1rem', padding: '1rem', background: '#f9f9f9', borderRadius: '8px' }}>
+                        <Text variant="headingXs" as="h5" style={{ marginBottom: '0.5rem' }}>
+                          Score & Discount Settings
+                        </Text>
+                        {game.defaultScoreRanges.map((range, index) => {
+                          const currentSettings = gameSettings?.gameSpecificSettings?.[game.id]?.discountTiers || game.defaultScoreRanges;
+                          const currentRange = currentSettings[index] || range;
+
+                          return (
+                            <div key={index} style={{ marginBottom: '0.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                              <input
+                                type="number"
+                                placeholder="Min Score"
+                                value={currentRange.minScore}
+                                onChange={(e) => {
+                                  const newScore = parseInt(e.target.value) || 0;
+                                  updateGameSpecificSettings(game.id, index, 'minScore', newScore);
+                                }}
+                                style={{ width: '80px', padding: '4px', fontSize: '12px' }}
+                              />
+                              <span style={{ fontSize: '12px' }}>pts =</span>
+                              <input
+                                type="number"
+                                placeholder="Discount %"
+                                value={currentRange.discount}
+                                onChange={(e) => {
+                                  const newDiscount = parseInt(e.target.value) || 0;
+                                  updateGameSpecificSettings(game.id, index, 'discount', newDiscount);
+                                }}
+                                style={{ width: '60px', padding: '4px', fontSize: '12px' }}
+                              />
+                              <span style={{ fontSize: '12px' }}>% off</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+
                       <div style={{ marginTop: '1rem' }}>
                         <Stack spacing="tight">
                           <Button

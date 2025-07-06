@@ -19,6 +19,7 @@ interface EnhancedGameEngineProps {
   gameConfig: GameConfig;
   onShowIntro: () => void;
   adminTest?: boolean;
+  onClose?: () => void;
 }
 
 // Game canvas that adapts to context (iframe or fullscreen)
@@ -106,7 +107,8 @@ export default function EnhancedGameEngine({
   onScoreUpdate,
   gameConfig,
   onShowIntro,
-  adminTest = false
+  adminTest = false,
+  onClose
 }: EnhancedGameEngineProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
@@ -790,6 +792,32 @@ export default function EnhancedGameEngine({
         }}
       />
       <TouchControlsHint gameType="dino" />
+
+      {/* Close button for admin testing */}
+      {adminTest && onClose && (
+        <button
+          onClick={onClose}
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            background: 'rgba(0, 0, 0, 0.7)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '50%',
+            width: '40px',
+            height: '40px',
+            fontSize: '20px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+          }}
+        >
+          ×
+        </button>
+      )}
     </>
   );
 }
