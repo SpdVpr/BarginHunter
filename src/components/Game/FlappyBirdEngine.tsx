@@ -472,23 +472,37 @@ export default function FlappyBirdEngine({
       {/* Close button for admin testing */}
       {adminTest && onClose && (
         <button
-          onClick={onClose}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🎮 Flappy Bird close button clicked!');
+            onClose();
+          }}
           style={{
             position: 'absolute',
-            top: '10px',
-            right: '10px',
-            background: 'rgba(0, 0, 0, 0.7)',
+            top: '20px',
+            right: '20px',
+            background: 'rgba(255,255,255,0.2)',
             color: 'white',
             border: 'none',
             borderRadius: '50%',
             width: '40px',
             height: '40px',
-            fontSize: '20px',
+            fontSize: '24px',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            transition: 'all 0.2s ease',
             zIndex: 1000
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.3)';
+            e.currentTarget.style.transform = 'scale(1.1)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
+            e.currentTarget.style.transform = 'scale(1)';
           }}
         >
           ×

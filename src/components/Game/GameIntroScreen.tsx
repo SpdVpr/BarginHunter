@@ -209,14 +209,19 @@ export default function GameIntroScreen({
 
       {/* Close button */}
       <button
-        onClick={onClose}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log('🎮 Intro close button clicked!');
+          onClose();
+        }}
         style={{
           position: 'absolute',
           top: '20px',
           right: '20px',
           background: 'rgba(255,255,255,0.2)',
           border: 'none',
-          color: introSettings.textColor,
+          color: 'white',
           fontSize: '24px',
           width: '40px',
           height: '40px',
@@ -225,14 +230,16 @@ export default function GameIntroScreen({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          transition: 'background 0.2s ease',
-          zIndex: 10
+          transition: 'all 0.2s ease',
+          zIndex: 1000
         }}
         onMouseOver={(e) => {
           e.currentTarget.style.background = 'rgba(255,255,255,0.3)';
+          e.currentTarget.style.transform = 'scale(1.1)';
         }}
         onMouseOut={(e) => {
           e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
+          e.currentTarget.style.transform = 'scale(1)';
         }}
       >
         ×
@@ -367,34 +374,7 @@ export default function GameIntroScreen({
           </button>
         )}
 
-        <button
-          onClick={onClose}
-          className="close-button"
-          style={{
-            background: 'rgba(255,255,255,0.2)',
-            color: introSettings.textColor,
-            border: '2px solid rgba(255,255,255,0.3)',
-            padding: '15px 30px',
-            borderRadius: '12px',
-            fontSize: 'clamp(16px, 4vw, 20px)',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            transition: 'background 0.2s ease, transform 0.2s ease',
-            flex: '1',
-            maxWidth: '150px',
-            textShadow: '1px 1px 2px rgba(0,0,0,0.2)'
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.background = 'rgba(255,255,255,0.3)';
-            e.currentTarget.style.transform = 'translateY(-2px)';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
-            e.currentTarget.style.transform = 'translateY(0)';
-          }}
-        >
-          {introSettings.showEmojis ? '❌ ' : ''}Close
-        </button>
+
       </div>
 
       {/* CSS animations */}
