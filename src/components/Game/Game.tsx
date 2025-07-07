@@ -47,6 +47,32 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
   const [currentScore, setCurrentScore] = useState(0);
   const [sessionId, setSessionId] = useState<string>('');
   const [attemptsUsed, setAttemptsUsed] = useState(0);
+  const [appearanceSettings, setAppearanceSettings] = useState<any>({
+    primaryColor: '#667eea',
+    secondaryColor: '#764ba2',
+    backgroundTheme: 'default'
+  });
+
+  // Load appearance settings immediately for loading screen
+  useEffect(() => {
+    const loadAppearanceSettings = async () => {
+      try {
+        const response = await fetch(`/api/game/config/${shopDomain}`);
+        if (response.ok) {
+          const config = await response.json();
+          if (config.appearance) {
+            setAppearanceSettings(config.appearance);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load appearance settings:', error);
+      }
+    };
+
+    if (shopDomain) {
+      loadAppearanceSettings();
+    }
+  }, [shopDomain]);
 
   // Load game configuration
   useEffect(() => {
@@ -352,7 +378,14 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
 
   if (gameState === 'loading') {
     return (
-      <div className="game-container">
+      <div style={{
+        ...getContainerStyle(),
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'white'
+      }}>
         <div className="loading-spinner"></div>
         <p style={{ textAlign: 'center', marginTop: '20px' }}>
           Loading Bargain Hunter...
@@ -396,13 +429,11 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
 
   // Calculate container style based on admin test mode and appearance settings
   const getContainerStyle = () => {
-    // Get background from appearance settings
+    // Get background from appearance settings with fallback
     const getBackground = () => {
-      if (!gameConfig?.appearance) {
-        return 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-      }
-
-      const { primaryColor, secondaryColor, backgroundTheme } = gameConfig.appearance;
+      // Use appearanceSettings which are loaded immediately, or gameConfig.appearance as fallback
+      const settings = gameConfig?.appearance || appearanceSettings;
+      const { primaryColor = '#667eea', secondaryColor = '#764ba2', backgroundTheme = 'default' } = settings;
 
       switch (backgroundTheme) {
         case 'dark':
