@@ -159,8 +159,12 @@ export default function GameOverScreen({
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Play limit Close button clicked!'); // Debug log
-                onClose();
+                console.log('🎮 Play limit Close button clicked!');
+                if (typeof onClose === 'function') {
+                  onClose();
+                } else {
+                  console.error('onClose is not a function:', onClose);
+                }
               }}
               onMouseDown={(e) => {
                 e.preventDefault();
@@ -180,7 +184,8 @@ export default function GameOverScreen({
                 cursor: 'pointer',
                 fontWeight: 'bold',
                 zIndex: 9999,
-                position: 'relative'
+                position: 'relative',
+                pointerEvents: 'auto'
               }}
             >
               Close
@@ -327,8 +332,12 @@ export default function GameOverScreen({
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              console.log('Close button clicked!'); // Debug log
-              onClose();
+              console.log('🎮 Game Over Close button clicked!');
+              if (typeof onClose === 'function') {
+                onClose();
+              } else {
+                console.error('onClose is not a function:', onClose);
+              }
             }}
             onMouseDown={(e) => {
               e.preventDefault();
@@ -349,7 +358,8 @@ export default function GameOverScreen({
               fontWeight: 'bold',
               transition: 'all 0.3s ease',
               zIndex: 9999,
-              position: 'relative'
+              position: 'relative',
+              pointerEvents: 'auto'
             }}
             onMouseOver={(e) => {
               e.currentTarget.style.background = 'white';

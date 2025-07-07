@@ -213,7 +213,11 @@ export default function GameIntroScreen({
           e.preventDefault();
           e.stopPropagation();
           console.log('🎮 Intro close button clicked!');
-          onClose();
+          if (typeof onClose === 'function') {
+            onClose();
+          } else {
+            console.error('onClose is not a function:', onClose);
+          }
         }}
         style={{
           position: 'absolute',
@@ -231,7 +235,8 @@ export default function GameIntroScreen({
           alignItems: 'center',
           justifyContent: 'center',
           transition: 'all 0.2s ease',
-          zIndex: 1000
+          zIndex: 1000,
+          pointerEvents: 'auto'
         }}
         onMouseOver={(e) => {
           e.currentTarget.style.background = 'rgba(255,255,255,0.3)';

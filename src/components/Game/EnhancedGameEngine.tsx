@@ -651,21 +651,30 @@ export default function EnhancedGameEngine({
       // Filter out off-screen obstacles
       const filtered = updated.filter(obstacle => obstacle.x > -100);
 
-      // Check collisions with precise hitbox (matching actual visual character size)
+      // Check collisions with reasonable hitbox
       filtered.forEach(obstacle => {
-        // Character visual size is ~15x30px (10x20 base * 1.5 scale), but hitbox is 60x60
-        // Reduce hitbox even more for ultra-precise collision detection
-        const hitboxPaddingX = 26; // Reduce width from 60px to ~8px (ultra-precise)
-        const hitboxPaddingY = 20; // Reduce height from 60px to ~20px (ultra-precise)
+        // Use reasonable hitbox - not too precise, not too loose
+        const hitboxPaddingX = 10; // Reduce width from 60px to 40px (reasonable)
+        const hitboxPaddingY = 10; // Reduce height from 60px to 40px (reasonable)
         const playerHitboxX = player.x + hitboxPaddingX;
         const playerHitboxY = player.y + hitboxPaddingY;
         const playerHitboxWidth = player.width - (hitboxPaddingX * 2);
         const playerHitboxHeight = player.height - (hitboxPaddingY * 2);
 
+        console.log('🔍 Collision check:', {
+          playerHitbox: { x: playerHitboxX, y: playerHitboxY, w: playerHitboxWidth, h: playerHitboxHeight },
+          obstacle: { x: obstacle.x, y: obstacle.y, w: obstacle.width, h: obstacle.height },
+          collision: (playerHitboxX < obstacle.x + obstacle.width &&
+                     playerHitboxX + playerHitboxWidth > obstacle.x &&
+                     playerHitboxY < obstacle.y + obstacle.height &&
+                     playerHitboxY + playerHitboxHeight > obstacle.y)
+        });
+
         if (playerHitboxX < obstacle.x + obstacle.width &&
             playerHitboxX + playerHitboxWidth > obstacle.x &&
             playerHitboxY < obstacle.y + obstacle.height &&
             playerHitboxY + playerHitboxHeight > obstacle.y) {
+          console.log('💥 COLLISION DETECTED!');
           setIsRunning(false);
           onGameEnd(gameScorer.getScore(), gameScorer.getGameStats());
         }
