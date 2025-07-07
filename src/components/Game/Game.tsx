@@ -53,6 +53,71 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
     backgroundTheme: 'default'
   });
 
+  // Calculate container style based on admin test mode and appearance settings
+  const getContainerStyle = () => {
+    // Get background from appearance settings with fallback
+    const getBackground = () => {
+      // Use appearanceSettings which are loaded immediately, or gameConfig.appearance as fallback
+      const settings = gameConfig?.appearance || appearanceSettings;
+      const { primaryColor = '#667eea', secondaryColor = '#764ba2', backgroundTheme = 'default' } = settings;
+
+      switch (backgroundTheme) {
+        case 'dark':
+          return 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)';
+        case 'light':
+          return 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)';
+        case 'custom':
+          return `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`;
+        default:
+          return `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`;
+      }
+    };
+
+    if (adminTest) {
+      // Use iframe dimensions for admin testing
+      const isMobile = window.innerWidth < 768;
+      return {
+        padding: 0,
+        margin: 0,
+        display: 'flex',
+        flexDirection: 'column' as const,
+        alignItems: 'center' as const,
+        justifyContent: 'center' as const,
+        width: isMobile ? '370px' : '540px',
+        height: isMobile ? '600px' : '700px',
+        background: getBackground(),
+        position: 'fixed' as const,
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        overflow: 'hidden',
+        boxSizing: 'border-box' as const,
+        zIndex: 9999,
+        borderRadius: '12px',
+        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
+      };
+    } else {
+      // Fullscreen for normal widget
+      return {
+        padding: 0,
+        margin: 0,
+        display: 'flex',
+        flexDirection: 'column' as const,
+        alignItems: 'center' as const,
+        justifyContent: 'center' as const,
+        width: '100vw',
+        height: '100vh',
+        background: getBackground(),
+        position: 'fixed' as const,
+        top: 0,
+        left: 0,
+        overflow: 'hidden',
+        boxSizing: 'border-box' as const,
+        zIndex: 9999
+      };
+    }
+  };
+
   // Load appearance settings immediately for loading screen
   useEffect(() => {
     const loadAppearanceSettings = async () => {
@@ -426,71 +491,6 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
       />
     );
   }
-
-  // Calculate container style based on admin test mode and appearance settings
-  const getContainerStyle = () => {
-    // Get background from appearance settings with fallback
-    const getBackground = () => {
-      // Use appearanceSettings which are loaded immediately, or gameConfig.appearance as fallback
-      const settings = gameConfig?.appearance || appearanceSettings;
-      const { primaryColor = '#667eea', secondaryColor = '#764ba2', backgroundTheme = 'default' } = settings;
-
-      switch (backgroundTheme) {
-        case 'dark':
-          return 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)';
-        case 'light':
-          return 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)';
-        case 'custom':
-          return `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`;
-        default:
-          return `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`;
-      }
-    };
-
-    if (adminTest) {
-      // Use iframe dimensions for admin testing
-      const isMobile = window.innerWidth < 768;
-      return {
-        padding: 0,
-        margin: 0,
-        display: 'flex',
-        flexDirection: 'column' as const,
-        alignItems: 'center' as const,
-        justifyContent: 'center' as const,
-        width: isMobile ? '370px' : '540px',
-        height: isMobile ? '600px' : '700px',
-        background: getBackground(),
-        position: 'fixed' as const,
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        overflow: 'hidden',
-        boxSizing: 'border-box' as const,
-        zIndex: 9999,
-        borderRadius: '12px',
-        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
-      };
-    } else {
-      // Fullscreen for normal widget
-      return {
-        padding: 0,
-        margin: 0,
-        display: 'flex',
-        flexDirection: 'column' as const,
-        alignItems: 'center' as const,
-        justifyContent: 'center' as const,
-        width: '100vw',
-        height: '100vh',
-        background: getBackground(),
-        position: 'fixed' as const,
-        top: 0,
-        left: 0,
-        overflow: 'hidden',
-        boxSizing: 'border-box' as const,
-        zIndex: 9999
-      };
-    }
-  };
 
   return (
     <div style={getContainerStyle()}>
