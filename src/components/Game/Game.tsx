@@ -57,8 +57,20 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
   const getContainerStyle = () => {
     // Get background from appearance settings with fallback
     const getBackground = () => {
-      // Use appearanceSettings which are loaded immediately, or gameConfig.appearance as fallback
-      const settings = gameConfig?.appearance || appearanceSettings;
+      // Always prefer appearanceSettings if they have custom values, otherwise use gameConfig.appearance
+      let settings = { ...appearanceSettings };
+
+      // If gameConfig has appearance settings and appearanceSettings are still default, use gameConfig
+      if (gameConfig?.appearance &&
+          appearanceSettings.primaryColor === '#667eea' &&
+          appearanceSettings.secondaryColor === '#764ba2') {
+        settings = gameConfig.appearance;
+      }
+
+      console.log('🎨 getBackground - appearanceSettings:', appearanceSettings);
+      console.log('🎨 getBackground - gameConfig.appearance:', gameConfig?.appearance);
+      console.log('🎨 getBackground - final settings:', settings);
+
       const { primaryColor = '#667eea', secondaryColor = '#764ba2', backgroundTheme = 'default' } = settings;
 
       switch (backgroundTheme) {
@@ -126,7 +138,10 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
         if (response.ok) {
           const config = await response.json();
           if (config.appearance) {
+            console.log('🎨 Loading appearance settings:', config.appearance);
             setAppearanceSettings(config.appearance);
+          } else {
+            console.log('🎨 No appearance settings found in config');
           }
         }
       } catch (error) {
@@ -167,12 +182,8 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
             minDiscount: Math.min(...(config.gameSettings?.discountTiers || DEFAULT_DISCOUNT_TIERS).map((t: any) => t.discount).filter((d: number) => d > 0)),
             maxDiscount: Math.max(...(config.gameSettings?.discountTiers || DEFAULT_DISCOUNT_TIERS).map((t: any) => t.discount)),
             shopName: config.shopName || shopDomain,
-            // Include appearance settings
-            appearance: config.appearance || {
-              primaryColor: '#667eea',
-              secondaryColor: '#764ba2',
-              backgroundTheme: 'default'
-            }
+            // Include appearance settings - prefer loaded appearanceSettings over defaults
+            appearance: config.appearance || appearanceSettings
           });
         } else {
           // Use default config
@@ -187,11 +198,7 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
             minDiscount: 5,
             maxDiscount: 25,
             shopName: shopDomain,
-            appearance: {
-              primaryColor: '#667eea',
-              secondaryColor: '#764ba2',
-              backgroundTheme: 'default'
-            }
+            appearance: appearanceSettings
           });
         }
       } catch (error) {
@@ -206,11 +213,7 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
           minDiscount: 5,
           maxDiscount: 25,
           shopName: shopDomain,
-          appearance: {
-            primaryColor: '#667eea',
-            secondaryColor: '#764ba2',
-            backgroundTheme: 'default'
-          }
+          appearance: appearanceSettings
         });
       } finally {
         setGameState('intro');
