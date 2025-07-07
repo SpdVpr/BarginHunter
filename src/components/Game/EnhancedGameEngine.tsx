@@ -170,8 +170,10 @@ export default function EnhancedGameEngine({
       accent: '#FF6B6B'
     };
 
-    // Animation frame for walking
-    const animFrame = Math.floor(Date.now() / 150) % 4;
+    // Animation frame for walking - faster animation at higher difficulty
+    const currentDifficulty = gameScorer.getCurrentDifficultyLevel();
+    const animSpeed = Math.max(150 - (currentDifficulty.level * 15), 80); // Faster animation with difficulty
+    const animFrame = Math.floor(Date.now() / animSpeed) % 4;
     const walkCycle = [0, 1, 0, -1]; // Walking animation cycle
     const legOffset = player.isJumping ? 0 : walkCycle[animFrame];
     const armSwing = player.isJumping ? 0 : walkCycle[animFrame] * 0.5;
@@ -546,21 +548,34 @@ export default function EnhancedGameEngine({
 
     setObstacles(prev => [...prev, newObstacle]);
 
-    // Chance for double obstacles at higher difficulty
-    if (difficultyLevel >= 3 && Math.random() < 0.3) {
-      setTimeout(() => {
-        const secondObstacleType = availableObstacles[Math.floor(Math.random() * availableObstacles.length)];
-        const secondObstacle: Obstacle = {
-          x: canvasSize.width + 80 + Math.random() * 40, // 80-120px gap
-          y: canvasSize.groundY - (secondObstacleType.height * sizeMultiplier),
-          width: secondObstacleType.width * sizeMultiplier,
-          height: secondObstacleType.height * sizeMultiplier,
-          type: secondObstacleType.name,
-          speed: currentDifficulty.speed,
-          id: Date.now() + 1
-        };
-        setObstacles(prev => [...prev, secondObstacle]);
-      }, 100);
+    // Progressive double/triple obstacles at higher difficulty
+    const obstacleChance = Math.min(difficultyLevel * 0.15, 0.6); // Max 60% chance
+    const maxObstacles = Math.min(Math.floor(difficultyLevel / 2) + 1, 3); // Max 3 obstacles
+
+    if (difficultyLevel >= 3 && Math.random() < obstacleChance) {
+      const numExtraObstacles = Math.min(Math.floor(Math.random() * maxObstacles) + 1, maxObstacles - 1);
+
+      for (let i = 0; i < numExtraObstacles; i++) {
+        setTimeout(() => {
+          const secondObstacleType = availableObstacles[Math.floor(Math.random() * availableObstacles.length)];
+
+          // Progressive gap reduction - closer obstacles at higher difficulty
+          const baseGap = 150; // Minimum safe gap for jumping
+          const gapReduction = Math.min(difficultyLevel * 10, 50); // Max 50px reduction
+          const finalGap = baseGap - gapReduction + Math.random() * 30; // 150-50+30 = 130-180px range
+
+          const secondObstacle: Obstacle = {
+            x: canvasSize.width + finalGap + (i * 60), // Space multiple obstacles
+            y: canvasSize.groundY - (secondObstacleType.height * sizeMultiplier),
+            width: secondObstacleType.width * sizeMultiplier,
+            height: secondObstacleType.height * sizeMultiplier,
+            type: secondObstacleType.name,
+            speed: currentDifficulty.speed,
+            id: Date.now() + i + 1
+          };
+          setObstacles(prev => [...prev, secondObstacle]);
+        }, 100 + (i * 50));
+      }
     }
   }, [gameScorer, canvasSize]);
 

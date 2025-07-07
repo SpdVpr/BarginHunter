@@ -215,8 +215,10 @@ export default function SnakeEngine({
         setScore(newScore);
         onScoreUpdate(newScore);
         
-        // Increase speed
-        setCurrentSpeed(prev => Math.max(MIN_SPEED, prev - SPEED_INCREASE));
+        // Increase speed every 100 points
+        const speedLevel = Math.floor(newScore / 100);
+        const newSpeed = Math.max(MIN_SPEED, INITIAL_SPEED - (speedLevel * SPEED_INCREASE));
+        setCurrentSpeed(newSpeed);
         
         // Generate new food
         generateFood(newSnake);
