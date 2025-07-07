@@ -75,7 +75,13 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
             maxPlaysPerDay: config.gameSettings?.maxPlaysPerDay || 10,
             minDiscount: Math.min(...(config.gameSettings?.discountTiers || DEFAULT_DISCOUNT_TIERS).map((t: any) => t.discount).filter((d: number) => d > 0)),
             maxDiscount: Math.max(...(config.gameSettings?.discountTiers || DEFAULT_DISCOUNT_TIERS).map((t: any) => t.discount)),
-            shopName: config.shopName || shopDomain
+            shopName: config.shopName || shopDomain,
+            // Include appearance settings
+            appearance: config.appearance || {
+              primaryColor: '#667eea',
+              secondaryColor: '#764ba2',
+              backgroundTheme: 'default'
+            }
           });
         } else {
           // Use default config
@@ -89,7 +95,12 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
             maxPlaysPerDay: 10,
             minDiscount: 5,
             maxDiscount: 25,
-            shopName: shopDomain
+            shopName: shopDomain,
+            appearance: {
+              primaryColor: '#667eea',
+              secondaryColor: '#764ba2',
+              backgroundTheme: 'default'
+            }
           });
         }
       } catch (error) {
@@ -103,7 +114,12 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
           maxAttempts: 3,
           minDiscount: 5,
           maxDiscount: 25,
-          shopName: shopDomain
+          shopName: shopDomain,
+          appearance: {
+            primaryColor: '#667eea',
+            secondaryColor: '#764ba2',
+            backgroundTheme: 'default'
+          }
         });
       } finally {
         setGameState('intro');
@@ -378,8 +394,28 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
     );
   }
 
-  // Calculate container style based on admin test mode
+  // Calculate container style based on admin test mode and appearance settings
   const getContainerStyle = () => {
+    // Get background from appearance settings
+    const getBackground = () => {
+      if (!gameConfig?.appearance) {
+        return 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+      }
+
+      const { primaryColor, secondaryColor, backgroundTheme } = gameConfig.appearance;
+
+      switch (backgroundTheme) {
+        case 'dark':
+          return 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)';
+        case 'light':
+          return 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)';
+        case 'custom':
+          return `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`;
+        default:
+          return `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`;
+      }
+    };
+
     if (adminTest) {
       // Use iframe dimensions for admin testing
       const isMobile = window.innerWidth < 768;
@@ -392,7 +428,7 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
         justifyContent: 'center' as const,
         width: isMobile ? '370px' : '540px',
         height: isMobile ? '600px' : '700px',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: getBackground(),
         position: 'fixed' as const,
         top: '50%',
         left: '50%',
@@ -414,7 +450,7 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
         justifyContent: 'center' as const,
         width: '100vw',
         height: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: getBackground(),
         position: 'fixed' as const,
         top: 0,
         left: 0,

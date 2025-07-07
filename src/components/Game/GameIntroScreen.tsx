@@ -119,6 +119,48 @@ export default function GameIntroScreen({
       .replace('{maxDiscount}', maxDiscount.toString());
   };
 
+  // Show loading screen until settings are loaded to prevent flashing
+  if (!settingsLoaded) {
+    return (
+      <div className="game-intro-container" style={{
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: '#ffffff',
+        borderRadius: 0,
+        textAlign: 'center',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
+        margin: 0,
+        padding: '40px 20px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          fontSize: '18px',
+          opacity: 0.8,
+          animation: 'pulse 1.5s ease-in-out infinite alternate'
+        }}>
+          Loading...
+        </div>
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            @keyframes pulse {
+              from { opacity: 0.4; }
+              to { opacity: 1; }
+            }
+          `
+        }} />
+      </div>
+    );
+  }
+
   return (
     <div className="game-intro-container" style={{
       background: `linear-gradient(135deg, ${introSettings.backgroundColor} 0%, ${introSettings.backgroundColor}dd 100%)`,

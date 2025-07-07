@@ -54,21 +54,26 @@ export function OverviewTab({ shop, onTabChange }: OverviewTabProps) {
   const loadRecentSessions = async () => {
     try {
       setSessionsLoading(true);
-      const discountsResponse = await fetch(`/api/dashboard/discounts?shop=${shop}`);
+      const discountsResponse = await fetch(`/api/dashboard/discounts?shop=${shop}&limit=20`);
       if (discountsResponse.ok) {
         const discountsData = await discountsResponse.json();
-        const recentDiscounts = (discountsData.discounts || [])
-          .filter((discount: any) => discount.isUsed)
+        // Show all recent discounts (both used and unused), prioritizing used ones
+        const allDiscounts = discountsData.discounts || [];
+        const usedDiscounts = allDiscounts.filter((discount: any) => discount.isUsed);
+        const unusedDiscounts = allDiscounts.filter((discount: any) => !discount.isUsed);
+
+        // Combine used and unused, with used ones first
+        const combinedDiscounts = [...usedDiscounts, ...unusedDiscounts]
           .slice(0, 10)
           .map((discount: any) => ({
             id: discount.id,
             customerEmail: discount.customerEmail || 'Anonymous',
             score: Math.round(discount.value * 20),
             discount: discount.value,
-            status: 'completed' as const,
+            status: discount.isUsed ? 'completed' as const : 'generated' as const,
             completedAt: discount.usedAt || discount.createdAt,
           }));
-        setRecentSessions(recentDiscounts);
+        setRecentSessions(combinedDiscounts);
       }
     } catch (error) {
       console.error('Failed to load recent sessions:', error);
@@ -135,7 +140,9 @@ export function OverviewTab({ shop, onTabChange }: OverviewTabProps) {
     session.customerEmail || 'Anonymous',
     session.score.toString(),
     session.discount > 0 ? `${session.discount}%` : 'No discount',
-    <Badge status="success">Used</Badge>,
+    <Badge status={session.status === 'completed' ? 'success' : 'info'}>
+      {session.status === 'completed' ? 'Used' : 'Generated'}
+    </Badge>,
     new Date(session.completedAt).toLocaleDateString(),
   ]);
 
