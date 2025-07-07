@@ -58,9 +58,9 @@ const getCanvasSize = (adminTest = false) => {
 const GRAVITY = 0.5; // Reduced gravity for better control
 const JUMP_FORCE = -12; // Adjusted for new gravity
 
-// Player constants - Chrome Dino style (smaller size)
-const PLAYER_WIDTH = 24;
-const PLAYER_HEIGHT = 24;
+// Player constants - Chrome Dino style (larger size for better visibility)
+const PLAYER_WIDTH = 40;
+const PLAYER_HEIGHT = 40;
 const PLAYER_X = 80;
 
 // Use universal difficulty progression from gameScoring.ts
@@ -448,13 +448,9 @@ export default function EnhancedGameEngine({
     ctx.fillStyle = groundGradient;
     ctx.fillRect(0, groundY, width, height - groundY);
 
-    // Ground surface line - make it more visible for debugging
+    // Ground surface line
     ctx.fillStyle = '#5D4E37';
     ctx.fillRect(0, groundY, width, 4);
-
-    // Debug: Draw exact ground line
-    ctx.fillStyle = '#FF0000';
-    ctx.fillRect(0, groundY - 1, width, 2);
 
     // Moving ground texture for speed effect
     ctx.fillStyle = '#6B5B47';

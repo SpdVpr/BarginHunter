@@ -74,11 +74,13 @@ interface Food extends Position {}
 
 type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
 
-export default function SnakeEngine({ 
-  onGameEnd, 
-  onScoreUpdate, 
+export default function SnakeEngine({
+  onGameEnd,
+  onScoreUpdate,
   gameConfig,
-  onShowIntro 
+  onShowIntro,
+  adminTest = false,
+  onClose
 }: SnakeEngineProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
@@ -88,7 +90,7 @@ export default function SnakeEngine({
   
   const [isRunning, setIsRunning] = useState(false);
   const [score, setScore] = useState(0);
-  const [canvasSize, setCanvasSize] = useState(getCanvasSize());
+  const [canvasSize, setCanvasSize] = useState(getCanvasSize(adminTest));
   const [gameScorer] = useState(() => new GameScorer());
   const [difficultyLevel, setDifficultyLevel] = useState(0);
   const [currentSpeed, setCurrentSpeed] = useState(INITIAL_SPEED);
@@ -110,13 +112,13 @@ export default function SnakeEngine({
   // Handle window resize
   useEffect(() => {
     const handleResize = () => {
-      const newSize = getCanvasSize();
+      const newSize = getCanvasSize(adminTest);
       setCanvasSize(newSize);
     };
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [adminTest]);
 
   // Initialize snake and food
   const initializeGame = useCallback(() => {

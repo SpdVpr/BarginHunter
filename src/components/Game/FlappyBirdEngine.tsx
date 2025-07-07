@@ -50,10 +50,11 @@ const getCanvasSize = (adminTest = false) => {
 };
 
 // Balanced Flappy Bird physics with progressive difficulty
-const GRAVITY = 0.3; // Balanced gravity
-const FLAP_FORCE = -5.5; // Balanced flap force
+const GRAVITY = 0.2; // Reduced gravity for easier control
+const FLAP_FORCE = -4.5; // Adjusted flap force for new gravity
 const BASE_PIPE_GAP = 120; // Base gap size (will adjust with difficulty)
 const PIPE_WIDTH = 50; // Standard pipe width
+const GRACE_PERIOD = 3000; // 3 seconds without pipes at start
 
 // Bird constants - easy horizontal layout
 const BIRD_SIZE = 28;
@@ -289,9 +290,12 @@ export default function FlappyBirdEngine({
       setDifficultyLevel(currentDifficulty.level - 1);
     }
 
-    // Spawn pipes based on current difficulty
+    // Spawn pipes based on current difficulty (with grace period)
     const now = Date.now();
-    if (now - lastPipeSpawn > currentDifficulty.spawnRate) {
+    const gameTime = now - gameStartTime.current;
+
+    // Only spawn pipes after grace period
+    if (gameTime > GRACE_PERIOD && now - lastPipeSpawn > currentDifficulty.spawnRate) {
       spawnPipe();
       setLastPipeSpawn(now);
     }
