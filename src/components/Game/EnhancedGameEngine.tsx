@@ -33,7 +33,7 @@ const getCanvasSize = (adminTest = false) => {
     return {
       width: width,
       height: height,
-      groundY: height * 0.85,
+      groundY: height * 0.65, // Ground at 65% instead of 85% - more ground space
     };
   } else {
     // Use full viewport dimensions for normal widget
@@ -49,7 +49,7 @@ const getCanvasSize = (adminTest = false) => {
     return {
       width: width,
       height: height,
-      groundY: height * 0.85, // Ground at 85% of height - lower for better positioning
+      groundY: height * 0.65, // Ground at 65% of height - more ground space
     };
   }
 };
@@ -58,9 +58,9 @@ const getCanvasSize = (adminTest = false) => {
 const GRAVITY = 0.5; // Reduced gravity for better control
 const JUMP_FORCE = -12; // Adjusted for new gravity
 
-// Player constants - Chrome Dino style (larger size for better visibility)
-const PLAYER_WIDTH = 40;
-const PLAYER_HEIGHT = 40;
+// Player constants - Runner style (large size, bigger than obstacles)
+const PLAYER_WIDTH = 60;
+const PLAYER_HEIGHT = 60;
 const PLAYER_X = 80;
 
 // Use universal difficulty progression from gameScoring.ts
@@ -123,7 +123,7 @@ export default function EnhancedGameEngine({
   
   const [player, setPlayer] = useState<Player>({
     x: canvasSize.width * 0.1, // 10% from left
-    y: canvasSize.groundY - PLAYER_HEIGHT,
+    y: canvasSize.groundY - PLAYER_HEIGHT, // Feet exactly on ground line
     velocityY: 0,
     isJumping: false,
     width: PLAYER_WIDTH,
@@ -140,7 +140,7 @@ export default function EnhancedGameEngine({
       setPlayer(prev => ({
         ...prev,
         x: newSize.width * 0.1,
-        y: newSize.groundY - prev.height,
+        y: newSize.groundY - prev.height, // Feet exactly on ground line
       }));
     };
 
@@ -176,8 +176,8 @@ export default function EnhancedGameEngine({
     const legOffset = player.isJumping ? 0 : walkCycle[animFrame];
     const armSwing = player.isJumping ? 0 : walkCycle[animFrame] * 0.5;
 
-    // Scale factor for smaller character
-    const scale = 0.8;
+    // Scale factor for larger character (bigger than obstacles)
+    const scale = 1.5;
     const pixelSize = 1;
 
     // Helper function to draw scaled pixel

@@ -47,8 +47,8 @@ interface GameSettings {
 const AVAILABLE_GAMES = [
   {
     id: 'dino',
-    name: '🦕 Chrome Dino Runner',
-    description: 'Classic endless runner inspired by Chrome\'s offline game. Jump over obstacles to score points.',
+    name: '🏃 Runner',
+    description: 'Classic endless runner game. Jump over obstacles to score points and earn discounts.',
     difficulty: 'Medium',
     controls: 'Spacebar/Click to Jump',
     category: 'Arcade',
