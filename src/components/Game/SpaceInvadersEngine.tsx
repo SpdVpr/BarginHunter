@@ -527,7 +527,17 @@ export default function SpaceInvadersEngine({
     ctx.fillText(`Score: ${formatScore(score)}`, 10, 25);
     ctx.fillText(`Lives: ${lives}`, 10, 45);
 
+    // Show current discount based on score (find highest applicable tier)
+    const sortedTiers = [...gameConfig.discountTiers].sort((a: any, b: any) => b.minScore - a.minScore);
+    const currentDiscount = sortedTiers.find((tier: any) => score >= tier.minScore)?.discount || 0;
+    if (currentDiscount > 0) {
+      ctx.font = 'bold 16px monospace';
+      ctx.fillStyle = '#000000'; // Black color
+      ctx.fillText(`${currentDiscount}% OFF`, 10, 65);
+    }
+
     if (difficultyLevel > 0) {
+      ctx.fillStyle = '#00ff00';
       ctx.fillText(`Level: ${difficultyLevel + 1}`, canvasSize.width - 100, 25);
     }
 

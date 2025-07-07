@@ -446,8 +446,18 @@ export default function SnakeEngine({
     ctx.fillText(`Score: ${formatScore(score)}`, 10, 25);
     ctx.fillText(`Length: ${snake.length}`, 10, 45);
 
+    // Show current discount based on score (find highest applicable tier)
+    const sortedTiers = [...gameConfig.discountTiers].sort((a: any, b: any) => b.minScore - a.minScore);
+    const currentDiscount = sortedTiers.find((tier: any) => score >= tier.minScore)?.discount || 0;
+    if (currentDiscount > 0) {
+      ctx.font = 'bold 16px Arial';
+      ctx.fillStyle = '#000000'; // Black color
+      ctx.fillText(`${currentDiscount}% OFF`, 10, 65);
+    }
+
     if (difficultyLevel > 0) {
-      ctx.fillText(`Level: ${difficultyLevel + 1}`, 10, 65);
+      ctx.fillStyle = '#333';
+      ctx.fillText(`Level: ${difficultyLevel + 1}`, 10, 85);
     }
 
 

@@ -342,11 +342,12 @@ export default function FlappyBirdEngine({
     ctx.textAlign = 'left';
     ctx.fillText(`Score: ${formatScore(score)}`, 10, 30);
 
-    // Show current discount instead of level
-    const currentDiscount = discountTiers.find(tier => score >= tier.minScore)?.discount || 0;
+    // Show current discount based on score (find highest applicable tier)
+    const sortedTiers = [...discountTiers].sort((a, b) => b.minScore - a.minScore);
+    const currentDiscount = sortedTiers.find(tier => score >= tier.minScore)?.discount || 0;
     if (currentDiscount > 0) {
       ctx.font = 'bold 16px Arial';
-      ctx.fillStyle = '#4ecdc4';
+      ctx.fillStyle = '#000000'; // Black color
       ctx.fillText(`${currentDiscount}% OFF`, 10, 55);
     }
 

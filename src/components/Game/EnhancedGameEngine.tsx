@@ -639,9 +639,9 @@ export default function EnhancedGameEngine({
       // Check collisions with precise hitbox (matching actual visual character size)
       filtered.forEach(obstacle => {
         // Character visual size is ~15x30px (10x20 base * 1.5 scale), but hitbox is 60x60
-        // Reduce hitbox dramatically to match actual visual size
-        const hitboxPaddingX = 22; // Reduce width from 60px to ~16px
-        const hitboxPaddingY = 15; // Reduce height from 60px to ~30px
+        // Reduce hitbox even more for ultra-precise collision detection
+        const hitboxPaddingX = 26; // Reduce width from 60px to ~8px (ultra-precise)
+        const hitboxPaddingY = 20; // Reduce height from 60px to ~20px (ultra-precise)
         const playerHitboxX = player.x + hitboxPaddingX;
         const playerHitboxY = player.y + hitboxPaddingY;
         const playerHitboxWidth = player.width - (hitboxPaddingX * 2);
@@ -665,8 +665,8 @@ export default function EnhancedGameEngine({
 
     // Debug: Draw hitbox in admin mode (optional)
     if (adminTest && false) { // Set to true to enable hitbox visualization
-      const hitboxPaddingX = 22;
-      const hitboxPaddingY = 15;
+      const hitboxPaddingX = 26;
+      const hitboxPaddingY = 20;
       ctx.strokeStyle = '#FF0000';
       ctx.lineWidth = 2;
       ctx.strokeRect(
@@ -683,11 +683,12 @@ export default function EnhancedGameEngine({
     ctx.textAlign = 'left';
     ctx.fillText(`Score: ${formatScore(score)}`, 10, 30);
 
-    // Show current discount instead of level
-    const currentDiscount = gameConfig.discountTiers.find((tier: any) => score >= tier.minScore)?.discount || 0;
+    // Show current discount based on score (find highest applicable tier)
+    const sortedTiers = [...gameConfig.discountTiers].sort((a: any, b: any) => b.minScore - a.minScore);
+    const currentDiscount = sortedTiers.find((tier: any) => score >= tier.minScore)?.discount || 0;
     if (currentDiscount > 0) {
       ctx.font = 'bold 16px Arial';
-      ctx.fillStyle = '#4ecdc4';
+      ctx.fillStyle = '#000000'; // Black color
       ctx.fillText(`${currentDiscount}% OFF`, 10, 55);
     }
 

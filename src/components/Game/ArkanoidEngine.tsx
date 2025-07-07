@@ -228,6 +228,15 @@ export default function ArkanoidEngine({
     ctx.fillText(`Score: ${formatScore(score)}`, 20, 30);
     ctx.fillText(`Lives: ${lives}`, canvasSize.width - 100, 30);
     ctx.fillText(`Level: ${level}`, canvasSize.width / 2 - 30, 30);
+
+    // Show current discount based on score (find highest applicable tier)
+    const sortedTiers = [...gameConfig.discountTiers].sort((a: any, b: any) => b.minScore - a.minScore);
+    const currentDiscount = sortedTiers.find((tier: any) => score >= tier.minScore)?.discount || 0;
+    if (currentDiscount > 0) {
+      ctx.font = '16px Arial';
+      ctx.fillStyle = '#000000'; // Black color
+      ctx.fillText(`${currentDiscount}% OFF`, 20, 55);
+    }
   }, [canvasSize, bricks, paddle, ball, score, lives, level]);
 
   // Game loop

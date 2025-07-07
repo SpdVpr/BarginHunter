@@ -348,6 +348,15 @@ export default function FruitNinjaEngine({
     ctx.fillText(`Score: ${formatScore(score)}`, 20, 40);
     ctx.fillText(`Lives: ${lives}`, 20, 70);
     ctx.fillText(`Combo: ${combo}`, 20, 100);
+
+    // Show current discount based on score (find highest applicable tier)
+    const sortedTiers = [...gameConfig.discountTiers].sort((a: any, b: any) => b.minScore - a.minScore);
+    const currentDiscount = sortedTiers.find((tier: any) => score >= tier.minScore)?.discount || 0;
+    if (currentDiscount > 0) {
+      ctx.font = '20px Arial';
+      ctx.fillStyle = '#000000'; // Black color
+      ctx.fillText(`${currentDiscount}% OFF`, 20, 130);
+    }
   }, [canvasSize, fruits, sliceTrail, score, lives, combo]);
 
   // Game loop

@@ -323,9 +323,19 @@ export default function TetrisEngine({
     ctx.fillText(`Score: ${formatScore(score)}`, 10, 30);
     ctx.fillText(`Lines: ${linesCleared}`, 10, 55);
 
+    // Show current discount based on score (find highest applicable tier)
+    const sortedTiers = [...gameConfig.discountTiers].sort((a: any, b: any) => b.minScore - a.minScore);
+    const currentDiscount = sortedTiers.find((tier: any) => score >= tier.minScore)?.discount || 0;
+    if (currentDiscount > 0) {
+      ctx.font = 'bold 16px Arial';
+      ctx.fillStyle = '#000000'; // Black color
+      ctx.fillText(`${currentDiscount}% OFF`, 10, 80);
+    }
+
     if (difficultyLevel > 0) {
       ctx.font = 'bold 16px Arial';
-      ctx.fillText(`Level: ${difficultyLevel + 1}`, 10, 80);
+      ctx.fillStyle = '#FFF';
+      ctx.fillText(`Level: ${difficultyLevel + 1}`, 10, 105);
     }
   }, [canvasSize, board, currentPiece, score, linesCleared, difficultyLevel]);
 
