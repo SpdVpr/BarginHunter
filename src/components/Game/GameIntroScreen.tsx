@@ -207,48 +207,7 @@ export default function GameIntroScreen({
         <style dangerouslySetInnerHTML={{ __html: introSettings.customCSS }} />
       )}
 
-      {/* Close button */}
-      <button
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          console.log('🎮 Intro close button clicked!');
-          if (typeof onClose === 'function') {
-            onClose();
-          } else {
-            console.error('onClose is not a function:', onClose);
-          }
-        }}
-        style={{
-          position: 'absolute',
-          top: '20px',
-          right: '20px',
-          background: 'rgba(255,255,255,0.2)',
-          border: 'none',
-          color: 'white',
-          fontSize: '24px',
-          width: '40px',
-          height: '40px',
-          borderRadius: '50%',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          transition: 'all 0.2s ease',
-          zIndex: 1000,
-          pointerEvents: 'auto'
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.background = 'rgba(255,255,255,0.3)';
-          e.currentTarget.style.transform = 'scale(1.1)';
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
-          e.currentTarget.style.transform = 'scale(1)';
-        }}
-      >
-        ×
-      </button>
+
 
       {/* Game title - CUSTOMIZABLE */}
       <div className="game-title" style={{
@@ -379,6 +338,59 @@ export default function GameIntroScreen({
           </button>
         )}
 
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🎮 Intro Close button clicked!');
+
+            try {
+              // Try multiple close methods
+              console.log('🎮 Method 1: Calling onClose...');
+              if (typeof onClose === 'function') {
+                onClose();
+                console.log('🎮 onClose called successfully');
+              }
+
+              // Method 2: Direct parent message
+              console.log('🎮 Method 2: Sending direct parent message...');
+              if (window.parent && window.parent !== window) {
+                window.parent.postMessage({
+                  type: 'BARGAIN_HUNTER_CLOSE'
+                }, '*');
+                console.log('🎮 Direct parent message sent');
+              }
+
+            } catch (error) {
+              console.error('❌ Error in close methods:', error);
+            }
+          }}
+          style={{
+            background: 'rgba(255,255,255,0.2)',
+            color: 'white',
+            border: '2px solid rgba(255,255,255,0.3)',
+            padding: '15px 30px',
+            borderRadius: '12px',
+            fontSize: 'clamp(16px, 4vw, 20px)',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            transition: 'background 0.2s ease, transform 0.2s ease',
+            flex: '1',
+            maxWidth: '150px',
+            textShadow: '1px 1px 2px rgba(0,0,0,0.2)',
+            pointerEvents: 'auto'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.3)';
+            e.currentTarget.style.transform = 'translateY(-2px)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
+            e.currentTarget.style.transform = 'translateY(0)';
+          }}
+        >
+          {introSettings.showEmojis ? '❌ ' : ''}Close
+        </button>
 
       </div>
 

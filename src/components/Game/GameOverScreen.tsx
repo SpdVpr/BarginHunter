@@ -338,15 +338,34 @@ export default function GameOverScreen({
               e.stopPropagation();
 
               try {
+                // Try multiple close methods
+                console.log('🎮 Method 1: Calling onClose...');
                 if (typeof onClose === 'function') {
-                  console.log('🎮 Calling onClose...');
                   onClose();
                   console.log('🎮 onClose called successfully');
-                } else {
-                  console.error('❌ onClose is not a function:', onClose);
                 }
+
+                // Method 2: Direct parent message
+                console.log('🎮 Method 2: Sending direct parent message...');
+                if (window.parent && window.parent !== window) {
+                  window.parent.postMessage({
+                    type: 'BARGAIN_HUNTER_CLOSE'
+                  }, '*');
+                  console.log('🎮 Direct parent message sent');
+                }
+
+                // Method 3: Try to find and remove overlay directly
+                console.log('🎮 Method 3: Looking for overlay in parent...');
+                if (window.parent && window.parent.document) {
+                  const overlay = window.parent.document.getElementById('bargain-hunter-modal');
+                  if (overlay) {
+                    console.log('🎮 Found overlay, removing...');
+                    overlay.remove();
+                  }
+                }
+
               } catch (error) {
-                console.error('❌ Error calling onClose:', error);
+                console.error('❌ Error in close methods:', error);
               }
             }}
             onMouseDown={(e) => {
