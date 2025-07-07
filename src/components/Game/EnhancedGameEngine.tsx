@@ -636,12 +636,19 @@ export default function EnhancedGameEngine({
       // Filter out off-screen obstacles
       const filtered = updated.filter(obstacle => obstacle.x > -100);
 
-      // Check collisions
+      // Check collisions with precise hitbox (smaller than visual size)
       filtered.forEach(obstacle => {
-        if (player.x < obstacle.x + obstacle.width &&
-            player.x + player.width > obstacle.x &&
-            player.y < obstacle.y + obstacle.height &&
-            player.y + player.height > obstacle.y) {
+        // Reduce hitbox to match actual visual character size
+        const hitboxPadding = 8; // Reduce hitbox by 8px on each side
+        const playerHitboxX = player.x + hitboxPadding;
+        const playerHitboxY = player.y + hitboxPadding;
+        const playerHitboxWidth = player.width - (hitboxPadding * 2);
+        const playerHitboxHeight = player.height - (hitboxPadding * 2);
+
+        if (playerHitboxX < obstacle.x + obstacle.width &&
+            playerHitboxX + playerHitboxWidth > obstacle.x &&
+            playerHitboxY < obstacle.y + obstacle.height &&
+            playerHitboxY + playerHitboxHeight > obstacle.y) {
           setIsRunning(false);
           onGameEnd(gameScorer.getScore(), gameScorer.getGameStats());
         }
@@ -653,6 +660,19 @@ export default function EnhancedGameEngine({
     // Draw game objects
     obstacles.forEach(obstacle => drawObstacle(ctx, obstacle));
     drawPlayer(ctx, player);
+
+    // Debug: Draw hitbox in admin mode (optional)
+    if (adminTest && false) { // Set to true to enable hitbox visualization
+      const hitboxPadding = 8;
+      ctx.strokeStyle = '#FF0000';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(
+        player.x + hitboxPadding,
+        player.y + hitboxPadding,
+        player.width - (hitboxPadding * 2),
+        player.height - (hitboxPadding * 2)
+      );
+    }
 
     // Draw score overlay
     ctx.fillStyle = '#333';
