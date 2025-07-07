@@ -119,11 +119,31 @@ export default function GameIntroScreen({
       .replace('{maxDiscount}', maxDiscount.toString());
   };
 
+  // Get background from gameConfig appearance settings
+  const getBackgroundFromAppearance = () => {
+    if (!gameConfig?.appearance) {
+      return 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+    }
+
+    const { primaryColor = '#667eea', secondaryColor = '#764ba2', backgroundTheme = 'default' } = gameConfig.appearance;
+
+    switch (backgroundTheme) {
+      case 'dark':
+        return 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)';
+      case 'light':
+        return 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)';
+      case 'custom':
+        return `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`;
+      default:
+        return `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`;
+    }
+  };
+
   // Show loading screen until settings are loaded to prevent flashing
   if (!settingsLoaded) {
     return (
       <div className="game-intro-container" style={{
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: getBackgroundFromAppearance(),
         color: '#ffffff',
         borderRadius: 0,
         textAlign: 'center',
@@ -163,7 +183,7 @@ export default function GameIntroScreen({
 
   return (
     <div className="game-intro-container" style={{
-      background: `linear-gradient(135deg, ${introSettings.backgroundColor} 0%, ${introSettings.backgroundColor}dd 100%)`,
+      background: getBackgroundFromAppearance(),
       color: introSettings.textColor,
       borderRadius: 0, // Remove border radius to fill entire space
       textAlign: 'center',
