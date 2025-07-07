@@ -93,7 +93,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    if (widgetSettings.showOn && !['all_pages', 'product_pages', 'cart_page', 'checkout_page', 'collection_pages', 'custom', 'url_targeting'].includes(widgetSettings.showOn)) {
+    if (widgetSettings.showOn && !['all_pages', 'homepage', 'product_pages', 'cart_page', 'checkout_page', 'collection_pages', 'custom', 'url_targeting'].includes(widgetSettings.showOn)) {
       console.log('🔧 Settings API: Invalid showOn:', widgetSettings.showOn);
       return res.status(400).json({
         success: false,

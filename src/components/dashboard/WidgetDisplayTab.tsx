@@ -99,6 +99,7 @@ export function WidgetDisplayTab({ shop }: WidgetDisplayTabProps) {
         const config = await response.json();
         const settings = {
           ...config.widgetSettings,
+          customPages: config.widgetSettings?.customPages || [],
           floatingButton: config.widgetSettings?.floatingButton || getDefaultFloatingButton()
         };
         setWidgetSettings(settings);
@@ -313,6 +314,20 @@ export function WidgetDisplayTab({ shop }: WidgetDisplayTabProps) {
                 value={widgetSettings.showOn}
                 onChange={(value) => setWidgetSettings({...widgetSettings, showOn: value as any})}
               />
+
+              {widgetSettings.showOn === 'custom' && (
+                <TextField
+                  label="Custom Page URLs"
+                  value={widgetSettings.customPages?.join('\n') || ''}
+                  onChange={(value) => {
+                    const pages = value.split('\n').filter(page => page.trim() !== '');
+                    setWidgetSettings({...widgetSettings, customPages: pages});
+                  }}
+                  multiline={4}
+                  helpText="Enter one URL per line (e.g., /about, /contact, /special-page)"
+                  placeholder="/about&#10;/contact&#10;/special-page"
+                />
+              )}
 
               <RangeSlider
                 label={`User Percentage: ${widgetSettings.userPercentage}%`}
