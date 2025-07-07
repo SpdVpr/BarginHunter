@@ -136,11 +136,26 @@ export default function WidgetGame() {
   };
 
   const handleClose = () => {
+    console.log('🎮 handleClose called in widget/game.tsx');
+    console.log('🎮 window.parent:', window.parent);
+    console.log('🎮 window.parent === window:', window.parent === window);
+
     // Send close message to parent window
-    if (window.parent) {
+    if (window.parent && window.parent !== window) {
+      console.log('🎮 Sending BARGAIN_HUNTER_CLOSE message to parent');
       window.parent.postMessage({
         type: 'BARGAIN_HUNTER_CLOSE'
       }, '*');
+      console.log('🎮 Message sent successfully');
+    } else {
+      console.log('🎮 No parent window found, trying to close current window');
+      // Fallback: try to close current window or redirect
+      try {
+        window.close();
+      } catch (e) {
+        console.log('🎮 Cannot close window, trying history.back()');
+        window.history.back();
+      }
     }
   };
 

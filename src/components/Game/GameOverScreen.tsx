@@ -330,20 +330,32 @@ export default function GameOverScreen({
           
           <button
             onClick={(e) => {
+              console.log('🎮 Game Over Close button clicked! Event:', e);
+              console.log('🎮 onClose function:', onClose);
+              console.log('🎮 onClose type:', typeof onClose);
+
               e.preventDefault();
               e.stopPropagation();
-              console.log('🎮 Game Over Close button clicked!');
-              if (typeof onClose === 'function') {
-                onClose();
-              } else {
-                console.error('onClose is not a function:', onClose);
+
+              try {
+                if (typeof onClose === 'function') {
+                  console.log('🎮 Calling onClose...');
+                  onClose();
+                  console.log('🎮 onClose called successfully');
+                } else {
+                  console.error('❌ onClose is not a function:', onClose);
+                }
+              } catch (error) {
+                console.error('❌ Error calling onClose:', error);
               }
             }}
             onMouseDown={(e) => {
+              console.log('🎮 Mouse down on close button');
               e.preventDefault();
               e.stopPropagation();
             }}
             onTouchStart={(e) => {
+              console.log('🎮 Touch start on close button');
               e.preventDefault();
               e.stopPropagation();
             }}
@@ -357,11 +369,16 @@ export default function GameOverScreen({
               fontSize: '16px',
               fontWeight: 'bold',
               transition: 'all 0.3s ease',
-              zIndex: 9999,
+              zIndex: 10000,
               position: 'relative',
-              pointerEvents: 'auto'
+              pointerEvents: 'auto',
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              MozUserSelect: 'none',
+              msUserSelect: 'none'
             }}
             onMouseOver={(e) => {
+              console.log('🎮 Mouse over close button');
               e.currentTarget.style.background = 'white';
               e.currentTarget.style.color = '#333';
             }}

@@ -585,6 +585,14 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
           iframe.style.width = newWidth + 'px';
           iframe.style.height = newHeight + 'px';
         }
+      } else if (event.data.type === 'BARGAIN_HUNTER_CLOSE') {
+        // Handle close message from iframe
+        console.log('🎮 Received BARGAIN_HUNTER_CLOSE message');
+        var overlay = document.getElementById('bargain-hunter-modal');
+        if (overlay && overlay.parentNode) {
+          console.log('🎮 Removing overlay');
+          overlay.parentNode.removeChild(overlay);
+        }
       }
     });
 
