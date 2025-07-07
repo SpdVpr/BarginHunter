@@ -636,14 +636,16 @@ export default function EnhancedGameEngine({
       // Filter out off-screen obstacles
       const filtered = updated.filter(obstacle => obstacle.x > -100);
 
-      // Check collisions with precise hitbox (smaller than visual size)
+      // Check collisions with precise hitbox (matching actual visual character size)
       filtered.forEach(obstacle => {
-        // Reduce hitbox to match actual visual character size
-        const hitboxPadding = 8; // Reduce hitbox by 8px on each side
-        const playerHitboxX = player.x + hitboxPadding;
-        const playerHitboxY = player.y + hitboxPadding;
-        const playerHitboxWidth = player.width - (hitboxPadding * 2);
-        const playerHitboxHeight = player.height - (hitboxPadding * 2);
+        // Character visual size is ~15x30px (10x20 base * 1.5 scale), but hitbox is 60x60
+        // Reduce hitbox dramatically to match actual visual size
+        const hitboxPaddingX = 22; // Reduce width from 60px to ~16px
+        const hitboxPaddingY = 15; // Reduce height from 60px to ~30px
+        const playerHitboxX = player.x + hitboxPaddingX;
+        const playerHitboxY = player.y + hitboxPaddingY;
+        const playerHitboxWidth = player.width - (hitboxPaddingX * 2);
+        const playerHitboxHeight = player.height - (hitboxPaddingY * 2);
 
         if (playerHitboxX < obstacle.x + obstacle.width &&
             playerHitboxX + playerHitboxWidth > obstacle.x &&
@@ -663,14 +665,15 @@ export default function EnhancedGameEngine({
 
     // Debug: Draw hitbox in admin mode (optional)
     if (adminTest && false) { // Set to true to enable hitbox visualization
-      const hitboxPadding = 8;
+      const hitboxPaddingX = 22;
+      const hitboxPaddingY = 15;
       ctx.strokeStyle = '#FF0000';
       ctx.lineWidth = 2;
       ctx.strokeRect(
-        player.x + hitboxPadding,
-        player.y + hitboxPadding,
-        player.width - (hitboxPadding * 2),
-        player.height - (hitboxPadding * 2)
+        player.x + hitboxPaddingX,
+        player.y + hitboxPaddingY,
+        player.width - (hitboxPaddingX * 2),
+        player.height - (hitboxPaddingY * 2)
       );
     }
 
@@ -681,7 +684,7 @@ export default function EnhancedGameEngine({
     ctx.fillText(`Score: ${formatScore(score)}`, 10, 30);
 
     // Show current discount instead of level
-    const currentDiscount = discountTiers.find(tier => score >= tier.minScore)?.discount || 0;
+    const currentDiscount = gameConfig.discountTiers.find((tier: any) => score >= tier.minScore)?.discount || 0;
     if (currentDiscount > 0) {
       ctx.font = 'bold 16px Arial';
       ctx.fillStyle = '#4ecdc4';
