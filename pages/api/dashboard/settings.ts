@@ -219,7 +219,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         showOn: widgetSettings.showOn,
         timeDelay: widgetSettings.timeDelay,
         scrollPercentage: widgetSettings.scrollPercentage,
-        customPages: widgetSettings.customPages || [],
+        customPages: (widgetSettings.customPages || []).map((page: string) => {
+          // Normalize and validate URLs - support both relative paths and full URLs
+          const trimmed = page.trim();
+          if (!trimmed) return null;
+
+          // If it's a full URL, keep it as is
+          if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+            return trimmed;
+          }
+
+          // If it's a relative path, ensure it starts with /
+          if (!trimmed.startsWith('/')) {
+            return '/' + trimmed;
+          }
+
+          return trimmed;
+        }).filter(Boolean),
         // New targeting options
         userPercentage: widgetSettings.userPercentage ?? 100,
 

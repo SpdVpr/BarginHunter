@@ -316,17 +316,41 @@ export function WidgetDisplayTab({ shop }: WidgetDisplayTabProps) {
               />
 
               {widgetSettings.showOn === 'custom' && (
-                <TextField
-                  label="Custom Page URLs"
-                  value={widgetSettings.customPages?.join('\n') || ''}
-                  onChange={(value) => {
-                    const pages = value.split('\n').filter(page => page.trim() !== '');
-                    setWidgetSettings({...widgetSettings, customPages: pages});
-                  }}
-                  multiline={4}
-                  helpText="Enter one URL per line (e.g., /about, /contact, /special-page)"
-                  placeholder="/about&#10;/contact&#10;/special-page"
-                />
+                <div>
+                  <TextField
+                    label="Custom Page URLs"
+                    value={widgetSettings.customPages?.join('\n') || ''}
+                    onChange={(value) => {
+                      const pages = value.split('\n')
+                        .map(page => page.trim())
+                        .filter(page => page !== '');
+                      setWidgetSettings({...widgetSettings, customPages: pages});
+                    }}
+                    multiline={6}
+                    helpText="Enter one URL per line. Supports both relative paths and full URLs with parameters."
+                    placeholder="/about&#10;/contact&#10;/products/example-shirt&#10;https://yourstore.myshopify.com/products/example-shirt?variant=123&#10;https://yourstore.myshopify.com/collections/sale&#10;/pages/custom-landing"
+                  />
+
+                  <div style={{
+                    marginTop: '1rem',
+                    padding: '1rem',
+                    backgroundColor: '#f6f6f7',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    color: '#637381'
+                  }}>
+                    <Text variant="headingXs" as="h4" color="subdued">
+                      📝 Supported URL Formats:
+                    </Text>
+                    <div style={{ marginTop: '0.5rem' }}>
+                      <div><strong>Relative paths:</strong> /about, /contact, /products/shirt</div>
+                      <div><strong>Product pages:</strong> /products/example-shirt, /products/shirt?variant=123</div>
+                      <div><strong>Collection pages:</strong> /collections/sale, /collections/featured</div>
+                      <div><strong>Full URLs:</strong> https://yourstore.myshopify.com/products/example-shirt?variant=123</div>
+                      <div><strong>Custom pages:</strong> /pages/about-us, /pages/size-guide</div>
+                    </div>
+                  </div>
+                </div>
               )}
 
               <RangeSlider
