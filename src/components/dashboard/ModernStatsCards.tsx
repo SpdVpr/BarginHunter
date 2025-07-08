@@ -2,40 +2,7 @@
 import React from 'react';
 import { Card, Text, Stack, Badge } from '@shopify/polaris';
 import { SharedStats } from '../../hooks/useSharedStats';
-
-// Mobile responsive styles
-const mobileStyles = `
-  @media (max-width: 768px) {
-    .modern-stats-container {
-      grid-template-columns: 1fr !important;
-      gap: 1rem !important;
-    }
-    .modern-stat-card {
-      padding: 1.25rem !important;
-      min-height: 120px !important;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .modern-stats-container {
-      gap: 0.75rem !important;
-    }
-    .modern-stat-card {
-      padding: 1rem !important;
-      min-height: 100px !important;
-    }
-  }
-`;
-
-// Inject styles
-if (typeof document !== 'undefined') {
-  const styleElement = document.createElement('style');
-  styleElement.textContent = mobileStyles;
-  if (!document.head.querySelector('style[data-modern-stats]')) {
-    styleElement.setAttribute('data-modern-stats', 'true');
-    document.head.appendChild(styleElement);
-  }
-}
+import styles from './ModernStatsCards.module.css';
 
 interface ModernStatsCardsProps {
   stats: SharedStats;
@@ -56,20 +23,9 @@ function ModernStatCard({ title, value, subtitle, badge, gradient, icon, trend }
   return (
     <Card>
       <div
-        className="modern-stat-card"
+        className={styles.modernStatCard}
         style={{
-          padding: '1.5rem',
           background: gradient,
-          color: 'white',
-          borderRadius: '12px',
-          position: 'relative',
-          overflow: 'hidden',
-          minHeight: '140px',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          width: '100%',
-          boxSizing: 'border-box',
         }}>
         {/* Background Pattern */}
         <div style={{
@@ -132,27 +88,12 @@ function ModernStatCard({ title, value, subtitle, badge, gradient, icon, trend }
 }
 
 export function ModernStatsCards({ stats, variant = 'grid' }: ModernStatsCardsProps) {
-  const containerStyle = variant === 'grid'
-    ? {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-        gap: '1rem',
-        width: '100%',
-        boxSizing: 'border-box' as const,
-      }
-    : {
-        display: 'flex',
-        gap: '1rem',
-        overflowX: 'auto' as const,
-        paddingBottom: '1rem',
-        width: '100%',
-        boxSizing: 'border-box' as const,
-      };
+  const containerClassName = variant === 'grid'
+    ? styles.modernStatsContainer
+    : styles.modernStatsContainerRow;
 
   return (
-    <div
-      className="modern-stats-container"
-      style={containerStyle}>
+    <div className={containerClassName}>
       {/* Total Sessions */}
       <ModernStatCard
         title="Total Sessions"
@@ -243,24 +184,9 @@ export function ModernStatsCards({ stats, variant = 'grid' }: ModernStatsCardsPr
 // Quick Stats Component for smaller displays
 export function QuickModernStats({ stats }: { stats: SharedStats }) {
   return (
-    <div
-      className="modern-stats-container"
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-        gap: '1rem',
-        width: '100%',
-        boxSizing: 'border-box',
-      }}>
+    <div className={styles.quickStatsContainer}>
       <Card>
-        <div style={{
-          padding: '1.25rem',
-          textAlign: 'center',
-          minHeight: '100px',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-        }}>
+        <div className={styles.quickStatCard}>
           <Text variant="heading2xl" as="p">
             {stats.totalSessions.toLocaleString()}
           </Text>
@@ -271,14 +197,7 @@ export function QuickModernStats({ stats }: { stats: SharedStats }) {
       </Card>
 
       <Card>
-        <div style={{
-          padding: '1.25rem',
-          textAlign: 'center',
-          minHeight: '100px',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-        }}>
+        <div className={styles.quickStatCard}>
           <Text variant="heading2xl" as="p">
             ${stats.revenue?.toLocaleString() || '0'}
           </Text>
