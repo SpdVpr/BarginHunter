@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import {
-  Page,
   Layout,
   Card,
   Text,
@@ -15,6 +14,9 @@ import {
   ProgressBar,
   DisplayText,
 } from '@shopify/polaris';
+import { AdminDashboardLayout } from '../../src/components/dashboard/ModernDashboardLayout';
+import { ResponsiveAdminStats, ResponsiveDataTable } from '../../src/components/admin/ResponsiveAdminStats';
+import styles from '../../src/styles/AdminDashboard.module.css';
 
 interface AdminAnalytics {
   metrics: {
@@ -138,42 +140,34 @@ export default function AdminDashboard() {
 
   if (!isAuthenticated) {
     return (
-      <Page title="Admin Access Required">
-        <Layout>
-          <Layout.Section>
-            <Card>
-              <div style={{ padding: '2rem', textAlign: 'center' }}>
-                <Stack vertical spacing="loose">
-                  <DisplayText size="medium">🔐 Admin Dashboard</DisplayText>
-                  <Text variant="bodyMd">
-                    This area is restricted to authorized administrators only.
-                  </Text>
-                  <Button primary onClick={handleLogin}>
-                    Login as Admin
-                  </Button>
-                </Stack>
-              </div>
-            </Card>
-          </Layout.Section>
-        </Layout>
-      </Page>
+      <AdminDashboardLayout title="Admin Access Required">
+        <div className={styles.adminDashboard}>
+          <div className={styles.errorContainer}>
+            <Stack vertical spacing="loose">
+              <DisplayText size="medium">🔐 Admin Dashboard</DisplayText>
+              <Text variant="bodyMd">
+                This area is restricted to authorized administrators only.
+              </Text>
+              <Button primary onClick={handleLogin}>
+                Login as Admin
+              </Button>
+            </Stack>
+          </div>
+        </div>
+      </AdminDashboardLayout>
     );
   }
 
   if (loading || !analytics) {
     return (
-      <Page title="Admin Dashboard">
-        <Layout>
-          <Layout.Section>
-            <Card>
-              <div style={{ padding: '2rem', textAlign: 'center' }}>
-                <Spinner size="large" />
-                <Text variant="bodyMd">Loading admin analytics...</Text>
-              </div>
-            </Card>
-          </Layout.Section>
-        </Layout>
-      </Page>
+      <AdminDashboardLayout title="Admin Dashboard">
+        <div className={styles.adminDashboard}>
+          <div className={styles.loadingContainer}>
+            <Spinner size="large" />
+            <Text variant="bodyMd">Loading admin analytics...</Text>
+          </div>
+        </div>
+      </AdminDashboardLayout>
     );
   }
 
@@ -198,223 +192,131 @@ export default function AdminDashboard() {
   ]);
 
   const renderOverviewTab = () => (
-    <Layout>
-      {/* Key Metrics */}
-      <Layout.Section>
-        <Layout>
-          <Layout.Section oneThird>
-            <Card>
-              <div style={{ padding: '1.5rem', textAlign: 'center' }}>
-                <Stack vertical spacing="tight">
-                  <Text variant="headingMd" color="subdued">Monthly Revenue</Text>
-                  <DisplayText size="large">${analytics.metrics.totalRevenue.toLocaleString()}</DisplayText>
-                  <Text variant="bodyMd" color="success">+12% from last month</Text>
-                </Stack>
-              </div>
-            </Card>
-          </Layout.Section>
-          
-          <Layout.Section oneThird>
-            <Card>
-              <div style={{ padding: '1.5rem', textAlign: 'center' }}>
-                <Stack vertical spacing="tight">
-                  <Text variant="headingMd" color="subdued">Active Shops</Text>
-                  <DisplayText size="large">{analytics.metrics.activeShops.toLocaleString()}</DisplayText>
-                  <Text variant="bodyMd" color="success">
-                    {analytics.metrics.totalShops} total shops
-                  </Text>
-                </Stack>
-              </div>
-            </Card>
-          </Layout.Section>
-          
-          <Layout.Section oneThird>
-            <Card>
-              <div style={{ padding: '1.5rem', textAlign: 'center' }}>
-                <Stack vertical spacing="tight">
-                  <Text variant="headingMd" color="subdued">Discount Codes</Text>
-                  <DisplayText size="large">{analytics.metrics.totalDiscountCodes.toLocaleString()}</DisplayText>
-                  <Text variant="bodyMd" color="subdued">
-                    {analytics.metrics.averageDiscountCodesPerShop.toFixed(1)} avg per shop
-                  </Text>
-                </Stack>
-              </div>
-            </Card>
-          </Layout.Section>
-        </Layout>
-      </Layout.Section>
-
-      {/* Plan Distribution */}
-      <Layout.Section>
-        <Card>
-          <div style={{ padding: '1.5rem' }}>
-            <Text variant="headingMd" as="h3" marginBottom="4">Plan Distribution</Text>
-            <Layout>
-              <Layout.Section oneQuarter>
-                <Stack vertical spacing="tight">
-                  <Text variant="bodyMd">🆓 Free</Text>
-                  <Text variant="headingLg">{analytics.metrics.planDistribution.free}</Text>
-                  <ProgressBar 
-                    progress={(analytics.metrics.planDistribution.free / analytics.metrics.totalShops) * 100} 
-                    size="small" 
-                  />
-                </Stack>
-              </Layout.Section>
-              
-              <Layout.Section oneQuarter>
-                <Stack vertical spacing="tight">
-                  <Text variant="bodyMd">💼 Starter</Text>
-                  <Text variant="headingLg">{analytics.metrics.planDistribution.starter}</Text>
-                  <ProgressBar 
-                    progress={(analytics.metrics.planDistribution.starter / analytics.metrics.totalShops) * 100} 
-                    size="small" 
-                    color="success"
-                  />
-                </Stack>
-              </Layout.Section>
-              
-              <Layout.Section oneQuarter>
-                <Stack vertical spacing="tight">
-                  <Text variant="bodyMd">🚀 Pro</Text>
-                  <Text variant="headingLg">{analytics.metrics.planDistribution.pro}</Text>
-                  <ProgressBar 
-                    progress={(analytics.metrics.planDistribution.pro / analytics.metrics.totalShops) * 100} 
-                    size="small" 
-                    color="success"
-                  />
-                </Stack>
-              </Layout.Section>
-              
-              <Layout.Section oneQuarter>
-                <Stack vertical spacing="tight">
-                  <Text variant="bodyMd">🏢 Enterprise</Text>
-                  <Text variant="headingLg">{analytics.metrics.planDistribution.enterprise}</Text>
-                  <ProgressBar 
-                    progress={(analytics.metrics.planDistribution.enterprise / analytics.metrics.totalShops) * 100} 
-                    size="small" 
-                    color="success"
-                  />
-                </Stack>
-              </Layout.Section>
-            </Layout>
-          </div>
-        </Card>
-      </Layout.Section>
-    </Layout>
+    <ResponsiveAdminStats metrics={analytics.metrics} />
   );
 
   const renderRevenueTab = () => (
-    <Layout>
-      <Layout.Section>
-        <Card>
-          <div style={{ padding: '1.5rem' }}>
-            <Text variant="headingMd" as="h3" marginBottom="4">Revenue by Plan</Text>
-            <DataTable
-              columnContentTypes={['text', 'numeric', 'numeric', 'numeric']}
-              headings={['Plan', 'Customers', 'Revenue', 'Avg Revenue/Customer']}
-              rows={Object.entries(analytics.planMetrics).map(([plan, metrics]) => [
-                plan.toUpperCase(),
-                metrics.count.toString(),
-                `$${metrics.revenue.toFixed(2)}`,
-                `$${metrics.count > 0 ? (metrics.revenue / metrics.count).toFixed(2) : '0.00'}`,
-              ])}
-            />
-          </div>
-        </Card>
-      </Layout.Section>
-    </Layout>
+    <ResponsiveDataTable
+      title="💰 Revenue by Plan"
+      columnContentTypes={['text', 'numeric', 'numeric', 'numeric']}
+      headings={['Plan', 'Customers', 'Revenue', 'Avg Revenue/Customer']}
+      rows={Object.entries(analytics.planMetrics).map(([plan, metrics]) => [
+        plan.toUpperCase(),
+        metrics.count.toString(),
+        `$${metrics.revenue.toFixed(2)}`,
+        `$${metrics.count > 0 ? (metrics.revenue / metrics.count).toFixed(2) : '0.00'}`,
+      ])}
+    />
   );
 
   const renderShopsTab = () => (
-    <Layout>
-      <Layout.Section>
-        <Card>
-          <div style={{ padding: '1.5rem' }}>
-            <Stack distribution="equalSpacing" alignment="center">
-              <Text variant="headingMd" as="h3">All Shops</Text>
-              <Button onClick={() => window.location.reload()}>Refresh</Button>
-            </Stack>
-            <div style={{ marginTop: '1rem' }}>
-              <DataTable
-                columnContentTypes={['text', 'text', 'text', 'numeric', 'numeric', 'text']}
-                headings={['Shop Domain', 'Plan', 'Status', 'Revenue', 'Discount Codes', 'Last Active']}
-                rows={shopsTableRows}
-                footerContent={`Showing ${shops.length} shops`}
-              />
-            </div>
-          </div>
-        </Card>
-      </Layout.Section>
-    </Layout>
+    <ResponsiveDataTable
+      title="🏪 All Shops"
+      columnContentTypes={['text', 'text', 'text', 'numeric', 'numeric', 'text']}
+      headings={['Shop Domain', 'Plan', 'Status', 'Revenue', 'Discount Codes', 'Last Active']}
+      rows={shopsTableRows}
+      footerContent={`Showing ${shops.length} shops`}
+      actions={<Button onClick={() => window.location.reload()}>Refresh</Button>}
+    />
   );
 
   const renderUsageTab = () => (
-    <Layout>
-      <Layout.Section>
-        <Card>
-          <div style={{ padding: '1.5rem' }}>
-            <Text variant="headingMd" as="h3" marginBottom="4">Usage Statistics</Text>
-            <Layout>
-              <Layout.Section oneHalf>
-                <Stack vertical spacing="loose">
-                  <div>
-                    <Text variant="bodyMd" fontWeight="semibold">Total Game Sessions</Text>
-                    <DisplayText size="medium">{analytics.metrics.totalGameSessions.toLocaleString()}</DisplayText>
-                  </div>
-                  <div>
-                    <Text variant="bodyMd" fontWeight="semibold">Total Discount Codes</Text>
-                    <DisplayText size="medium">{analytics.metrics.totalDiscountCodes.toLocaleString()}</DisplayText>
-                  </div>
-                </Stack>
-              </Layout.Section>
-              
-              <Layout.Section oneHalf>
-                <Stack vertical spacing="loose">
-                  <div>
-                    <Text variant="bodyMd" fontWeight="semibold">Average Codes per Shop</Text>
-                    <DisplayText size="medium">{analytics.metrics.averageDiscountCodesPerShop.toFixed(1)}</DisplayText>
-                  </div>
-                  <div>
-                    <Text variant="bodyMd" fontWeight="semibold">Conversion Rate</Text>
-                    <DisplayText size="medium">
-                      {analytics.metrics.totalGameSessions > 0 
-                        ? ((analytics.metrics.totalDiscountCodes / analytics.metrics.totalGameSessions) * 100).toFixed(1)
-                        : '0'
-                      }%
-                    </DisplayText>
-                  </div>
-                </Stack>
-              </Layout.Section>
-            </Layout>
+    <div>
+      <div className={styles.adminCard}>
+        <div className={styles.adminCardHeader}>
+          <Text variant="headingMd" as="h3">📊 Usage Statistics</Text>
+        </div>
+        <div className={styles.adminCardContent}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
+            <div className={styles.adminStatCard}>
+              <Stack vertical spacing="loose">
+                <div>
+                  <Text variant="bodyMd" fontWeight="semibold">🎮 Total Game Sessions</Text>
+                  <DisplayText size="medium">{analytics.metrics.totalGameSessions.toLocaleString()}</DisplayText>
+                </div>
+                <div>
+                  <Text variant="bodyMd" fontWeight="semibold">🎫 Total Discount Codes</Text>
+                  <DisplayText size="medium">{analytics.metrics.totalDiscountCodes.toLocaleString()}</DisplayText>
+                </div>
+              </Stack>
+            </div>
+
+            <div className={styles.adminStatCard}>
+              <Stack vertical spacing="loose">
+                <div>
+                  <Text variant="bodyMd" fontWeight="semibold">📈 Average Codes per Shop</Text>
+                  <DisplayText size="medium">{analytics.metrics.averageDiscountCodesPerShop.toFixed(1)}</DisplayText>
+                </div>
+                <div>
+                  <Text variant="bodyMd" fontWeight="semibold">🎯 Conversion Rate</Text>
+                  <DisplayText size="medium">
+                    {analytics.metrics.totalGameSessions > 0
+                      ? ((analytics.metrics.totalDiscountCodes / analytics.metrics.totalGameSessions) * 100).toFixed(1)
+                      : '0'
+                    }%
+                  </DisplayText>
+                </div>
+              </Stack>
+            </div>
           </div>
-        </Card>
-      </Layout.Section>
-    </Layout>
+        </div>
+      </div>
+    </div>
   );
 
   return (
-    <Page 
+    <AdminDashboardLayout
       title="🏢 Bargain Hunter - Admin Dashboard"
       subtitle="Business intelligence and shop management"
-      primaryAction={{
-        content: 'Generate Report',
-        onAction: () => window.open('/api/admin/export/report', '_blank'),
-      }}
     >
-      <Banner status="info">
-        <p>Welcome to the Bargain Hunter admin dashboard. All data is updated in real-time.</p>
-      </Banner>
-      
-      <div style={{ marginTop: '1rem' }}>
-        <Tabs tabs={tabs} selected={selectedTab} onSelect={setSelectedTab}>
-          <div style={{ marginTop: '1rem' }}>
-            {selectedTab === 0 && renderOverviewTab()}
-            {selectedTab === 1 && renderRevenueTab()}
-            {selectedTab === 2 && renderShopsTab()}
-            {selectedTab === 3 && renderUsageTab()}
+      <div className={`${styles.adminDashboard} admin-dashboard-page`}>
+        {/* Modern Header */}
+        <div className={styles.adminHeader}>
+          <div className={styles.adminHeaderContent}>
+            <div className={styles.adminTitle}>
+              <Text variant="headingXl" as="h1" color="subdued">
+                🏢 Bargain Hunter - Admin Dashboard
+              </Text>
+              <Text variant="bodyMd" as="p" color="subdued">
+                Business intelligence and shop management
+              </Text>
+            </div>
+            <div className={styles.adminActions}>
+              <Button
+                onClick={() => window.open('/api/admin/export/report', '_blank')}
+              >
+                Generate Report
+              </Button>
+            </div>
           </div>
-        </Tabs>
+        </div>
+
+        {/* Banner */}
+        <div className={styles.adminBanner}>
+          <Banner status="info">
+            <p>Welcome to the Bargain Hunter admin dashboard. All data is updated in real-time.</p>
+          </Banner>
+        </div>
+
+        {/* Modern Tabs */}
+        <div className={styles.adminTabsContainer}>
+          <div className={styles.adminTabsContent}>
+            <Tabs
+              tabs={tabs}
+              selected={selectedTab}
+              onSelect={setSelectedTab}
+            />
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        <div className={styles.adminContent}>
+          {selectedTab === 0 && renderOverviewTab()}
+          {selectedTab === 1 && renderRevenueTab()}
+          {selectedTab === 2 && renderShopsTab()}
+          {selectedTab === 3 && renderUsageTab()}
+        </div>
       </div>
-    </Page>
+    </AdminDashboardLayout>
   );
 }

@@ -7,6 +7,12 @@ interface ModernDashboardLayoutProps {
   shop: string;
 }
 
+interface AdminDashboardLayoutProps {
+  children: React.ReactNode;
+  title?: string;
+  subtitle?: string;
+}
+
 export function ModernDashboardLayout({ children, shop }: ModernDashboardLayoutProps) {
   const [mobileNavigationActive, setMobileNavigationActive] = useState(false);
   const [userMenuActive, setUserMenuActive] = useState(false);
@@ -54,6 +60,39 @@ export function ModernDashboardLayout({ children, shop }: ModernDashboardLayoutP
   const toastMarkup = toastActive ? (
     <Toast
       content="Help documentation coming soon!"
+      onDismiss={() => setToastActive(false)}
+    />
+  ) : null;
+
+  return (
+    <Frame
+      topBar={topBarMarkup}
+      showMobileNavigation={mobileNavigationActive}
+      onNavigationDismiss={toggleMobileNavigation}
+    >
+      {toastMarkup}
+      {children}
+    </Frame>
+  );
+}
+
+export function AdminDashboardLayout({ children, title = "Admin Dashboard", subtitle }: AdminDashboardLayoutProps) {
+  const [mobileNavigationActive, setMobileNavigationActive] = useState(false);
+  const [toastActive, setToastActive] = useState(false);
+
+  const toggleMobileNavigation = () => {
+    setMobileNavigationActive(!mobileNavigationActive);
+  };
+
+  const topBarMarkup = (
+    <TopBar
+      showNavigationToggle={false}
+    />
+  );
+
+  const toastMarkup = toastActive ? (
+    <Toast
+      content="Admin action completed!"
       onDismiss={() => setToastActive(false)}
     />
   ) : null;
