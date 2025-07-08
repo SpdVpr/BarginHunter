@@ -3,6 +3,40 @@ import React from 'react';
 import { Card, Text, Stack, Badge } from '@shopify/polaris';
 import { SharedStats } from '../../hooks/useSharedStats';
 
+// Mobile responsive styles
+const mobileStyles = `
+  @media (max-width: 768px) {
+    .modern-stats-container {
+      grid-template-columns: 1fr !important;
+      gap: 1rem !important;
+    }
+    .modern-stat-card {
+      padding: 1.25rem !important;
+      min-height: 120px !important;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .modern-stats-container {
+      gap: 0.75rem !important;
+    }
+    .modern-stat-card {
+      padding: 1rem !important;
+      min-height: 100px !important;
+    }
+  }
+`;
+
+// Inject styles
+if (typeof document !== 'undefined') {
+  const styleElement = document.createElement('style');
+  styleElement.textContent = mobileStyles;
+  if (!document.head.querySelector('style[data-modern-stats]')) {
+    styleElement.setAttribute('data-modern-stats', 'true');
+    document.head.appendChild(styleElement);
+  }
+}
+
 interface ModernStatsCardsProps {
   stats: SharedStats;
   variant?: 'grid' | 'row';
@@ -21,24 +55,32 @@ interface ModernStatCardProps {
 function ModernStatCard({ title, value, subtitle, badge, gradient, icon, trend }: ModernStatCardProps) {
   return (
     <Card>
-      <div style={{
-        padding: '2rem',
-        background: gradient,
-        color: 'white',
-        borderRadius: '12px',
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
+      <div
+        className="modern-stat-card"
+        style={{
+          padding: '1.5rem',
+          background: gradient,
+          color: 'white',
+          borderRadius: '12px',
+          position: 'relative',
+          overflow: 'hidden',
+          minHeight: '140px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          width: '100%',
+          boxSizing: 'border-box',
+        }}>
         {/* Background Pattern */}
         <div style={{
           position: 'absolute',
           top: 0,
           right: 0,
-          width: '100px',
-          height: '100px',
+          width: '80px',
+          height: '80px',
           background: 'rgba(255, 255, 255, 0.1)',
           borderRadius: '50%',
-          transform: 'translate(30px, -30px)',
+          transform: 'translate(25px, -25px)',
         }} />
         
         <Stack vertical spacing="tight">
@@ -90,21 +132,27 @@ function ModernStatCard({ title, value, subtitle, badge, gradient, icon, trend }
 }
 
 export function ModernStatsCards({ stats, variant = 'grid' }: ModernStatsCardsProps) {
-  const containerStyle = variant === 'grid' 
+  const containerStyle = variant === 'grid'
     ? {
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-        gap: '1.5rem',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+        gap: '1rem',
+        width: '100%',
+        boxSizing: 'border-box' as const,
       }
     : {
         display: 'flex',
-        gap: '1.5rem',
-        overflowX: 'auto',
+        gap: '1rem',
+        overflowX: 'auto' as const,
         paddingBottom: '1rem',
+        width: '100%',
+        boxSizing: 'border-box' as const,
       };
 
   return (
-    <div style={containerStyle}>
+    <div
+      className="modern-stats-container"
+      style={containerStyle}>
       {/* Total Sessions */}
       <ModernStatCard
         title="Total Sessions"
@@ -195,13 +243,24 @@ export function ModernStatsCards({ stats, variant = 'grid' }: ModernStatsCardsPr
 // Quick Stats Component for smaller displays
 export function QuickModernStats({ stats }: { stats: SharedStats }) {
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-      gap: '1rem',
-    }}>
+    <div
+      className="modern-stats-container"
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+        gap: '1rem',
+        width: '100%',
+        boxSizing: 'border-box',
+      }}>
       <Card>
-        <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+        <div style={{
+          padding: '1.25rem',
+          textAlign: 'center',
+          minHeight: '100px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+        }}>
           <Text variant="heading2xl" as="p">
             {stats.totalSessions.toLocaleString()}
           </Text>
@@ -212,7 +271,14 @@ export function QuickModernStats({ stats }: { stats: SharedStats }) {
       </Card>
 
       <Card>
-        <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+        <div style={{
+          padding: '1.25rem',
+          textAlign: 'center',
+          minHeight: '100px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+        }}>
           <Text variant="heading2xl" as="p">
             ${stats.revenue?.toLocaleString() || '0'}
           </Text>

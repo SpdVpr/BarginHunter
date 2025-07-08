@@ -47,6 +47,8 @@
   height: auto !important;
   max-height: none !important;
   min-height: auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .modernStatsGrid {
@@ -54,6 +56,8 @@
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .modernStatCard {
@@ -137,24 +141,28 @@
   .modernHeader {
     padding: 1rem;
   }
-  
+
   .modernTabsContainer {
     padding: 0 1rem;
   }
-  
+
   .modernContent {
     padding: 1rem;
+    margin: 0;
+    max-width: 100%;
   }
-  
+
   .modernStatsGrid {
     grid-template-columns: 1fr;
     gap: 1rem;
+    margin-bottom: 1rem;
   }
-  
+
   .modernStatCard {
     padding: 1.5rem;
+    margin: 0;
   }
-  
+
   .modernHeaderContent {
     flex-direction: column;
     gap: 1rem;
@@ -164,15 +172,26 @@
 
 @media (max-width: 480px) {
   .modernHeader {
-    padding: 0.5rem;
+    padding: 0.75rem;
   }
-  
+
   .modernContent {
-    padding: 0.5rem;
+    padding: 0.75rem;
+    margin: 0;
   }
-  
+
+  .modernStatsGrid {
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
   .modernStatCard {
     padding: 1rem;
+    margin: 0;
+  }
+
+  .modernHeaderContent {
+    gap: 0.75rem;
   }
 }
 
@@ -198,6 +217,47 @@
 .modernCard:focus-within {
   outline: 2px solid #667eea;
   outline-offset: 2px;
+}
+
+/* Additional mobile fixes */
+@media (max-width: 768px) {
+  /* Ensure cards don't overflow */
+  .modernStatsGrid > * {
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  /* Better card spacing */
+  .modernCard {
+    margin-bottom: 1rem;
+  }
+
+  /* Responsive text sizing */
+  .modernStatCard h1,
+  .modernStatCard h2,
+  .modernStatCard h3 {
+    font-size: clamp(1.25rem, 4vw, 2rem);
+  }
+}
+
+@media (max-width: 480px) {
+  /* Ultra-mobile optimizations */
+  .modernStatsGrid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .modernStatCard {
+    padding: 1rem;
+    min-height: 120px;
+  }
+
+  /* Smaller text on very small screens */
+  .modernStatCard h1,
+  .modernStatCard h2,
+  .modernStatCard h3 {
+    font-size: clamp(1rem, 3.5vw, 1.5rem);
+  }
 }
 
 /* Print styles */
