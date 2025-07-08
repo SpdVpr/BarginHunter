@@ -66,13 +66,7 @@ export function AnalyticsTab({ shop }: AnalyticsTabProps) {
   }
 
   return (
-    <div style={{
-      display: 'grid',
-      gap: '2rem',
-      paddingBottom: '4rem',
-      overflow: 'visible',
-      height: 'auto',
-    }}>
+    <div style={{ display: 'grid', gap: '1.5rem' }}>
       {/* Period Selector */}
       <Card>
         <div style={{ padding: '1.5rem' }}>

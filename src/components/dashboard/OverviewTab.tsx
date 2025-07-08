@@ -158,7 +158,7 @@ export function OverviewTab({ shop, onTabChange }: OverviewTabProps) {
   }
 
   return (
-    <div style={{ display: 'grid', gap: '2rem' }}>
+    <div style={{ display: 'grid', gap: '1.5rem' }}>
       {/* Billing Status Card - Most Important */}
       {billingLoading ? (
         <Card>
