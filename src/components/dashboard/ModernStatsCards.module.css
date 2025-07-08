@@ -23,13 +23,16 @@
   color: white;
   border-radius: 12px;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   min-height: 140px;
+  height: auto;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   width: 100%;
   box-sizing: border-box;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .modernStatCard::before {
@@ -102,6 +105,8 @@
   .modernStatCard {
     padding: 1rem;
     min-height: 100px;
+    height: auto;
+    overflow: visible;
   }
   
   .quickStatsContainer {
@@ -118,6 +123,8 @@
   .modernStatCard {
     padding: 0.75rem;
     min-height: 90px;
+    height: auto;
+    overflow: visible;
   }
   
   .quickStatCard {
@@ -126,28 +133,50 @@
   }
 }
 
-/* Ensure proper text scaling */
+/* Ensure proper text scaling and spacing */
 @media (max-width: 768px) {
+  .modernStatsContainer {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .modernStatCard {
+    margin-bottom: 0.5rem;
+  }
+
   .modernStatCard h1,
   .modernStatCard h2,
   .modernStatCard h3 {
     font-size: clamp(1.25rem, 4vw, 2rem);
+    margin-bottom: 0.5rem;
   }
-  
+
   .modernStatCard p {
     font-size: clamp(0.875rem, 3vw, 1rem);
+    line-height: 1.4;
   }
 }
 
 @media (max-width: 480px) {
+  .modernStatsContainer {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .modernStatCard {
+    margin-bottom: 0.25rem;
+  }
+
   .modernStatCard h1,
   .modernStatCard h2,
   .modernStatCard h3 {
     font-size: clamp(1rem, 3.5vw, 1.5rem);
+    margin-bottom: 0.25rem;
   }
-  
+
   .modernStatCard p {
     font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+    line-height: 1.3;
   }
 }
 
