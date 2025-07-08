@@ -88,11 +88,11 @@ export function AnalyticsTab({ shop }: AnalyticsTabProps) {
 
       {analyticsData && (
         <>
-          {/* Key Metrics Grid */}
+          {/* Key Metrics Grid - Same structure as Games tab */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-            gap: '1.5rem',
+            gap: '1.5rem'
           }}>
             <Card>
               <div style={{ padding: '1.5rem', textAlign: 'center' }}>

@@ -13,7 +13,6 @@ import {
   Banner,
 } from '@shopify/polaris';
 import { useSharedStats } from '../../hooks/useSharedStats';
-import { ModernStatsCards } from './ModernStatsCards';
 
 interface OverviewTabProps {
   shop: string | string[] | undefined;
@@ -245,8 +244,68 @@ export function OverviewTab({ shop, onTabChange }: OverviewTabProps) {
         </Banner>
       )}
 
-      {/* Modern Stats Grid */}
-      <ModernStatsCards stats={stats} variant="grid" />
+      {/* Stats Grid - Same structure as Games tab */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+        gap: '1.5rem'
+      }}>
+        <Card>
+          <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+            <Text variant="heading2xl" as="p">
+              {stats.totalSessions}
+            </Text>
+            <Text variant="headingMd" as="h3" color="subdued">
+              Total Sessions
+            </Text>
+            <Badge status="info">
+              {stats.completedSessions} completed
+            </Badge>
+          </div>
+        </Card>
+
+        <Card>
+          <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+            <Text variant="heading2xl" as="p">
+              {Math.round(stats.completionRate)}%
+            </Text>
+            <Text variant="headingMd" as="h3" color="subdued">
+              Completion Rate
+            </Text>
+            <Badge status={stats.completionRate > 50 ? "success" : "attention"}>
+              {stats.completionRate > 50 ? "Good" : "Needs improvement"}
+            </Badge>
+          </div>
+        </Card>
+
+        <Card>
+          <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+            <Text variant="heading2xl" as="p">
+              {stats.totalDiscounts}
+            </Text>
+            <Text variant="headingMd" as="h3" color="subdued">
+              Discounts Generated
+            </Text>
+            <Badge status="success">
+              Active codes
+            </Badge>
+          </div>
+        </Card>
+
+        <Card>
+          <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+            <Text variant="heading2xl" as="p">
+              {Math.round(stats.averageScore)}
+            </Text>
+            <Text variant="headingMd" as="h3" color="subdued">
+              Average Score
+            </Text>
+            <Text variant="bodyMd" as="p" color="subdued">
+              Points per game
+            </Text>
+          </div>
+        </Card>
+      </div>
 
       {/* Recent Activity */}
       <Card>
