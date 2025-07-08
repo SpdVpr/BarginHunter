@@ -13,6 +13,7 @@ import {
   Banner,
 } from '@shopify/polaris';
 import { useSharedStats } from '../../hooks/useSharedStats';
+import styles from './ResponsiveGrid.module.css';
 
 interface OverviewTabProps {
   shop: string | string[] | undefined;
@@ -157,16 +158,17 @@ export function OverviewTab({ shop, onTabChange }: OverviewTabProps) {
   }
 
   return (
-    <div style={{ display: 'grid', gap: '1.5rem' }}>
+    <div className={styles.container}>
       {/* Billing Status Card - Most Important */}
-      {billingLoading ? (
-        <Card>
-          <div style={{ padding: '2rem', textAlign: 'center' }}>
-            <Spinner size="small" />
-            <Text variant="bodyMd">Loading billing information...</Text>
-          </div>
-        </Card>
-      ) : billingInfo ? (
+      <div className={styles.section}>
+        {billingLoading ? (
+          <Card>
+            <div style={{ padding: '2rem', textAlign: 'center' }}>
+              <Spinner size="small" />
+              <Text variant="bodyMd">Loading billing information...</Text>
+            </div>
+          </Card>
+        ) : billingInfo ? (
         <Card>
           <div style={{ padding: '1.5rem' }}>
             <Stack distribution="equalSpacing" alignment="center">
@@ -222,34 +224,33 @@ export function OverviewTab({ shop, onTabChange }: OverviewTabProps) {
             </Stack>
           </div>
         </Card>
-      ) : null}
+        ) : null}
+      </div>
 
       {/* Usage Warning Banner */}
       {billingInfo && billingInfo.usagePercentage >= 95 && billingInfo.discountCodesLimit !== -1 && (
-        <Banner status="critical">
-          <Stack vertical spacing="tight">
-            <Text variant="bodyMd" fontWeight="semibold">
-              🚨 Discount Code Limit Almost Reached!
-            </Text>
-            <Text variant="bodyMd">
-              You've used {billingInfo.discountCodesUsed} of {billingInfo.discountCodesLimit} discount codes this month.
-              Upgrade your plan to continue generating codes for your customers.
-            </Text>
-            <div>
-              <Button primary onClick={handleUpgrade}>
-                View Upgrade Options
-              </Button>
-            </div>
-          </Stack>
-        </Banner>
+        <div className={styles.section}>
+          <Banner status="critical">
+            <Stack vertical spacing="tight">
+              <Text variant="bodyMd" fontWeight="semibold">
+                🚨 Discount Code Limit Almost Reached!
+              </Text>
+              <Text variant="bodyMd">
+                You've used {billingInfo.discountCodesUsed} of {billingInfo.discountCodesLimit} discount codes this month.
+                Upgrade your plan to continue generating codes for your customers.
+              </Text>
+              <div>
+                <Button primary onClick={handleUpgrade}>
+                  View Upgrade Options
+                </Button>
+              </div>
+            </Stack>
+          </Banner>
+        </div>
       )}
 
-      {/* Stats Grid - Same structure as Games tab */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-        gap: '1.5rem'
-      }}>
+      {/* Stats Cards - Simple responsive grid */}
+      <div className={styles.responsiveGrid}>
         <Card>
           <div style={{ padding: '1.5rem', textAlign: 'center' }}>
             <Text variant="heading2xl" as="p">
@@ -308,30 +309,32 @@ export function OverviewTab({ shop, onTabChange }: OverviewTabProps) {
       </div>
 
       {/* Recent Activity */}
-      <Card>
-        <div style={{ padding: '2rem' }}>
-          <Stack vertical spacing="loose">
-            <Text variant="headingLg" as="h2">
-              Recent Activity
-            </Text>
-            {sessionsLoading ? (
-              <div style={{ textAlign: 'center', padding: '2rem' }}>
-                <Spinner size="small" />
-                <Text variant="bodyMd" as="p" color="subdued">
-                  Loading recent sessions...
-                </Text>
-              </div>
-            ) : (
-              <DataTable
-                columnContentTypes={['text', 'numeric', 'text', 'text', 'text']}
-                headings={['Customer', 'Score', 'Discount', 'Status', 'Date']}
-                rows={recentSessionsRows}
-                footerContent={`Showing ${recentSessions.length} recent sessions`}
-              />
-            )}
-          </Stack>
-        </div>
-      </Card>
+      <div>
+        <Card>
+          <div style={{ padding: '2rem' }}>
+            <Stack vertical spacing="loose">
+              <Text variant="headingLg" as="h2">
+                Recent Activity
+              </Text>
+              {sessionsLoading ? (
+                <div style={{ textAlign: 'center', padding: '2rem' }}>
+                  <Spinner size="small" />
+                  <Text variant="bodyMd" as="p" color="subdued">
+                    Loading recent sessions...
+                  </Text>
+                </div>
+              ) : (
+                <DataTable
+                  columnContentTypes={['text', 'numeric', 'text', 'text', 'text']}
+                  headings={['Customer', 'Score', 'Discount', 'Status', 'Date']}
+                  rows={recentSessionsRows}
+                  footerContent={`Showing ${recentSessions.length} recent sessions`}
+                />
+              )}
+            </Stack>
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }

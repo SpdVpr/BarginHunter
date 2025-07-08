@@ -11,6 +11,7 @@ import {
   Layout,
 } from '@shopify/polaris';
 import { useAnalyticsData } from '../../hooks/useAnalyticsData';
+import styles from './ResponsiveGrid.module.css';
 
 interface AnalyticsTabProps {
   shop: string | string[] | undefined;
@@ -66,34 +67,32 @@ export function AnalyticsTab({ shop }: AnalyticsTabProps) {
   }
 
   return (
-    <div style={{ display: 'grid', gap: '1.5rem' }}>
+    <div className={styles.container}>
       {/* Period Selector */}
-      <Card>
-        <div style={{ padding: '1.5rem' }}>
-          <Stack distribution="equalSpacing" alignment="center">
-            <Text variant="headingLg" as="h2">
-              Analytics Dashboard
-            </Text>
-            <div style={{ minWidth: '200px' }}>
-              <Select
-                label=""
-                options={periodOptions}
-                value={selectedPeriod}
-                onChange={setSelectedPeriod}
-              />
-            </div>
-          </Stack>
-        </div>
-      </Card>
+      <div className={styles.section}>
+        <Card>
+          <div style={{ padding: '1.5rem' }}>
+            <Stack distribution="equalSpacing" alignment="center">
+              <Text variant="headingLg" as="h2">
+                Analytics Dashboard
+              </Text>
+              <div style={{ minWidth: '200px' }}>
+                <Select
+                  label=""
+                  options={periodOptions}
+                  value={selectedPeriod}
+                  onChange={setSelectedPeriod}
+                />
+              </div>
+            </Stack>
+          </div>
+        </Card>
+      </div>
 
       {analyticsData && (
         <>
-          {/* Key Metrics Grid - Same structure as Games tab */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-            gap: '1.5rem'
-          }}>
+          {/* Key Metrics Cards - Simple responsive grid */}
+          <div className={styles.responsiveGrid}>
             <Card>
               <div style={{ padding: '1.5rem', textAlign: 'center' }}>
                 <Text variant="heading2xl" as="p">
@@ -180,56 +179,62 @@ export function AnalyticsTab({ shop }: AnalyticsTabProps) {
           </div>
 
           {/* Top Scores Table */}
-          <Card>
-            <div style={{ padding: '2rem' }}>
-              <Stack vertical spacing="loose">
-                <Text variant="headingLg" as="h2">
-                  Top Scores
-                </Text>
-                <DataTable
-                  columnContentTypes={['text', 'numeric', 'text', 'text']}
-                  headings={['Customer', 'Score', 'Discount', 'Date']}
-                  rows={topScoresRows}
-                  footerContent={`Top ${topScoresRows.length} scores in selected period`}
-                />
-              </Stack>
-            </div>
-          </Card>
+          <div className={styles.section}>
+            <Card>
+              <div style={{ padding: '2rem' }}>
+                <Stack vertical spacing="loose">
+                  <Text variant="headingLg" as="h2">
+                    Top Scores
+                  </Text>
+                  <DataTable
+                    columnContentTypes={['text', 'numeric', 'text', 'text']}
+                    headings={['Customer', 'Score', 'Discount', 'Date']}
+                    rows={topScoresRows}
+                    footerContent={`Top ${topScoresRows.length} scores in selected period`}
+                  />
+                </Stack>
+              </div>
+            </Card>
+          </div>
 
           {/* Hourly Activity */}
-          <Card>
-            <div style={{ padding: '2rem' }}>
-              <Stack vertical spacing="loose">
-                <Text variant="headingLg" as="h2">
-                  Hourly Activity
-                </Text>
-                <DataTable
-                  columnContentTypes={['text', 'numeric', 'numeric', 'numeric', 'text']}
-                  headings={['Hour', 'Sessions', 'Completions', 'Discounts', 'Completion Rate']}
-                  rows={hourlyRows}
-                  footerContent="24-hour activity breakdown"
-                />
-              </Stack>
-            </div>
-          </Card>
+          <div className={styles.section}>
+            <Card>
+              <div style={{ padding: '2rem' }}>
+                <Stack vertical spacing="loose">
+                  <Text variant="headingLg" as="h2">
+                    Hourly Activity
+                  </Text>
+                  <DataTable
+                    columnContentTypes={['text', 'numeric', 'numeric', 'numeric', 'text']}
+                    headings={['Hour', 'Sessions', 'Completions', 'Discounts', 'Completion Rate']}
+                    rows={hourlyRows}
+                    footerContent="24-hour activity breakdown"
+                  />
+                </Stack>
+              </div>
+            </Card>
+          </div>
 
           {/* Traffic Sources */}
-          <Card>
-            <div style={{ padding: '2rem' }}>
-              <Stack vertical spacing="loose">
-                <Text variant="headingLg" as="h2">
-                  Traffic Sources
-                </Text>
-                <Stack>
-                  {analyticsData.sourceBreakdown && Object.entries(analyticsData.sourceBreakdown).map(([source, count]) => (
-                    <Badge key={source} status="info">
-                      {`${source}: ${String(count)}`}
-                    </Badge>
-                  ))}
+          <div>
+            <Card>
+              <div style={{ padding: '2rem' }}>
+                <Stack vertical spacing="loose">
+                  <Text variant="headingLg" as="h2">
+                    Traffic Sources
+                  </Text>
+                  <Stack>
+                    {analyticsData.sourceBreakdown && Object.entries(analyticsData.sourceBreakdown).map(([source, count]) => (
+                      <Badge key={source} status="info">
+                        {`${source}: ${String(count)}`}
+                      </Badge>
+                    ))}
+                  </Stack>
                 </Stack>
-              </Stack>
-            </div>
-          </Card>
+              </div>
+            </Card>
+          </div>
         </>
       )}
     </div>
