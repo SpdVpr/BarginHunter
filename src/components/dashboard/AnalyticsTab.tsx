@@ -28,11 +28,23 @@ export function AnalyticsTab({ shop }: AnalyticsTabProps) {
     { label: 'Last year', value: '1y' },
   ];
 
+  const formatDateForMobile = (date: Date) => {
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+      // Short format for mobile: MM/DD
+      return date.toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit'
+      });
+    }
+    return date.toLocaleDateString();
+  };
+
   const topScoresRows = analyticsData?.topScores?.map((score) => [
     score.customerEmail,
     score.score.toString(),
     `${score.discount}%`,
-    new Date(score.achievedAt).toLocaleDateString(),
+    formatDateForMobile(new Date(score.achievedAt)),
   ]) || [];
 
   const hourlyRows = analyticsData?.hourlyBreakdown?.map((hour) => [
@@ -186,12 +198,14 @@ export function AnalyticsTab({ shop }: AnalyticsTabProps) {
                   <Text variant="headingLg" as="h2">
                     Top Scores
                   </Text>
-                  <DataTable
-                    columnContentTypes={['text', 'numeric', 'text', 'text']}
-                    headings={['Customer', 'Score', 'Discount', 'Date']}
-                    rows={topScoresRows}
-                    footerContent={`Top ${topScoresRows.length} scores in selected period`}
-                  />
+                  <div className={styles.tableContainer}>
+                    <DataTable
+                      columnContentTypes={['text', 'numeric', 'text', 'text']}
+                      headings={['Customer', 'Score', 'Discount', 'Date']}
+                      rows={topScoresRows}
+                      footerContent={`Top ${topScoresRows.length} scores in selected period`}
+                    />
+                  </div>
                 </Stack>
               </div>
             </Card>
@@ -205,12 +219,14 @@ export function AnalyticsTab({ shop }: AnalyticsTabProps) {
                   <Text variant="headingLg" as="h2">
                     Hourly Activity
                   </Text>
-                  <DataTable
-                    columnContentTypes={['text', 'numeric', 'numeric', 'numeric', 'text']}
-                    headings={['Hour', 'Sessions', 'Completions', 'Discounts', 'Completion Rate']}
-                    rows={hourlyRows}
-                    footerContent="24-hour activity breakdown"
-                  />
+                  <div className={styles.tableContainer}>
+                    <DataTable
+                      columnContentTypes={['text', 'numeric', 'numeric', 'numeric', 'text']}
+                      headings={['Hour', 'Sessions', 'Completions', 'Discounts', 'Completion Rate']}
+                      rows={hourlyRows}
+                      footerContent="24-hour activity breakdown"
+                    />
+                  </div>
                 </Stack>
               </div>
             </Card>

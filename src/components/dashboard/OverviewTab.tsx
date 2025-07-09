@@ -136,6 +136,18 @@ export function OverviewTab({ shop, onTabChange }: OverviewTabProps) {
     return 'success';
   };
 
+  const formatDateForMobile = (date: Date) => {
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+      // Short format for mobile: MM/DD
+      return date.toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit'
+      });
+    }
+    return date.toLocaleDateString();
+  };
+
   const recentSessionsRows = recentSessions.map((session) => [
     session.customerEmail || 'Anonymous',
     session.score.toString(),
@@ -143,7 +155,7 @@ export function OverviewTab({ shop, onTabChange }: OverviewTabProps) {
     <Badge status={session.status === 'completed' ? 'success' : 'info'}>
       {session.status === 'completed' ? 'Used' : 'Generated'}
     </Badge>,
-    new Date(session.completedAt).toLocaleDateString(),
+    formatDateForMobile(new Date(session.completedAt)),
   ]);
 
   if (isLoading) {
@@ -324,12 +336,14 @@ export function OverviewTab({ shop, onTabChange }: OverviewTabProps) {
                   </Text>
                 </div>
               ) : (
-                <DataTable
-                  columnContentTypes={['text', 'numeric', 'text', 'text', 'text']}
-                  headings={['Customer', 'Score', 'Discount', 'Status', 'Date']}
-                  rows={recentSessionsRows}
-                  footerContent={`Showing ${recentSessions.length} recent sessions`}
-                />
+                <div className={styles.tableContainer}>
+                  <DataTable
+                    columnContentTypes={['text', 'numeric', 'text', 'text', 'text']}
+                    headings={['Customer', 'Score', 'Discount', 'Status', 'Date']}
+                    rows={recentSessionsRows}
+                    footerContent={`Showing ${recentSessions.length} recent sessions`}
+                  />
+                </div>
               )}
             </Stack>
           </div>

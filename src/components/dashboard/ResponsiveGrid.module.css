@@ -44,3 +44,50 @@
     margin-bottom: 1rem;
   }
 }
+
+/* Responsive table styles */
+.tableContainer {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+  .tableContainer {
+    margin: 0 -1rem;
+    padding: 0 1rem;
+  }
+
+  /* Make all table cells more compact */
+  .tableContainer :global(.Polaris-DataTable__Cell) {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Make date column narrower and more compact */
+  .tableContainer :global(.Polaris-DataTable__Cell):last-child {
+    max-width: 90px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Hide Status column on very small screens */
+  .tableContainer :global(.Polaris-DataTable__Cell):nth-child(4) {
+    display: none;
+  }
+
+  /* Make remaining columns more compact */
+  .tableContainer :global(.Polaris-DataTable__Cell) {
+    padding: 0.5rem 0.25rem;
+    font-size: 0.85rem;
+  }
+
+  /* Make date column even more compact */
+  .tableContainer :global(.Polaris-DataTable__Cell):last-child {
+    max-width: 70px;
+    font-size: 0.75rem;
+  }
+}
