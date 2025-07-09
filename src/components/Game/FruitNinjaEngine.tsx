@@ -21,7 +21,7 @@ interface FruitNinjaEngineProps {
 }
 
 // Game constants
-const GRAVITY = 0.3; // Reduced from 0.5 for easier fruit slicing
+const GRAVITY = 0.2; // Further reduced for better fruit targeting
 const FRUIT_SIZE = 60;
 const BOMB_SIZE = 50;
 
@@ -36,6 +36,20 @@ interface Fruit {
   emoji: string;
   points: number;
   sliceTime?: number;
+  // Enhanced physics for sliced fruits
+  leftHalf?: { x: number; y: number; vx: number; vy: number; rotation: number };
+  rightHalf?: { x: number; y: number; vx: number; vy: number; rotation: number };
+}
+
+interface ParticleEffect {
+  id: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  color: string;
+  life: number;
+  maxLife: number;
 }
 
 interface SliceTrail {
@@ -67,6 +81,8 @@ export default function FruitNinjaEngine({
   const [fruits, setFruits] = useState<Fruit[]>([]);
   const [sliceTrail, setSliceTrail] = useState<SliceTrail[]>([]);
   const [isSlicing, setIsSlicing] = useState(false);
+  const [particles, setParticles] = useState<ParticleEffect[]>([]);
+  const nextParticleId = useRef<number>(1);
 
   // Fruit types with emojis and points
   const fruitTypes = [
@@ -97,46 +113,72 @@ export default function FruitNinjaEngine({
     return () => window.removeEventListener('resize', updateCanvasSize);
   }, []);
 
-  // Spawn fruit
+  // Create particle effects
+  const createParticles = useCallback((x: number, y: number, color: string) => {
+    const newParticles: ParticleEffect[] = [];
+    for (let i = 0; i < 8; i++) {
+      newParticles.push({
+        id: nextParticleId.current++,
+        x,
+        y,
+        vx: (Math.random() - 0.5) * 8,
+        vy: (Math.random() - 0.5) * 8 - 2,
+        color,
+        life: 60,
+        maxLife: 60
+      });
+    }
+    setParticles(prev => [...prev, ...newParticles]);
+  }, []);
+
+  // Spawn fruits (multiple at once for more action)
   const spawnFruit = useCallback(() => {
     const now = Date.now();
-    if (now - lastSpawnTime.current < 1500 + Math.random() * 1000) return; // Slower spawn for easier gameplay
-    
+    if (now - lastSpawnTime.current < 800 + Math.random() * 600) return; // Faster spawn for more action
+
     lastSpawnTime.current = now;
-    
-    // 15% chance for bomb
-    const isBomb = Math.random() < 0.15;
-    
-    let newFruit: Fruit;
-    
-    if (isBomb) {
-      newFruit = {
-        id: nextFruitId.current++,
-        x: Math.random() * (canvasSize.width - BOMB_SIZE),
-        y: canvasSize.height + BOMB_SIZE,
-        vx: (Math.random() - 0.5) * 3,
-        vy: -10 - Math.random() * 5,
-        type: 'bomb',
-        sliced: false,
-        emoji: '💣',
-        points: -50
-      };
-    } else {
-      const fruitType = fruitTypes[Math.floor(Math.random() * fruitTypes.length)];
-      newFruit = {
-        id: nextFruitId.current++,
-        x: Math.random() * (canvasSize.width - FRUIT_SIZE),
-        y: canvasSize.height + FRUIT_SIZE,
-        vx: (Math.random() - 0.5) * 4,
-        vy: -12 - Math.random() * 6,
-        type: fruitType.type,
-        sliced: false,
-        emoji: fruitType.emoji,
-        points: fruitType.points
-      };
+
+    // Spawn 1-3 fruits at once for more dynamic gameplay
+    const spawnCount = Math.random() < 0.3 ? (Math.random() < 0.5 ? 2 : 3) : 1;
+    const newFruits: Fruit[] = [];
+
+    for (let i = 0; i < spawnCount; i++) {
+      // 12% chance for bomb (reduced since we spawn more items)
+      const isBomb = Math.random() < 0.12;
+
+      let newFruit: Fruit;
+
+      if (isBomb) {
+        newFruit = {
+          id: nextFruitId.current++,
+          x: Math.random() * (canvasSize.width - BOMB_SIZE),
+          y: canvasSize.height + BOMB_SIZE + (i * 50), // Offset multiple spawns
+          vx: (Math.random() - 0.5) * 3,
+          vy: -10 - Math.random() * 5,
+          type: 'bomb',
+          sliced: false,
+          emoji: '💣',
+          points: -50
+        };
+      } else {
+        const fruitType = fruitTypes[Math.floor(Math.random() * fruitTypes.length)];
+        newFruit = {
+          id: nextFruitId.current++,
+          x: Math.random() * (canvasSize.width - FRUIT_SIZE),
+          y: canvasSize.height + FRUIT_SIZE + (i * 50), // Offset multiple spawns
+          vx: (Math.random() - 0.5) * 4,
+          vy: -12 - Math.random() * 6,
+          type: fruitType.type,
+          sliced: false,
+          emoji: fruitType.emoji,
+          points: fruitType.points
+        };
+      }
+
+      newFruits.push(newFruit);
     }
-    
-    setFruits(prev => [...prev, newFruit]);
+
+    setFruits(prev => [...prev, ...newFruits]);
   }, [canvasSize]);
 
   // Handle mouse/touch events
@@ -167,7 +209,8 @@ export default function FruitNinjaEngine({
         // Increased hit area for easier slicing (was FRUIT_SIZE/2)
         if (distance < FRUIT_SIZE * 0.8) {
           if (fruit.type === 'bomb') {
-            // Hit bomb - lose life
+            // Hit bomb - lose life and create explosion particles
+            createParticles(fruit.x + FRUIT_SIZE/2, fruit.y + FRUIT_SIZE/2, '#FF4444');
             setLives(prev => {
               const newLives = prev - 1;
               if (newLives <= 0) {
@@ -182,15 +225,45 @@ export default function FruitNinjaEngine({
             });
             setCombo(0);
           } else {
-            // Hit fruit - add score
+            // Hit fruit - add score and create juice particles
+            const fruitColors = {
+              apple: '#FF6B6B',
+              orange: '#FFA500',
+              banana: '#FFFF00',
+              watermelon: '#FF69B4'
+            };
+            createParticles(fruit.x + FRUIT_SIZE/2, fruit.y + FRUIT_SIZE/2, fruitColors[fruit.type] || '#FF6B6B');
+
             const newScore = score + fruit.points + (combo * 5);
             setScore(newScore);
             onScoreUpdate(newScore);
             gameScorer.addScore(fruit.points + (combo * 5));
             setCombo(prev => prev + 1);
           }
-          
-          return { ...fruit, sliced: true, sliceTime: Date.now() };
+
+          // Create enhanced sliced fruit with physics
+          const centerX = fruit.x + FRUIT_SIZE/2;
+          const centerY = fruit.y + FRUIT_SIZE/2;
+
+          return {
+            ...fruit,
+            sliced: true,
+            sliceTime: Date.now(),
+            leftHalf: {
+              x: centerX - FRUIT_SIZE/4,
+              y: centerY,
+              vx: fruit.vx - 3 - Math.random() * 2,
+              vy: fruit.vy - 2,
+              rotation: 0
+            },
+            rightHalf: {
+              x: centerX + FRUIT_SIZE/4,
+              y: centerY,
+              vx: fruit.vx + 3 + Math.random() * 2,
+              vy: fruit.vy - 2,
+              rotation: 0
+            }
+          };
         }
         
         return fruit;
@@ -295,30 +368,70 @@ export default function FruitNinjaEngine({
     ctx.textBaseline = 'middle';
     
     fruits.forEach(fruit => {
-      if (fruit.sliced && fruit.sliceTime && Date.now() - fruit.sliceTime > 500) {
-        return; // Don't draw sliced fruits after 500ms
+      if (fruit.sliced && fruit.sliceTime && Date.now() - fruit.sliceTime > 800) {
+        return; // Don't draw sliced fruits after 800ms (longer for better effect)
       }
-      
+
       const centerX = fruit.x + FRUIT_SIZE/2;
       const centerY = fruit.y + FRUIT_SIZE/2;
-      
-      if (fruit.sliced) {
-        // Draw sliced fruit with explosion effect
+
+      if (fruit.sliced && fruit.leftHalf && fruit.rightHalf) {
+        // Draw enhanced sliced fruit halves with physics
         ctx.save();
-        ctx.globalAlpha = 0.7;
-        ctx.fillText(fruit.emoji, centerX - 10, centerY - 10);
-        ctx.fillText(fruit.emoji, centerX + 10, centerY + 10);
+        const timeElapsed = Date.now() - (fruit.sliceTime || 0);
+        const alpha = Math.max(0, 1 - timeElapsed / 800);
+        ctx.globalAlpha = alpha;
+
+        // Draw left half
+        ctx.save();
+        ctx.translate(fruit.leftHalf.x, fruit.leftHalf.y);
+        ctx.rotate(fruit.leftHalf.rotation);
+        ctx.font = `${FRUIT_SIZE * 0.8}px Arial`;
+        ctx.fillText(fruit.emoji, 0, 0);
         ctx.restore();
-        
-        // Draw score popup
+
+        // Draw right half
+        ctx.save();
+        ctx.translate(fruit.rightHalf.x, fruit.rightHalf.y);
+        ctx.rotate(fruit.rightHalf.rotation);
+        ctx.font = `${FRUIT_SIZE * 0.8}px Arial`;
+        ctx.fillText(fruit.emoji, 0, 0);
+        ctx.restore();
+
+        ctx.restore();
+
+        // Draw score popup with fade effect
         if (fruit.type !== 'bomb') {
+          ctx.save();
+          ctx.globalAlpha = alpha;
           ctx.fillStyle = '#FFD700';
-          ctx.font = '20px Arial';
-          ctx.fillText(`+${fruit.points}`, centerX, centerY - 30);
+          ctx.font = 'bold 24px Arial';
+          ctx.strokeStyle = '#000';
+          ctx.lineWidth = 2;
+          ctx.strokeText(`+${fruit.points}`, centerX, centerY - 40);
+          ctx.fillText(`+${fruit.points}`, centerX, centerY - 40);
+          ctx.restore();
         }
-      } else {
+      } else if (!fruit.sliced) {
+        // Draw whole fruit with slight bounce effect
+        ctx.save();
+        const bounce = Math.sin(Date.now() * 0.01) * 2;
+        ctx.translate(0, bounce);
         ctx.fillText(fruit.emoji, centerX, centerY);
+        ctx.restore();
       }
+    });
+
+    // Draw particle effects
+    particles.forEach(particle => {
+      const alpha = particle.life / particle.maxLife;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = particle.color;
+      ctx.beginPath();
+      ctx.arc(particle.x, particle.y, 3 * alpha, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
     });
     
     // Draw slice trail
@@ -367,15 +480,37 @@ export default function FruitNinjaEngine({
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
     
-    // Update fruits
+    // Update fruits with enhanced physics
     setFruits(prevFruits => {
       return prevFruits
-        .map(fruit => ({
-          ...fruit,
-          x: fruit.x + fruit.vx,
-          y: fruit.y + fruit.vy,
-          vy: fruit.vy + GRAVITY
-        }))
+        .map(fruit => {
+          const updatedFruit = {
+            ...fruit,
+            x: fruit.x + fruit.vx,
+            y: fruit.y + fruit.vy,
+            vy: fruit.vy + GRAVITY
+          };
+
+          // Update sliced fruit halves physics
+          if (fruit.sliced && fruit.leftHalf && fruit.rightHalf) {
+            updatedFruit.leftHalf = {
+              ...fruit.leftHalf,
+              x: fruit.leftHalf.x + fruit.leftHalf.vx,
+              y: fruit.leftHalf.y + fruit.leftHalf.vy,
+              vy: fruit.leftHalf.vy + GRAVITY,
+              rotation: fruit.leftHalf.rotation + 0.1
+            };
+            updatedFruit.rightHalf = {
+              ...fruit.rightHalf,
+              x: fruit.rightHalf.x + fruit.rightHalf.vx,
+              y: fruit.rightHalf.y + fruit.rightHalf.vy,
+              vy: fruit.rightHalf.vy + GRAVITY,
+              rotation: fruit.rightHalf.rotation - 0.1
+            };
+          }
+
+          return updatedFruit;
+        })
         .filter(fruit => {
           // Remove fruits that fell off screen or were sliced long ago
           if (fruit.y > canvasSize.height + 100) {
@@ -397,14 +532,28 @@ export default function FruitNinjaEngine({
             }
             return false;
           }
-          
-          // Remove sliced fruits after animation
-          if (fruit.sliced && fruit.sliceTime && Date.now() - fruit.sliceTime > 500) {
+
+          // Remove sliced fruits after longer animation
+          if (fruit.sliced && fruit.sliceTime && Date.now() - fruit.sliceTime > 800) {
             return false;
           }
-          
+
           return true;
         });
+    });
+
+    // Update particles
+    setParticles(prevParticles => {
+      return prevParticles
+        .map(particle => ({
+          ...particle,
+          x: particle.x + particle.vx,
+          y: particle.y + particle.vy,
+          vy: particle.vy + GRAVITY * 0.5,
+          vx: particle.vx * 0.98, // Air resistance
+          life: particle.life - 1
+        }))
+        .filter(particle => particle.life > 0);
     });
     
     // Spawn new fruits
@@ -426,7 +575,8 @@ export default function FruitNinjaEngine({
     setCombo(0);
     setFruits([]);
     setSliceTrail([]);
-    
+    setParticles([]);
+
     gameStartTime.current = Date.now();
     lastSpawnTime.current = Date.now();
   }, []);
