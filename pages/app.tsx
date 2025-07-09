@@ -89,8 +89,8 @@ export default function ShopifyApp() {
         const response = await fetch(`/api/debug/installation-flow?shop=${shop}`);
         const data = await response.json();
 
-        if (data.success && data.debug.installationComplete) {
-          console.log('🔍 App is installed, redirecting to dashboard');
+        if (data.success && data.debug.store) {
+          console.log('🔍 Store found, redirecting to dashboard');
           const { hmac, host, timestamp } = router.query;
           const params = new URLSearchParams();
           if (shop) params.set('shop', shop as string);
@@ -101,7 +101,7 @@ export default function ShopifyApp() {
           router.push(`/dashboard?${params.toString()}`);
           return;
         } else {
-          console.log('🔍 App is not installed, showing installation page');
+          console.log('🔍 No store found, showing installation page');
           setLoading(false);
           return;
         }
