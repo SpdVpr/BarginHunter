@@ -83,40 +83,46 @@ export default function ShopifyApp() {
       }
 
       if (shop && typeof shop === 'string') {
-        // Check if this is coming from Shopify install flow
+        // Check if this is coming from Shopify admin
         const { hmac, host, timestamp } = router.query;
         const hasShopifyParams = hmac && host && timestamp;
 
         console.log('🔍 Checking installation for shop:', shop);
         console.log('🔍 Has Shopify params:', !!hasShopifyParams);
 
-        const response = await fetch(`/api/debug/installation-flow?shop=${shop}`);
-        const data = await response.json();
+        if (hasShopifyParams) {
+          // This is coming from Shopify admin - assume app is installed and redirect immediately
+          console.log('🔍 Shopify params detected, redirecting to dashboard immediately');
+          const params = new URLSearchParams();
+          if (shop) params.set('shop', shop as string);
+          if (hmac) params.set('hmac', hmac as string);
+          if (host) params.set('host', host as string);
+          if (timestamp) params.set('timestamp', timestamp as string);
 
-        if (data.success && data.debug.store && data.debug.store.isActive) {
-          // Store exists and is active
-          if (hasShopifyParams) {
-            // This is coming from Shopify admin - redirect to dashboard
-            console.log('🔍 Store active + Shopify params, redirecting to dashboard');
-            const params = new URLSearchParams();
-            if (shop) params.set('shop', shop as string);
-            if (hmac) params.set('hmac', hmac as string);
-            if (host) params.set('host', host as string);
-            if (timestamp) params.set('timestamp', timestamp as string);
+          router.push(`/dashboard?${params.toString()}`);
+          return;
+        } else {
+          // Direct access without Shopify params - check if app is installed
+          console.log('🔍 No Shopify params, checking installation status');
 
-            router.push(`/dashboard?${params.toString()}`);
-            return;
-          } else {
-            // Direct access without Shopify params - show installation page for testing
-            console.log('🔍 Store active but no Shopify params, showing installation page');
+          try {
+            const response = await fetch(`/api/debug/installation-flow?shop=${shop}`);
+            const data = await response.json();
+
+            if (data.success && data.debug.store && data.debug.store.isActive) {
+              console.log('🔍 Store active, showing installation page for testing');
+              setLoading(false);
+              return;
+            } else {
+              console.log('🔍 No active store found, showing installation page');
+              setLoading(false);
+              return;
+            }
+          } catch (error) {
+            console.error('🔍 Error checking installation:', error);
             setLoading(false);
             return;
           }
-        } else {
-          // No store or inactive store - show installation page
-          console.log('🔍 No active store found, showing installation page');
-          setLoading(false);
-          return;
         }
       }
 
