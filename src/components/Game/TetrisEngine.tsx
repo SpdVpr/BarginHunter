@@ -1,6 +1,6 @@
 /** @jsxImportSource react */
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import TouchControlsHint from './TouchControlsHint';
+
 import { GameScorer, getDifficultyName, formatScore } from '../../utils/gameScoring';
 
 interface GameConfig {
@@ -590,7 +590,7 @@ export default function TetrisEngine({
           zIndex: 1
         }}
       />
-      <TouchControlsHint gameType="tetris" />
+
       {/* Close button for admin testing */}
       {adminTest && onClose && (
         <button

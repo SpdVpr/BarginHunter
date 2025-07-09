@@ -1,6 +1,6 @@
 /** @jsxImportSource react */
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import TouchControlsHint from './TouchControlsHint';
+
 import { GameScorer, DIFFICULTY_PROGRESSION, getDifficultyName, formatScore } from '../../utils/gameScoring';
 
 interface GameConfig {
@@ -412,15 +412,7 @@ export default function ArkanoidEngine({
         }}
       />
       
-      <TouchControlsHint 
-        controls={['Move mouse or drag to control paddle']}
-        style={{
-          position: 'absolute',
-          bottom: '20px',
-          left: '50%',
-          transform: 'translateX(-50%)'
-        }}
-      />
+
       {/* Close button for admin testing */}
       {adminTest && onClose && (
         <button

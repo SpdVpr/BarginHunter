@@ -1,6 +1,6 @@
 /** @jsxImportSource react */
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import TouchControlsHint from './TouchControlsHint';
+
 import { GameScorer, DIFFICULTY_PROGRESSION, getDifficultyName, formatScore } from '../../utils/gameScoring';
 
 interface GameConfig {
@@ -641,7 +641,7 @@ export default function SpaceInvadersEngine({
           zIndex: 1
         }}
       />
-      <TouchControlsHint gameType="space_invaders" />
+
       {/* Close button for admin testing */}
       {adminTest && onClose && (
         <button

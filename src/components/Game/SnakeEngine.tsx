@@ -1,6 +1,6 @@
 /** @jsxImportSource react */
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import TouchControlsHint from './TouchControlsHint';
+
 import { GameScorer, DIFFICULTY_PROGRESSION, getDifficultyName, formatScore } from '../../utils/gameScoring';
 
 interface GameConfig {
@@ -572,7 +572,7 @@ export default function SnakeEngine({
           zIndex: 1
         }}
       />
-      <TouchControlsHint gameType="snake" />
+
       {/* Close button for admin testing */}
       {adminTest && onClose && (
         <button

@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import TouchControlsHint from './TouchControlsHint';
+
 
 interface NewGameEngineProps {
   onGameEnd: (score: number, gameData: any) => void;
@@ -497,7 +497,7 @@ export default function NewGameEngine({ onGameEnd, onScoreUpdate, discountTiers,
       <div style={{ marginTop: '10px', fontSize: '18px', fontWeight: 'bold' }}>
         Score: {Math.floor(score)}
       </div>
-      <TouchControlsHint gameType="dino" />
+
     </div>
   );
 }
