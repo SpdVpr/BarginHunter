@@ -3,6 +3,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { Page, Card, Layout, Button, Banner, Spinner, Text } from '@shopify/polaris';
+import ShopifyAppBridge from '../src/components/ShopifyAppBridge';
 
 export default function ShopifyApp() {
   const router = useRouter();
@@ -161,7 +162,7 @@ export default function ShopifyApp() {
 
   // Show installation page for specific shop
   return (
-    <>
+    <ShopifyAppBridge>
       <Head>
         <title>Install Bargain Hunter - {shop}</title>
         <meta name="description" content="Install Bargain Hunter app for your Shopify store" />
@@ -220,6 +221,6 @@ export default function ShopifyApp() {
           </Layout.Section>
         </Layout>
       </Page>
-    </>
+    </ShopifyAppBridge>
   );
 }

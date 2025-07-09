@@ -190,9 +190,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Script tag is already installed above, no need to install again
 
-    // Redirect to root URL (which will redirect to dashboard) with shop parameter
-    const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/?shop=${shop}&installed=true`;
+    // For embedded apps, redirect to /app endpoint with shop parameter
+    // This is required for Shopify embedded app architecture
+    const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/app?shop=${shop}&installed=true`;
 
+    console.log('🔄 Auth Callback: Redirecting to app endpoint:', redirectUrl);
     return res.redirect(302, redirectUrl);
 
   } catch (error) {

@@ -1,13 +1,13 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 name = "bargain-hunter"
-client_id = "YOUR_CLIENT_ID"
-application_url = "https://bargin-hunter2.vercel.app"
+client_id = "b33e93da065728ab025c58bfc6609d5e"
+application_url = "https://bargin-hunter2.vercel.app/app"
 embedded = true
 
 [access_scopes]
 # https://shopify.dev/docs/api/usage/access-scopes
-scopes = "write_products,read_customers,write_discounts,write_script_tags,read_orders"
+scopes = "read_products,write_discounts,read_customers,write_script_tags,read_orders"
 
 [auth]
 redirect_urls = [

@@ -25,6 +25,7 @@ import { DiscountsTab } from '../src/components/dashboard/DiscountsTab';
 import { BillingTab } from '../src/components/dashboard/BillingTab';
 import { WidgetDisplayTab } from '../src/components/dashboard/WidgetDisplayTab';
 import { SettingsTab } from '../src/components/dashboard/SettingsTab';
+import ShopifyAppBridge from '../src/components/ShopifyAppBridge';
 import styles from '../src/styles/ModernDashboard.module.css';
 
 interface RecentSession {
@@ -123,7 +124,8 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <ModernDashboardLayout shop={typeof shop === 'string' ? shop : ''}>
+    <ShopifyAppBridge>
+      <ModernDashboardLayout shop={typeof shop === 'string' ? shop : ''}>
       <div className={`${styles.modernDashboard} admin-dashboard-page`}>
         {/* Modern Header */}
         <div className={styles.modernHeader}>
@@ -172,5 +174,6 @@ export default function Dashboard() {
         </div>
       </div>
     </ModernDashboardLayout>
+    </ShopifyAppBridge>
   );
 }
