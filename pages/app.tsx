@@ -91,16 +91,36 @@ export default function ShopifyApp() {
         console.log('🔍 Has Shopify params:', !!hasShopifyParams);
 
         if (hasShopifyParams) {
-          // This is coming from Shopify admin - assume app is installed and redirect immediately
-          console.log('🔍 Shopify params detected, redirecting to dashboard immediately');
-          const params = new URLSearchParams();
-          if (shop) params.set('shop', shop as string);
-          if (hmac) params.set('hmac', hmac as string);
-          if (host) params.set('host', host as string);
-          if (timestamp) params.set('timestamp', timestamp as string);
+          // This is coming from Shopify admin - check if app is actually installed
+          console.log('🔍 Shopify params detected, checking if app is installed');
 
-          router.push(`/dashboard?${params.toString()}`);
-          return;
+          try {
+            const response = await fetch(`/api/debug/installation-flow?shop=${shop}`);
+            const data = await response.json();
+
+            if (data.success && data.debug.store && data.debug.store.isActive) {
+              // App is installed - redirect to dashboard
+              console.log('🔍 App is installed, redirecting to dashboard');
+              const params = new URLSearchParams();
+              if (shop) params.set('shop', shop as string);
+              if (hmac) params.set('hmac', hmac as string);
+              if (host) params.set('host', host as string);
+              if (timestamp) params.set('timestamp', timestamp as string);
+
+              router.push(`/dashboard?${params.toString()}`);
+              return;
+            } else {
+              // App is not installed - show installation page
+              console.log('🔍 App is not installed, showing installation page');
+              setLoading(false);
+              return;
+            }
+          } catch (error) {
+            console.error('🔍 Error checking installation:', error);
+            // On error, show installation page to be safe
+            setLoading(false);
+            return;
+          }
         } else {
           // Direct access without Shopify params - check if app is installed
           console.log('🔍 No Shopify params, checking installation status');
