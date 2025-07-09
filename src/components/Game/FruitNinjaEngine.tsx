@@ -83,6 +83,8 @@ export default function FruitNinjaEngine({
   const [isSlicing, setIsSlicing] = useState(false);
   const [particles, setParticles] = useState<ParticleEffect[]>([]);
   const nextParticleId = useRef<number>(1);
+  const [timeLeft, setTimeLeft] = useState(20); // 20 second timer
+  const gameTimer = useRef<NodeJS.Timeout | null>(null);
 
   // Fruit types with emojis and points
   const fruitTypes = [
@@ -215,6 +217,10 @@ export default function FruitNinjaEngine({
               const newLives = prev - 1;
               if (newLives <= 0) {
                 setIsRunning(false);
+                // Clear timer when game ends
+                if (gameTimer.current) {
+                  clearInterval(gameTimer.current);
+                }
                 onGameEnd(score, {
                   duration: Date.now() - gameStartTime.current,
                   fruitsSliced: prevFruits.filter(f => f.sliced && f.type !== 'bomb').length,
@@ -462,13 +468,18 @@ export default function FruitNinjaEngine({
     ctx.fillText(`Lives: ${lives}`, 20, 70);
     ctx.fillText(`Combo: ${combo}`, 20, 100);
 
+    // Draw timer
+    ctx.fillStyle = timeLeft <= 5 ? '#FF0000' : '#333';
+    ctx.font = 'bold 28px Arial';
+    ctx.fillText(`Time: ${timeLeft}s`, 20, 140);
+
     // Show current discount based on score (find highest applicable tier)
     const sortedTiers = [...gameConfig.discountTiers].sort((a: any, b: any) => b.minScore - a.minScore);
     const currentDiscount = sortedTiers.find((tier: any) => score >= tier.minScore)?.discount || 0;
     if (currentDiscount > 0) {
       ctx.font = '20px Arial';
       ctx.fillStyle = '#000000'; // Black color
-      ctx.fillText(`${currentDiscount}% OFF`, 20, 130);
+      ctx.fillText(`${currentDiscount}% OFF`, 20, 170);
     }
   }, [canvasSize, fruits, sliceTrail, score, lives, combo]);
 
@@ -515,19 +526,7 @@ export default function FruitNinjaEngine({
           // Remove fruits that fell off screen or were sliced long ago
           if (fruit.y > canvasSize.height + 100) {
             if (!fruit.sliced && fruit.type !== 'bomb') {
-              // Missed fruit - lose life
-              setLives(prev => {
-                const newLives = prev - 1;
-                if (newLives <= 0) {
-                  setIsRunning(false);
-                  onGameEnd(score, {
-                    duration: Date.now() - gameStartTime.current,
-                    fruitsSliced: prevFruits.filter(f => f.sliced && f.type !== 'bomb').length,
-                    fruitsMissed: prevFruits.filter(f => !f.sliced && f.type !== 'bomb').length + 1
-                  });
-                }
-                return newLives;
-              });
+              // Missed fruit - just reset combo, no life lost
               setCombo(0);
             }
             return false;
@@ -576,10 +575,39 @@ export default function FruitNinjaEngine({
     setFruits([]);
     setSliceTrail([]);
     setParticles([]);
+    setTimeLeft(20);
 
     gameStartTime.current = Date.now();
     lastSpawnTime.current = Date.now();
-  }, []);
+
+    // Clear any existing timer
+    if (gameTimer.current) {
+      clearInterval(gameTimer.current);
+    }
+
+    // Start countdown timer
+    gameTimer.current = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          setIsRunning(false);
+          // Clear timer when time is up
+          if (gameTimer.current) {
+            clearInterval(gameTimer.current);
+          }
+          // Use setTimeout to ensure state is updated before calling onGameEnd
+          setTimeout(() => {
+            onGameEnd(score, {
+              duration: 20000, // 20 seconds
+              fruitsSliced: fruits.filter(f => f.sliced && f.type !== 'bomb').length,
+              timeUp: true
+            });
+          }, 100);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, [score, fruits, onGameEnd]);
 
   // Auto-start game
   useEffect(() => {
@@ -600,6 +628,15 @@ export default function FruitNinjaEngine({
       }
     };
   }, [isRunning, gameLoop]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (gameTimer.current) {
+        clearInterval(gameTimer.current);
+      }
+    };
+  }, []);
 
   return (
     <div style={{
