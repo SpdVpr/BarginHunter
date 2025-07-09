@@ -11,10 +11,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { shop } = req.query;
 
     if (!shop || typeof shop !== 'string') {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Shop parameter is required' 
-      });
+      console.log('❌ Install API: Shop parameter missing or invalid:', shop);
+      // Redirect back to app page with error
+      return res.redirect(302, `/app?error=shop_required`);
     }
 
     // Validate and normalize shop domain format
@@ -32,11 +31,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const shopRegex = /^[a-zA-Z0-9][a-zA-Z0-9\-]*\.myshopify\.com$/;
 
     if (!shopRegex.test(shopDomain)) {
-      console.log('Shop domain validation failed:', shopDomain);
-      return res.status(400).json({
-        success: false,
-        error: `Invalid shop domain format: ${shopDomain}`
-      });
+      console.log('❌ Install API: Shop domain validation failed:', shopDomain);
+      // Redirect back to app page with error
+      return res.redirect(302, `/app?error=invalid_shop&shop=${encodeURIComponent(shop as string)}`);
     }
 
     // Generate state parameter for CSRF protection
@@ -53,10 +50,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.redirect(302, authUrl);
 
   } catch (error) {
-    console.error('Install error:', error);
-    return res.status(500).json({ 
-      success: false, 
-      error: 'Internal server error' 
-    });
+    console.error('❌ Install API error:', error);
+    // Redirect back to app page with error
+    return res.redirect(302, `/app?error=install_failed`);
   }
 }

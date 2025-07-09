@@ -7,13 +7,26 @@ import ShopifyAppBridge from '../src/components/ShopifyAppBridge';
 
 export default function ShopifyApp() {
   const router = useRouter();
-  const { shop, installed } = router.query;
+  const { shop, installed, error: errorParam } = router.query;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     console.log('🔍 App.tsx - Router query:', router.query);
     console.log('🔍 App.tsx - Shop parameter:', shop);
+
+    // Check for error parameters
+    if (errorParam) {
+      console.log('🔍 Error parameter detected:', errorParam);
+      const errorMessages = {
+        shop_required: 'Shop parameter is required for installation.',
+        invalid_shop: 'Invalid shop domain format.',
+        install_failed: 'Installation failed. Please try again.',
+      };
+      setError(errorMessages[errorParam as keyof typeof errorMessages] || 'An error occurred during installation.');
+      setLoading(false);
+      return;
+    }
 
     // If no shop parameter, show installation instructions
     if (!shop) {

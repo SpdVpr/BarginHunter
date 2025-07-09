@@ -10,7 +10,8 @@ export default function OAuthPage() {
 
   useEffect(() => {
     if (!shop) {
-      setError('Shop parameter is required');
+      console.log('❌ OAuth page: Shop parameter missing');
+      setError('Shop parameter is required. Please use a valid installation link.');
       setLoading(false);
       return;
     }
@@ -20,10 +21,16 @@ export default function OAuthPage() {
     // Redirect to install API immediately
     const installUrl = `/api/auth/install?shop=${shop}&fresh_install=true`;
     console.log('🔄 OAuth page - Redirecting to:', installUrl);
-    
+
     // Use a small delay to ensure the page loads properly
     setTimeout(() => {
-      window.location.href = installUrl;
+      try {
+        window.location.href = installUrl;
+      } catch (err) {
+        console.error('❌ OAuth page redirect error:', err);
+        setError('Failed to redirect to installation. Please try again.');
+        setLoading(false);
+      }
     }, 100);
 
   }, [shop]);
