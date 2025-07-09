@@ -39,8 +39,8 @@ export function ShopifyAppBridge({ children }: ShopifyAppBridgeProps) {
 
   const initializeAppBridge = () => {
     try {
-      const { createApp } = (window as any).ShopifyAppBridge;
-      
+      const { createApp, Redirect } = (window as any).ShopifyAppBridge;
+
       if (!createApp) {
         console.error('Shopify App Bridge not loaded');
         return;
@@ -54,6 +54,13 @@ export function ShopifyAppBridge({ children }: ShopifyAppBridgeProps) {
 
       // Store app instance globally
       window.shopifyApp = app;
+
+      // Add global function for OAuth redirects
+      (window as any).shopifyOAuthRedirect = (url: string) => {
+        console.log('🔄 App Bridge OAuth redirect:', url);
+        const redirect = Redirect.create(app);
+        redirect.dispatch(Redirect.Action.REMOTE, url);
+      };
 
       console.log('✅ Shopify App Bridge initialized');
       setIsReady(true);

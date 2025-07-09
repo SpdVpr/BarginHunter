@@ -107,8 +107,27 @@ export default function ShopifyApp() {
       setLoading(true);
       console.log('🔄 Starting installation for shop:', shop);
 
-      // Direct redirect to install API (which will redirect to Shopify OAuth)
-      window.location.href = `/api/auth/install?shop=${shop}&fresh_install=true`;
+      // Use dedicated OAuth page for cleaner flow
+      const oauthUrl = `${process.env.NEXT_PUBLIC_APP_URL}/oauth?shop=${shop}`;
+      console.log('🔄 OAuth URL:', oauthUrl);
+
+      // Try to use App Bridge for OAuth redirect if available
+      if ((window as any).shopifyOAuthRedirect) {
+        console.log('🔄 Using App Bridge for OAuth redirect');
+        (window as any).shopifyOAuthRedirect(oauthUrl);
+        return;
+      }
+
+      // Check if we're in an embedded context (iframe)
+      if (window.top !== window.self) {
+        console.log('🔄 Embedded context detected, using top window for OAuth');
+        // We're in an iframe, need to redirect the top window
+        window.top!.location.href = oauthUrl;
+      } else {
+        console.log('🔄 Direct context, using normal redirect');
+        // We're not in an iframe, normal redirect
+        window.location.href = oauthUrl;
+      }
 
     } catch (err) {
       console.error('Installation error:', err);
