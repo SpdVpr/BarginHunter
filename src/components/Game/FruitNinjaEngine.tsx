@@ -220,6 +220,7 @@ export default function FruitNinjaEngine({
                 // Clear timer when game ends
                 if (gameTimer.current) {
                   clearInterval(gameTimer.current);
+                  gameTimer.current = null;
                 }
                 onGameEnd(score, {
                   duration: Date.now() - gameStartTime.current,
@@ -568,7 +569,6 @@ export default function FruitNinjaEngine({
   // Start game
   const startGame = useCallback(() => {
     gameScorer.reset();
-    setIsRunning(true);
     setScore(0);
     setLives(3);
     setCombo(0);
@@ -585,29 +585,9 @@ export default function FruitNinjaEngine({
       clearInterval(gameTimer.current);
     }
 
-    // Start countdown timer
-    gameTimer.current = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          setIsRunning(false);
-          // Clear timer when time is up
-          if (gameTimer.current) {
-            clearInterval(gameTimer.current);
-          }
-          // Use setTimeout to ensure state is updated before calling onGameEnd
-          setTimeout(() => {
-            onGameEnd(score, {
-              duration: 20000, // 20 seconds
-              fruitsSliced: fruits.filter(f => f.sliced && f.type !== 'bomb').length,
-              timeUp: true
-            });
-          }, 100);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  }, [score, fruits, onGameEnd]);
+    // Start the game first
+    setIsRunning(true);
+  }, []);
 
   // Auto-start game
   useEffect(() => {
@@ -628,6 +608,41 @@ export default function FruitNinjaEngine({
       }
     };
   }, [isRunning, gameLoop]);
+
+  // Start timer when game starts running
+  useEffect(() => {
+    if (isRunning && timeLeft === 20 && !gameTimer.current) {
+      // Start countdown timer only when game actually starts and timer isn't already running
+      gameTimer.current = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            setIsRunning(false);
+            // Clear timer when time is up
+            if (gameTimer.current) {
+              clearInterval(gameTimer.current);
+              gameTimer.current = null;
+            }
+            // End game when time is up
+            setTimeout(() => {
+              onGameEnd(score, {
+                duration: 20000, // 20 seconds
+                fruitsSliced: fruits.filter(f => f.sliced && f.type !== 'bomb').length,
+                timeUp: true
+              });
+            }, 100);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    // Cleanup when game stops
+    if (!isRunning && gameTimer.current) {
+      clearInterval(gameTimer.current);
+      gameTimer.current = null;
+    }
+  }, [isRunning, timeLeft]);
 
   // Cleanup timer on unmount
   useEffect(() => {
