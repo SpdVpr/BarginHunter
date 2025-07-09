@@ -166,12 +166,31 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         }
 
         async function resetShop() {
-            if (!confirm('Are you sure you want to reset all shop data? This cannot be undone.')) {
+            if (!confirm('Are you sure you want to reset all shop data? This will delete all store and game configuration data. This cannot be undone.')) {
                 return;
             }
-            
+
             showLoading('Resetting shop data...');
-            showResult('Reset functionality not implemented yet', 'error');
+
+            try {
+                const response = await fetch('/api/debug/reset-shop', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ shop: shop })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showResult('Shop data reset successfully! You can now reinstall the app from Shopify Partner Dashboard.', 'success');
+                } else {
+                    showResult('Failed to reset shop data: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showResult('Error resetting shop data: ' + error.message, 'error');
+            }
         }
 
         // Auto-check status on load

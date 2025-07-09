@@ -135,43 +135,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Create default game configuration
     try {
-      await GameConfigService.createOrUpdateConfig({
+      await GameConfigService.createConfig({
         shopDomain: shop,
         isEnabled: true,
         gameSettings: {
-          minScoreForDiscount: 150,
-          maxPlaysPerCustomer: 3,
-          maxPlaysPerDay: 10,
           discountTiers: [
-            { minScore: 0, discount: 0, message: "Keep hunting! 🔍" },
-            { minScore: 150, discount: 5, message: "Nice start! 🎯" },
-            { minScore: 300, discount: 10, message: "Getting warmer! 🔥" },
-            { minScore: 500, discount: 15, message: "Bargain expert! 💡" },
-            { minScore: 750, discount: 20, message: "Sale master! 👑" },
-            { minScore: 1000, discount: 25, message: "LEGENDARY HUNTER! 🏆" }
+            { minScore: 0, maxScore: 49, discountPercentage: 5 },
+            { minScore: 50, maxScore: 99, discountPercentage: 10 },
+            { minScore: 100, maxScore: 199, discountPercentage: 15 },
+            { minScore: 200, maxScore: 999, discountPercentage: 20 },
           ],
-          gameSpeed: 1,
-          difficulty: 'medium' as 'easy' | 'medium' | 'hard',
+          maxPlaysPerDay: 3,
+          gameTimeLimit: 60,
+          selectedGames: ['runner', 'flappy', 'tetris', 'snake', 'space-invaders', 'arkanoid', 'fruit-ninja'],
         },
         widgetSettings: {
-          displayMode: 'tab' as 'popup' | 'tab' | 'inline',
-          triggerEvent: 'immediate' as 'immediate' | 'scroll' | 'exit_intent' | 'time_delay',
-          position: 'bottom-right' as 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center',
-          showOn: 'all_pages' as 'all_pages' | 'product_pages' | 'cart_page' | 'checkout_page' | 'collection_pages' | 'custom',
+          displayType: 'popup',
+          triggerType: 'button',
+          position: 'bottom-right',
+          buttonText: 'Play & Win!',
           customPages: [],
-          userPercentage: 100,
-          testMode: false,
-          showDelay: 0,
-          pageLoadTrigger: 'immediate' as 'immediate' | 'after_delay' | 'on_scroll' | 'on_exit_intent',
-          deviceTargeting: 'all' as 'all' | 'desktop' | 'mobile' | 'tablet',
-          geoTargeting: [],
-          timeBasedRules: {
-            enabled: false,
-            startTime: undefined,
-            endTime: undefined,
-            timezone: undefined,
-            daysOfWeek: undefined,
-          },
         },
         appearance: {
           primaryColor: '#ff6b6b',
@@ -184,8 +167,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           discountExpiryHours: 24,
         },
       });
+
+      console.log('🔧 Auth Callback: Game config created successfully');
     } catch (configError) {
-      console.error('Failed to create default game config:', configError);
+      console.error('🔧 Auth Callback: Failed to create default game config:', configError);
+      // Don't fail the installation if game config creation fails
     }
 
     // Script tag is already installed above, no need to install again
