@@ -83,25 +83,38 @@ export default function ShopifyApp() {
       }
 
       if (shop && typeof shop === 'string') {
-        // Check if app is actually installed by calling our API
-        console.log('🔍 Checking if app is installed for shop:', shop);
+        // Check if this is coming from Shopify install flow
+        const { hmac, host, timestamp } = router.query;
+        const hasShopifyParams = hmac && host && timestamp;
+
+        console.log('🔍 Checking installation for shop:', shop);
+        console.log('🔍 Has Shopify params:', !!hasShopifyParams);
 
         const response = await fetch(`/api/debug/installation-flow?shop=${shop}`);
         const data = await response.json();
 
-        if (data.success && data.debug.store) {
-          console.log('🔍 Store found, redirecting to dashboard');
-          const { hmac, host, timestamp } = router.query;
-          const params = new URLSearchParams();
-          if (shop) params.set('shop', shop as string);
-          if (hmac) params.set('hmac', hmac as string);
-          if (host) params.set('host', host as string);
-          if (timestamp) params.set('timestamp', timestamp as string);
+        if (data.success && data.debug.store && data.debug.store.isActive) {
+          // Store exists and is active
+          if (hasShopifyParams) {
+            // This is coming from Shopify admin - redirect to dashboard
+            console.log('🔍 Store active + Shopify params, redirecting to dashboard');
+            const params = new URLSearchParams();
+            if (shop) params.set('shop', shop as string);
+            if (hmac) params.set('hmac', hmac as string);
+            if (host) params.set('host', host as string);
+            if (timestamp) params.set('timestamp', timestamp as string);
 
-          router.push(`/dashboard?${params.toString()}`);
-          return;
+            router.push(`/dashboard?${params.toString()}`);
+            return;
+          } else {
+            // Direct access without Shopify params - show installation page for testing
+            console.log('🔍 Store active but no Shopify params, showing installation page');
+            setLoading(false);
+            return;
+          }
         } else {
-          console.log('🔍 No store found, showing installation page');
+          // No store or inactive store - show installation page
+          console.log('🔍 No active store found, showing installation page');
           setLoading(false);
           return;
         }
