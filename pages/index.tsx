@@ -6,18 +6,34 @@ export default function Home() {
 
   useEffect(() => {
     // Check if this is a Shopify app context
-    const { shop, hmac, host, timestamp } = router.query;
+    const { shop, hmac, host, timestamp, installed } = router.query;
+
+    console.log('🔍 Root page - Query params:', router.query);
 
     if (shop) {
-      // If shop parameter exists, this is a Shopify app access
-      // Redirect to dashboard with all Shopify parameters
+      // If this is a fresh installation (from OAuth callback)
+      if (installed === 'true') {
+        console.log('🔍 Fresh installation detected, redirecting to dashboard');
+        const params = new URLSearchParams();
+        if (shop) params.set('shop', shop as string);
+        if (hmac) params.set('hmac', hmac as string);
+        if (host) params.set('host', host as string);
+        if (timestamp) params.set('timestamp', timestamp as string);
+
+        router.push(`/dashboard?${params.toString()}`);
+        return;
+      }
+
+      // For embedded app access, redirect to /app endpoint first
+      // This ensures proper App Bridge initialization
+      console.log('🔍 Shopify embedded app access, redirecting to /app');
       const params = new URLSearchParams();
       if (shop) params.set('shop', shop as string);
       if (hmac) params.set('hmac', hmac as string);
       if (host) params.set('host', host as string);
       if (timestamp) params.set('timestamp', timestamp as string);
 
-      router.push(`/dashboard?${params.toString()}`);
+      router.push(`/app?${params.toString()}`);
     } else {
       // Otherwise, show installation instructions
       router.push('/app');

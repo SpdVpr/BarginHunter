@@ -12,19 +12,27 @@ export default function ShopifyApp() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('App.tsx - Router query:', router.query);
-    console.log('App.tsx - Shop parameter:', shop);
+    console.log('🔍 App.tsx - Router query:', router.query);
+    console.log('🔍 App.tsx - Shop parameter:', shop);
 
     // If no shop parameter, show installation instructions
     if (!shop) {
-      console.log('No shop parameter found');
+      console.log('🔍 No shop parameter found, showing installation page');
       setLoading(false);
       return;
     }
 
     // If just installed, redirect to dashboard
     if (installed === 'true') {
-      router.push(`/dashboard?shop=${shop}`);
+      console.log('🔍 Installation completed, redirecting to dashboard');
+      const { hmac, host, timestamp } = router.query;
+      const params = new URLSearchParams();
+      if (shop) params.set('shop', shop as string);
+      if (hmac) params.set('hmac', hmac as string);
+      if (host) params.set('host', host as string);
+      if (timestamp) params.set('timestamp', timestamp as string);
+
+      router.push(`/dashboard?${params.toString()}`);
       return;
     }
 
@@ -34,7 +42,7 @@ export default function ShopifyApp() {
 
   const checkInstallation = async () => {
     try {
-      console.log('Checking installation for shop:', shop);
+      console.log('🔍 Checking installation for shop:', shop);
 
       // Check if this is coming from OAuth callback with code parameter
       const urlParams = new URLSearchParams(window.location.search);
@@ -42,30 +50,54 @@ export default function ShopifyApp() {
       const hasInstalled = urlParams.has('installed');
 
       if (hasCode) {
-        console.log('OAuth code detected, processing installation...');
+        console.log('🔍 OAuth code detected, processing installation...');
         // Let the OAuth flow handle this
         setLoading(false);
         return;
       }
 
       if (hasInstalled) {
-        console.log('Installation completed, redirecting to dashboard...');
-        router.push(`/dashboard?shop=${shop}`);
+        console.log('🔍 Installation completed, redirecting to dashboard...');
+        const { hmac, host, timestamp } = router.query;
+        const params = new URLSearchParams();
+        if (shop) params.set('shop', shop as string);
+        if (hmac) params.set('hmac', hmac as string);
+        if (host) params.set('host', host as string);
+        if (timestamp) params.set('timestamp', timestamp as string);
+
+        router.push(`/dashboard?${params.toString()}`);
         return;
       }
 
       if (shop && typeof shop === 'string') {
-        // For now, always redirect to dashboard if shop parameter exists
-        // TODO: Implement proper installation check
-        console.log('Shop parameter found, redirecting to dashboard...');
-        router.push(`/dashboard?shop=${shop}`);
-        return;
+        // Check if app is actually installed by calling our API
+        console.log('🔍 Checking if app is installed for shop:', shop);
+
+        const response = await fetch(`/api/debug/installation-flow?shop=${shop}`);
+        const data = await response.json();
+
+        if (data.success && data.debug.installationComplete) {
+          console.log('🔍 App is installed, redirecting to dashboard');
+          const { hmac, host, timestamp } = router.query;
+          const params = new URLSearchParams();
+          if (shop) params.set('shop', shop as string);
+          if (hmac) params.set('hmac', hmac as string);
+          if (host) params.set('host', host as string);
+          if (timestamp) params.set('timestamp', timestamp as string);
+
+          router.push(`/dashboard?${params.toString()}`);
+          return;
+        } else {
+          console.log('🔍 App is not installed, showing installation page');
+          setLoading(false);
+          return;
+        }
       }
 
       setLoading(false);
     } catch (err) {
-      console.error('Installation check error:', err);
-      setError('Failed to check installation status');
+      console.error('🔍 Installation check error:', err);
+      console.log('🔍 Assuming app needs installation due to error');
       setLoading(false);
     }
   };
