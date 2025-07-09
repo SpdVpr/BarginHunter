@@ -9,6 +9,7 @@ import {
   Spinner,
   Select,
 } from '@shopify/polaris';
+import styles from './ResponsiveGrid.module.css';
 
 interface DiscountsTabProps {
   shop: string | string[] | undefined;
@@ -81,6 +82,18 @@ export function DiscountsTab({ shop }: DiscountsTabProps) {
     return true;
   });
 
+  const formatDateForMobile = (date: Date) => {
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+      // Short format for mobile: MM/DD
+      return date.toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit'
+      });
+    }
+    return date.toLocaleDateString();
+  };
+
   const discountsTableRows = filteredDiscounts.map((discount) => [
     discount.code,
     `${discount.value}%`,
@@ -88,8 +101,8 @@ export function DiscountsTab({ shop }: DiscountsTabProps) {
     <Badge status={discount.isUsed ? 'success' : 'attention'}>
       {discount.isUsed ? 'Used' : 'Unused'}
     </Badge>,
-    new Date(discount.createdAt).toLocaleDateString(),
-    discount.usedAt ? new Date(discount.usedAt).toLocaleDateString() : '-',
+    formatDateForMobile(new Date(discount.createdAt)),
+    discount.usedAt ? formatDateForMobile(new Date(discount.usedAt)) : '-',
     discount.orderValue ? `$${discount.orderValue.toFixed(2)}` : '-',
   ]);
 
@@ -105,146 +118,150 @@ export function DiscountsTab({ shop }: DiscountsTabProps) {
   }
 
   return (
-    <div style={{ display: 'grid', gap: '2rem' }}>
+    <div className={styles.container}>
       {/* Summary Statistics */}
       {summary && (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-          gap: '1.5rem',
-        }}>
-          <Card>
-            <div style={{ padding: '1.5rem', textAlign: 'center' }}>
-              <Text variant="heading2xl" as="p">
-                {summary.total}
-              </Text>
-              <Text variant="headingMd" as="h3" color="subdued">
-                Total Generated
-              </Text>
-              <Text variant="bodyMd" as="p" color="subdued">
-                Discount codes
-              </Text>
-            </div>
-          </Card>
+        <div className={styles.section}>
+          <div className={styles.responsiveGrid}>
+            <Card>
+              <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+                <Text variant="heading2xl" as="p">
+                  {summary.total}
+                </Text>
+                <Text variant="headingMd" as="h3" color="subdued">
+                  Total Generated
+                </Text>
+                <Text variant="bodyMd" as="p" color="subdued">
+                  Discount codes
+                </Text>
+              </div>
+            </Card>
 
-          <Card>
-            <div style={{ padding: '1.5rem', textAlign: 'center' }}>
-              <Text variant="heading2xl" as="p">
-                {summary.used}
-              </Text>
-              <Text variant="headingMd" as="h3" color="subdued">
-                Used Codes
-              </Text>
-              <Badge status="success">
-                {Math.round((summary.used / Math.max(summary.total, 1)) * 100)}% usage rate
-              </Badge>
-            </div>
-          </Card>
+            <Card>
+              <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+                <Text variant="heading2xl" as="p">
+                  {summary.used}
+                </Text>
+                <Text variant="headingMd" as="h3" color="subdued">
+                  Used Codes
+                </Text>
+                <Badge status="success">
+                  {Math.round((summary.used / Math.max(summary.total, 1)) * 100)}% usage rate
+                </Badge>
+              </div>
+            </Card>
 
-          <Card>
-            <div style={{ padding: '1.5rem', textAlign: 'center' }}>
-              <Text variant="heading2xl" as="p">
-                {summary.unused}
-              </Text>
-              <Text variant="headingMd" as="h3" color="subdued">
-                Unused Codes
-              </Text>
-              <Text variant="bodyMd" as="p" color="subdued">
-                Available for use
-              </Text>
-            </div>
-          </Card>
+            <Card>
+              <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+                <Text variant="heading2xl" as="p">
+                  {summary.unused}
+                </Text>
+                <Text variant="headingMd" as="h3" color="subdued">
+                  Unused Codes
+                </Text>
+                <Text variant="bodyMd" as="p" color="subdued">
+                  Available for use
+                </Text>
+              </div>
+            </Card>
 
-          <Card>
-            <div style={{ padding: '1.5rem', textAlign: 'center' }}>
-              <Text variant="heading2xl" as="p">
-                ${(summary.averageOrderValue || 0).toFixed(0)}
-              </Text>
-              <Text variant="headingMd" as="h3" color="subdued">
-                Avg Order Value
-              </Text>
-              <Text variant="bodyMd" as="p" color="subdued">
-                With discount
-              </Text>
-            </div>
-          </Card>
+            <Card>
+              <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+                <Text variant="heading2xl" as="p">
+                  ${(summary.averageOrderValue || 0).toFixed(0)}
+                </Text>
+                <Text variant="headingMd" as="h3" color="subdued">
+                  Avg Order Value
+                </Text>
+                <Text variant="bodyMd" as="p" color="subdued">
+                  With discount
+                </Text>
+              </div>
+            </Card>
 
-          <Card>
-            <div style={{ padding: '1.5rem', textAlign: 'center' }}>
-              <Text variant="heading2xl" as="p">
-                ${(summary.totalValue || 0).toFixed(0)}
-              </Text>
-              <Text variant="headingMd" as="h3" color="subdued">
-                Total Discount Value
-              </Text>
-              <Text variant="bodyMd" as="p" color="subdued">
-                All generated codes
-              </Text>
-            </div>
-          </Card>
+            <Card>
+              <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+                <Text variant="heading2xl" as="p">
+                  ${(summary.totalValue || 0).toFixed(0)}
+                </Text>
+                <Text variant="headingMd" as="h3" color="subdued">
+                  Total Discount Value
+                </Text>
+                <Text variant="bodyMd" as="p" color="subdued">
+                  All generated codes
+                </Text>
+              </div>
+            </Card>
 
-          <Card>
-            <div style={{ padding: '1.5rem', textAlign: 'center' }}>
-              <Text variant="heading2xl" as="p">
-                ${(summary.usedValue || 0).toFixed(0)}
-              </Text>
-              <Text variant="headingMd" as="h3" color="subdued">
-                Used Discount Value
-              </Text>
-              <Text variant="bodyMd" as="p" color="subdued">
-                Customer savings
-              </Text>
-            </div>
-          </Card>
+            <Card>
+              <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+                <Text variant="heading2xl" as="p">
+                  ${(summary.usedValue || 0).toFixed(0)}
+                </Text>
+                <Text variant="headingMd" as="h3" color="subdued">
+                  Used Discount Value
+                </Text>
+                <Text variant="bodyMd" as="p" color="subdued">
+                  Customer savings
+                </Text>
+              </div>
+            </Card>
+          </div>
         </div>
       )}
 
       {/* Filter Controls */}
-      <Card>
-        <div style={{ padding: '1.5rem' }}>
-          <Stack distribution="equalSpacing" alignment="center">
-            <Text variant="headingLg" as="h2">
-              Discount Codes
-            </Text>
-            <div style={{ minWidth: '200px' }}>
-              <Select
-                label=""
-                options={statusOptions}
-                value={statusFilter}
-                onChange={setStatusFilter}
-              />
-            </div>
-          </Stack>
-        </div>
-      </Card>
+      <div className={styles.section}>
+        <Card>
+          <div style={{ padding: '1.5rem' }}>
+            <Stack distribution="equalSpacing" alignment="center">
+              <Text variant="headingLg" as="h2">
+                Discount Codes
+              </Text>
+              <div style={{ minWidth: '200px' }}>
+                <Select
+                  label=""
+                  options={statusOptions}
+                  value={statusFilter}
+                  onChange={setStatusFilter}
+                />
+              </div>
+            </Stack>
+          </div>
+        </Card>
+      </div>
 
       {/* Discounts Table */}
-      <Card>
-        <div style={{ padding: '2rem' }}>
-          <DataTable
-            columnContentTypes={[
-              'text',
-              'text',
-              'text',
-              'text',
-              'text',
-              'text',
-              'text',
-            ]}
-            headings={[
-              'Code',
-              'Discount',
-              'Customer',
-              'Status',
-              'Created',
-              'Used Date',
-              'Order Value',
-            ]}
-            rows={discountsTableRows}
-            footerContent={`Showing ${filteredDiscounts.length} of ${discounts.length} discount codes`}
-          />
-        </div>
-      </Card>
+      <div className={styles.section}>
+        <Card>
+          <div style={{ padding: '2rem' }}>
+            <div className={styles.tableContainer}>
+              <DataTable
+                columnContentTypes={[
+                  'text',
+                  'text',
+                  'text',
+                  'text',
+                  'text',
+                  'text',
+                  'text',
+                ]}
+                headings={[
+                  'Code',
+                  'Discount',
+                  'Customer',
+                  'Status',
+                  'Created',
+                  'Used Date',
+                  'Order Value',
+                ]}
+                rows={discountsTableRows}
+                footerContent={`Showing ${filteredDiscounts.length} of ${discounts.length} discount codes`}
+              />
+            </div>
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }

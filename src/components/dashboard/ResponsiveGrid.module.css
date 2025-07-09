@@ -79,6 +79,12 @@
     display: none;
   }
 
+  /* For Discounts table with 7 columns, hide more columns on mobile */
+  .tableContainer :global(.Polaris-DataTable__Cell):nth-child(6),
+  .tableContainer :global(.Polaris-DataTable__Cell):nth-child(7) {
+    display: none;
+  }
+
   /* Make remaining columns more compact */
   .tableContainer :global(.Polaris-DataTable__Cell) {
     padding: 0.5rem 0.25rem;
@@ -89,5 +95,21 @@
   .tableContainer :global(.Polaris-DataTable__Cell):last-child {
     max-width: 70px;
     font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 360px) {
+  /* On very small screens, show only essential columns */
+  .tableContainer :global(.Polaris-DataTable__Cell):nth-child(3),
+  .tableContainer :global(.Polaris-DataTable__Cell):nth-child(4),
+  .tableContainer :global(.Polaris-DataTable__Cell):nth-child(6),
+  .tableContainer :global(.Polaris-DataTable__Cell):nth-child(7) {
+    display: none;
+  }
+
+  /* Make remaining columns even more compact */
+  .tableContainer :global(.Polaris-DataTable__Cell) {
+    padding: 0.25rem 0.125rem;
+    font-size: 0.8rem;
   }
 }
