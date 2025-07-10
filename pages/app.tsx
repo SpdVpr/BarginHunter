@@ -65,16 +65,17 @@ export default function ShopifyApp() {
     if (hmac) params.set('hmac', hmac as string);
     if (host) params.set('host', host as string);
     if (timestamp) params.set('timestamp', timestamp as string);
-
-    const dashboardUrl = `/dashboard?${params.toString()}`;
+    if (installed) params.set('installed', installed as string);
 
     if (isEmbedded) {
-      // For embedded context, use App Bridge redirect
-      console.log('🔄 Using embedded redirect to dashboard');
-      initializeAppBridgeAndRedirect(dashboardUrl);
+      // For embedded context, use server-side redirect to avoid external URL
+      console.log('🔄 Using server-side redirect for embedded context');
+      const redirectUrl = `/api/redirect-to-dashboard?${params.toString()}`;
+      window.location.replace(redirectUrl);
     } else {
       // For non-embedded context, use normal redirect
       console.log('🔄 Using normal redirect to dashboard');
+      const dashboardUrl = `/dashboard?${params.toString()}`;
       window.location.replace(dashboardUrl);
     }
   };
@@ -385,4 +386,70 @@ export default function ShopifyApp() {
       </Page>
     </>
   );
+}
+
+// Server-side redirect for embedded apps
+export async function getServerSideProps(context: any) {
+  const { shop, hmac, host, timestamp, installed } = context.query;
+
+  console.log('🔍 Server-side props for /app:', { shop, hmac, host, timestamp, installed });
+
+  // If we have shop and Shopify params, check if app is installed
+  if (shop && hmac && host) {
+    try {
+      console.log('🔍 Server-side: Checking installation for shop:', shop);
+
+      // Check installation status
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://bargin-hunter2.vercel.app';
+      const response = await fetch(`${baseUrl}/api/check-installation?shop=${shop}`);
+      const data = await response.json();
+
+      console.log('🔍 Server-side installation check:', data);
+
+      if (data.success && data.installed) {
+        // App is installed - redirect to dashboard
+        console.log('🔍 Server-side: App is installed, redirecting to dashboard');
+
+        const params = new URLSearchParams();
+        if (shop) params.set('shop', shop as string);
+        if (hmac) params.set('hmac', hmac as string);
+        if (host) params.set('host', host as string);
+        if (timestamp) params.set('timestamp', timestamp as string);
+        if (installed) params.set('installed', installed as string);
+
+        return {
+          redirect: {
+            destination: `/dashboard?${params.toString()}`,
+            permanent: false,
+          },
+        };
+      }
+    } catch (error) {
+      console.error('🔍 Server-side installation check error:', error);
+    }
+  }
+
+  // If just installed, redirect to dashboard
+  if (installed === 'true' && shop) {
+    console.log('🔍 Server-side: Fresh installation, redirecting to dashboard');
+
+    const params = new URLSearchParams();
+    if (shop) params.set('shop', shop as string);
+    if (hmac) params.set('hmac', hmac as string);
+    if (host) params.set('host', host as string);
+    if (timestamp) params.set('timestamp', timestamp as string);
+    params.set('installed', 'true');
+
+    return {
+      redirect: {
+        destination: `/dashboard?${params.toString()}`,
+        permanent: false,
+      },
+    };
+  }
+
+  // Otherwise, show the app page
+  return {
+    props: {},
+  };
 }
