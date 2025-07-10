@@ -3,17 +3,22 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { Page, Card, Layout, Button, Banner, Spinner, Text } from '@shopify/polaris';
-import ShopifyAppBridge from '../src/components/ShopifyAppBridge';
 
 export default function ShopifyApp() {
   const router = useRouter();
   const { shop, installed, error: errorParam } = router.query;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isEmbedded, setIsEmbedded] = useState(false);
 
   useEffect(() => {
     console.log('🔍 App.tsx - Router query:', router.query);
     console.log('🔍 App.tsx - Shop parameter:', shop);
+
+    // Detect if we're in an embedded context (iframe)
+    const embedded = window.self !== window.top;
+    setIsEmbedded(embedded);
+    console.log('🔍 Embedded context detected:', embedded);
 
     // Check for error parameters
     if (errorParam) {
@@ -35,24 +40,105 @@ export default function ShopifyApp() {
       return;
     }
 
-    // If just installed, redirect to dashboard immediately without showing UI
-    if (installed === 'true') {
-      console.log('🔍 Installation completed, redirecting to dashboard immediately');
-      const { hmac, host, timestamp } = router.query;
-      const params = new URLSearchParams();
-      if (shop) params.set('shop', shop as string);
-      if (hmac) params.set('hmac', hmac as string);
-      if (host) params.set('host', host as string);
-      if (timestamp) params.set('timestamp', timestamp as string);
-
-      // Use immediate redirect without any UI rendering
-      window.location.replace(`/dashboard?${params.toString()}`);
+    // For embedded context, immediately check installation and redirect
+    if (embedded && shop) {
+      console.log('🔍 Embedded context - checking installation immediately');
+      checkInstallationAndRedirect();
       return;
     }
 
-    // Check if shop is already installed - do this immediately without showing UI
+    // If just installed, redirect to dashboard immediately without showing UI
+    if (installed === 'true') {
+      console.log('🔍 Installation completed, redirecting to dashboard immediately');
+      redirectToDashboard();
+      return;
+    }
+
+    // For non-embedded context, check installation normally
     checkInstallation();
   }, [shop, installed, router]);
+
+  const redirectToDashboard = () => {
+    const { hmac, host, timestamp } = router.query;
+    const params = new URLSearchParams();
+    if (shop) params.set('shop', shop as string);
+    if (hmac) params.set('hmac', hmac as string);
+    if (host) params.set('host', host as string);
+    if (timestamp) params.set('timestamp', timestamp as string);
+
+    const dashboardUrl = `/dashboard?${params.toString()}`;
+
+    if (isEmbedded) {
+      // For embedded context, use App Bridge redirect
+      console.log('🔄 Using embedded redirect to dashboard');
+      initializeAppBridgeAndRedirect(dashboardUrl);
+    } else {
+      // For non-embedded context, use normal redirect
+      console.log('🔄 Using normal redirect to dashboard');
+      window.location.replace(dashboardUrl);
+    }
+  };
+
+  const initializeAppBridgeAndRedirect = (targetUrl: string) => {
+    // Load App Bridge and redirect
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/@shopify/app-bridge@3';
+    script.onload = () => {
+      try {
+        const { createApp, Redirect } = (window as any).ShopifyAppBridge;
+        const { host } = router.query;
+
+        if (!createApp || !host) {
+          console.error('❌ App Bridge or host not available, using fallback');
+          window.location.replace(targetUrl);
+          return;
+        }
+
+        const app = createApp({
+          apiKey: process.env.NEXT_PUBLIC_SHOPIFY_API_KEY,
+          host: host as string,
+          forceRedirect: true,
+        });
+
+        console.log('✅ App Bridge initialized for redirect');
+        const redirect = Redirect.create(app);
+        redirect.dispatch(Redirect.Action.APP, targetUrl);
+
+      } catch (error) {
+        console.error('❌ App Bridge redirect failed:', error);
+        window.location.replace(targetUrl);
+      }
+    };
+
+    script.onerror = () => {
+      console.error('❌ Failed to load App Bridge, using fallback');
+      window.location.replace(targetUrl);
+    };
+
+    document.head.appendChild(script);
+  };
+
+  const checkInstallationAndRedirect = async () => {
+    try {
+      console.log('🔍 Checking installation for embedded redirect');
+
+      const response = await fetch(`/api/check-installation?shop=${shop}`);
+      const data = await response.json();
+
+      console.log('🔍 Installation check result:', data);
+
+      if (data.success && data.installed) {
+        console.log('🔍 App is installed, redirecting to dashboard');
+        redirectToDashboard();
+      } else {
+        console.log('🔍 App is not installed, showing installation page');
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error('🔍 Installation check failed:', error);
+      setLoading(false);
+    }
+  };
 
   const checkInstallation = async () => {
     try {
@@ -156,9 +242,9 @@ export default function ShopifyApp() {
     }
   };
 
-  // For installed apps or fresh installations, don't show any UI - just redirect
-  if (loading && (installed === 'true' || (shop && router.query.hmac))) {
-    return null; // Don't render anything while redirecting
+  // For embedded context or fresh installations, don't show any UI - just redirect
+  if (loading && (isEmbedded || installed === 'true' || (shop && router.query.hmac))) {
+    return null; // Don't render anything while redirecting in embedded context
   }
 
   if (loading) {
@@ -238,7 +324,7 @@ export default function ShopifyApp() {
 
   // Show installation page for specific shop
   return (
-    <ShopifyAppBridge>
+    <>
       <Head>
         <title>Install Bargain Hunter - {shop}</title>
         <meta name="description" content="Install Bargain Hunter app for your Shopify store" />
@@ -297,6 +383,6 @@ export default function ShopifyApp() {
           </Layout.Section>
         </Layout>
       </Page>
-    </ShopifyAppBridge>
+    </>
   );
 }
