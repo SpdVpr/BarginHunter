@@ -35,9 +35,9 @@ export default function ShopifyApp() {
       return;
     }
 
-    // If just installed, redirect to dashboard
+    // If just installed, redirect to dashboard immediately without showing UI
     if (installed === 'true') {
-      console.log('🔍 Installation completed, redirecting to dashboard');
+      console.log('🔍 Installation completed, redirecting to dashboard immediately');
       const { hmac, host, timestamp } = router.query;
       const params = new URLSearchParams();
       if (shop) params.set('shop', shop as string);
@@ -45,11 +45,12 @@ export default function ShopifyApp() {
       if (host) params.set('host', host as string);
       if (timestamp) params.set('timestamp', timestamp as string);
 
-      router.push(`/dashboard?${params.toString()}`);
+      // Use immediate redirect without any UI rendering
+      window.location.replace(`/dashboard?${params.toString()}`);
       return;
     }
 
-    // Check if shop is already installed
+    // Check if shop is already installed - do this immediately without showing UI
     checkInstallation();
   }, [shop, installed, router]);
 
@@ -60,7 +61,6 @@ export default function ShopifyApp() {
       // Check if this is coming from OAuth callback with code parameter
       const urlParams = new URLSearchParams(window.location.search);
       const hasCode = urlParams.has('code');
-      const hasInstalled = urlParams.has('installed');
 
       if (hasCode) {
         console.log('🔍 OAuth code detected, processing installation...');
@@ -69,98 +69,48 @@ export default function ShopifyApp() {
         return;
       }
 
-      if (hasInstalled) {
-        console.log('🔍 Installation completed, redirecting to dashboard...');
-        const { hmac, host, timestamp } = router.query;
-        const params = new URLSearchParams();
-        if (shop) params.set('shop', shop as string);
-        if (hmac) params.set('hmac', hmac as string);
-        if (host) params.set('host', host as string);
-        if (timestamp) params.set('timestamp', timestamp as string);
-
-        router.push(`/dashboard?${params.toString()}`);
-        return;
-      }
-
       if (shop && typeof shop === 'string') {
-        // Check if this is coming from Shopify admin
-        const { hmac, host, timestamp } = router.query;
-        const hasShopifyParams = hmac && host && timestamp;
+        // Always check installation status first - do this immediately
+        try {
+          const response = await fetch(`/api/check-installation?shop=${shop}`);
+          const data = await response.json();
 
-        console.log('🔍 Checking installation for shop:', shop);
-        console.log('🔍 Has Shopify params:', !!hasShopifyParams);
+          console.log('🔍 Installation check response:', JSON.stringify(data, null, 2));
 
-        if (hasShopifyParams) {
-          // This is coming from Shopify admin - check if app is actually installed
-          console.log('🔍 Shopify params detected, checking if app is installed');
+          const isInstalled = data.success && data.installed;
 
-          try {
-            const response = await fetch(`/api/check-installation?shop=${shop}`);
-            const data = await response.json();
+          console.log('🔍 Installation status:', {
+            success: data.success,
+            installed: data.installed,
+            reason: data.reason,
+            isInstalled
+          });
 
-            console.log('🔍 Installation check response:', JSON.stringify(data, null, 2));
+          if (isInstalled) {
+            // App is installed - redirect to dashboard immediately without any UI
+            console.log('🔍 App is installed, redirecting to dashboard immediately');
+            const { hmac, host, timestamp } = router.query;
+            const params = new URLSearchParams();
+            if (shop) params.set('shop', shop as string);
+            if (hmac) params.set('hmac', hmac as string);
+            if (host) params.set('host', host as string);
+            if (timestamp) params.set('timestamp', timestamp as string);
 
-            const isInstalled = data.success && data.installed;
-
-            console.log('🔍 Installation status:', {
-              success: data.success,
-              installed: data.installed,
-              reason: data.reason,
-              isInstalled
-            });
-
-            if (isInstalled) {
-              // App is installed - redirect to dashboard immediately without showing UI
-              console.log('🔍 App is installed, redirecting to dashboard immediately');
-              const params = new URLSearchParams();
-              if (shop) params.set('shop', shop as string);
-              if (hmac) params.set('hmac', hmac as string);
-              if (host) params.set('host', host as string);
-              if (timestamp) params.set('timestamp', timestamp as string);
-
-              // Use replace to avoid back button issues and prevent any UI flash
-              window.location.replace(`/dashboard?${params.toString()}`);
-              return;
-            } else {
-              // App is not installed - show installation page
-              console.log('🔍 App is not installed, showing installation page');
-              console.log('🔍 Reason:', data.reason);
-              setLoading(false);
-              return;
-            }
-          } catch (error) {
-            console.error('🔍 Error checking installation:', error);
-            // On error, show installation page to be safe
+            // Use immediate redirect to prevent any UI flash
+            window.location.replace(`/dashboard?${params.toString()}`);
+            return;
+          } else {
+            // App is not installed - show installation page
+            console.log('🔍 App is not installed, showing installation page');
+            console.log('🔍 Reason:', data.reason);
             setLoading(false);
             return;
           }
-        } else {
-          // Direct access without Shopify params - check if app is installed
-          console.log('🔍 No Shopify params, checking installation status');
-
-          try {
-            const response = await fetch(`/api/check-installation?shop=${shop}`);
-            const data = await response.json();
-
-            console.log('🔍 Direct access installation check:', JSON.stringify(data, null, 2));
-
-            const isInstalled = data.success && data.installed;
-
-            if (isInstalled) {
-              console.log('🔍 Store is installed, redirecting to dashboard for direct access');
-              // For direct access to installed app, redirect to dashboard immediately
-              window.location.replace(`/dashboard?shop=${shop}`);
-              return;
-            } else {
-              console.log('🔍 No active store found, showing installation page');
-              setLoading(false);
-              return;
-            }
-          } catch (error) {
-            console.error('🔍 Error checking installation:', error);
-            setLoading(false);
-            return;
-          }
+        } catch (error) {
+          console.error('🔍 Error checking installation:', error);
+          // On error, show installation page to be safe
+          setLoading(false);
+          return;
         }
       }
 
@@ -205,6 +155,11 @@ export default function ShopifyApp() {
       setLoading(false);
     }
   };
+
+  // For installed apps or fresh installations, don't show any UI - just redirect
+  if (loading && (installed === 'true' || (shop && router.query.hmac))) {
+    return null; // Don't render anything while redirecting
+  }
 
   if (loading) {
     return (

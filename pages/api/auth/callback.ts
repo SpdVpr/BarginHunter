@@ -176,11 +176,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Script tag is already installed above, no need to install again
 
-    // For embedded apps, redirect directly to dashboard
-    // This ensures the user stays within Shopify admin
-    const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?shop=${shop}&installed=true`;
+    // For embedded apps, use embedded redirect to stay within Shopify admin
+    const { host } = req.query;
+    const dashboardPath = `/dashboard?shop=${shop}&installed=true${host ? `&host=${host}` : ''}`;
+    const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/embedded-redirect?shop=${shop}&host=${host}&target=${encodeURIComponent(dashboardPath)}`;
 
-    console.log('🔄 Auth Callback: Redirecting to dashboard:', redirectUrl);
+    console.log('🔄 Auth Callback: Using embedded redirect to dashboard:', redirectUrl);
     return res.redirect(302, redirectUrl);
 
   } catch (error) {
