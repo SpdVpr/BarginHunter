@@ -110,16 +110,16 @@ export default function ShopifyApp() {
             });
 
             if (isInstalled) {
-              // App is installed - redirect to dashboard
-              console.log('🔍 App is installed, redirecting to dashboard');
+              // App is installed - redirect to dashboard immediately without showing UI
+              console.log('🔍 App is installed, redirecting to dashboard immediately');
               const params = new URLSearchParams();
               if (shop) params.set('shop', shop as string);
               if (hmac) params.set('hmac', hmac as string);
               if (host) params.set('host', host as string);
               if (timestamp) params.set('timestamp', timestamp as string);
 
-              // Use replace instead of push to avoid back button issues
-              router.replace(`/dashboard?${params.toString()}`);
+              // Use replace to avoid back button issues and prevent any UI flash
+              window.location.replace(`/dashboard?${params.toString()}`);
               return;
             } else {
               // App is not installed - show installation page
@@ -148,8 +148,8 @@ export default function ShopifyApp() {
 
             if (isInstalled) {
               console.log('🔍 Store is installed, redirecting to dashboard for direct access');
-              // For direct access to installed app, redirect to dashboard
-              router.push(`/dashboard?shop=${shop}`);
+              // For direct access to installed app, redirect to dashboard immediately
+              window.location.replace(`/dashboard?shop=${shop}`);
               return;
             } else {
               console.log('🔍 No active store found, showing installation page');

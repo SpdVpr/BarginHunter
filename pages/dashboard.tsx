@@ -39,8 +39,20 @@ interface RecentSession {
 
 export default function Dashboard() {
   const router = useRouter();
-  const { shop } = router.query;
+  const { shop, installed } = router.query;
   const [selectedTab, setSelectedTab] = useState(0);
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  // Check if this is a fresh installation
+  useEffect(() => {
+    if (installed === 'true') {
+      setShowWelcome(true);
+      // Remove the installed parameter from URL to clean it up
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('installed');
+      window.history.replaceState({}, '', newUrl.toString());
+    }
+  }, [installed]);
 
   const tabs = [
     {
@@ -153,6 +165,22 @@ export default function Dashboard() {
             </Stack>
           </div>
         </div>
+
+        {/* Welcome Banner for New Installations */}
+        {showWelcome && (
+          <div style={{ margin: '1rem 0' }}>
+            <Banner
+              title="🎉 Welcome to Bargain Hunter!"
+              status="success"
+              onDismiss={() => setShowWelcome(false)}
+            >
+              <p>
+                Your app has been successfully installed! Your customers can now play games to earn discount codes.
+                Start by configuring your game settings and discount tiers in the Settings tab.
+              </p>
+            </Banner>
+          </div>
+        )}
 
         {/* Notifications */}
         <NotificationBanner shop={typeof shop === 'string' ? shop : ''} />

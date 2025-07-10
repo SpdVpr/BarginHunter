@@ -50,12 +50,25 @@ export default function InstallationComplete() {
   const goToDashboard = () => {
     // Use App Bridge navigation for embedded apps
     if (window.shopifyApp && (window as any).ShopifyAppBridge) {
+      console.log('🔄 Using App Bridge to navigate to dashboard');
       const { Redirect } = (window as any).ShopifyAppBridge;
       const redirect = Redirect.create(window.shopifyApp);
-      redirect.dispatch(Redirect.Action.APP, `/dashboard?shop=${shop}`);
+
+      // Use APP action to navigate within the app
+      const { host } = router.query;
+      const dashboardPath = `/dashboard?shop=${shop}${host ? `&host=${host}` : ''}`;
+      redirect.dispatch(Redirect.Action.APP, dashboardPath);
     } else {
-      // Fallback to regular navigation
-      router.push(`/dashboard?shop=${shop}`);
+      console.log('🔄 App Bridge not available, using direct navigation');
+      // For embedded apps, we should never reach external URLs
+      // Instead, use window.parent to navigate within Shopify admin
+      if (window.parent && window.parent !== window) {
+        const { host } = router.query;
+        const dashboardUrl = `${window.location.origin}/dashboard?shop=${shop}${host ? `&host=${host}` : ''}`;
+        window.parent.location.href = dashboardUrl;
+      } else {
+        router.push(`/dashboard?shop=${shop}`);
+      }
     }
   };
 
@@ -174,7 +187,12 @@ export default function InstallationComplete() {
                     if (window.shopifyApp && (window as any).ShopifyAppBridge) {
                       const { Redirect } = (window as any).ShopifyAppBridge;
                       const redirect = Redirect.create(window.shopifyApp);
-                      redirect.dispatch(Redirect.Action.APP, `/dashboard?shop=${shop}&tab=settings`);
+                      const { host } = router.query;
+                      redirect.dispatch(Redirect.Action.APP, `/dashboard?shop=${shop}${host ? `&host=${host}` : ''}&tab=settings`);
+                    } else if (window.parent && window.parent !== window) {
+                      const { host } = router.query;
+                      const url = `${window.location.origin}/dashboard?shop=${shop}${host ? `&host=${host}` : ''}&tab=settings`;
+                      window.parent.location.href = url;
                     } else {
                       router.push(`/dashboard?shop=${shop}&tab=settings`);
                     }
@@ -188,7 +206,12 @@ export default function InstallationComplete() {
                     if (window.shopifyApp && (window as any).ShopifyAppBridge) {
                       const { Redirect } = (window as any).ShopifyAppBridge;
                       const redirect = Redirect.create(window.shopifyApp);
-                      redirect.dispatch(Redirect.Action.APP, `/dashboard?shop=${shop}&tab=analytics`);
+                      const { host } = router.query;
+                      redirect.dispatch(Redirect.Action.APP, `/dashboard?shop=${shop}${host ? `&host=${host}` : ''}&tab=analytics`);
+                    } else if (window.parent && window.parent !== window) {
+                      const { host } = router.query;
+                      const url = `${window.location.origin}/dashboard?shop=${shop}${host ? `&host=${host}` : ''}&tab=analytics`;
+                      window.parent.location.href = url;
                     } else {
                       router.push(`/dashboard?shop=${shop}&tab=analytics`);
                     }

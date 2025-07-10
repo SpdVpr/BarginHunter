@@ -176,11 +176,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Script tag is already installed above, no need to install again
 
-    // For embedded apps, redirect to installation complete page first
-    // This provides better user experience and instructions
-    const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/installation-complete?shop=${shop}`;
+    // For embedded apps, redirect directly to dashboard
+    // This ensures the user stays within Shopify admin
+    const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?shop=${shop}&installed=true`;
 
-    console.log('🔄 Auth Callback: Redirecting to installation complete page:', redirectUrl);
+    console.log('🔄 Auth Callback: Redirecting to dashboard:', redirectUrl);
     return res.redirect(302, redirectUrl);
 
   } catch (error) {
