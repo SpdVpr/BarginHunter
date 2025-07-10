@@ -95,10 +95,21 @@ export default function ShopifyApp() {
           console.log('🔍 Shopify params detected, checking if app is installed');
 
           try {
-            const response = await fetch(`/api/debug/installation-flow?shop=${shop}`);
+            const response = await fetch(`/api/check-installation?shop=${shop}`);
             const data = await response.json();
 
-            if (data.success && data.debug.store && data.debug.store.isActive) {
+            console.log('🔍 Installation check response:', JSON.stringify(data, null, 2));
+
+            const isInstalled = data.success && data.installed;
+
+            console.log('🔍 Installation status:', {
+              success: data.success,
+              installed: data.installed,
+              reason: data.reason,
+              isInstalled
+            });
+
+            if (isInstalled) {
               // App is installed - redirect to dashboard
               console.log('🔍 App is installed, redirecting to dashboard');
               const params = new URLSearchParams();
@@ -107,11 +118,13 @@ export default function ShopifyApp() {
               if (host) params.set('host', host as string);
               if (timestamp) params.set('timestamp', timestamp as string);
 
-              router.push(`/dashboard?${params.toString()}`);
+              // Use replace instead of push to avoid back button issues
+              router.replace(`/dashboard?${params.toString()}`);
               return;
             } else {
               // App is not installed - show installation page
               console.log('🔍 App is not installed, showing installation page');
+              console.log('🔍 Reason:', data.reason);
               setLoading(false);
               return;
             }
@@ -126,12 +139,17 @@ export default function ShopifyApp() {
           console.log('🔍 No Shopify params, checking installation status');
 
           try {
-            const response = await fetch(`/api/debug/installation-flow?shop=${shop}`);
+            const response = await fetch(`/api/check-installation?shop=${shop}`);
             const data = await response.json();
 
-            if (data.success && data.debug.store && data.debug.store.isActive) {
-              console.log('🔍 Store active, showing installation page for testing');
-              setLoading(false);
+            console.log('🔍 Direct access installation check:', JSON.stringify(data, null, 2));
+
+            const isInstalled = data.success && data.installed;
+
+            if (isInstalled) {
+              console.log('🔍 Store is installed, redirecting to dashboard for direct access');
+              // For direct access to installed app, redirect to dashboard
+              router.push(`/dashboard?shop=${shop}`);
               return;
             } else {
               console.log('🔍 No active store found, showing installation page');
