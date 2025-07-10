@@ -42,9 +42,26 @@ export class StoreService {
       installedAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     };
-    
+
     await docRef.set(store);
     return docRef.id;
+  }
+
+  static async createOrUpdateStore(storeData: Omit<StoreDocument, 'id' | 'installedAt' | 'updatedAt'>): Promise<string> {
+    const existing = await this.getStore(storeData.shopDomain);
+
+    if (existing) {
+      console.log('🔄 Updating existing store:', existing.id);
+      // Update existing store but preserve installedAt
+      await db.collection(collections.stores).doc(existing.id).update({
+        ...storeData,
+        updatedAt: Timestamp.now(),
+      });
+      return existing.id;
+    } else {
+      console.log('🔄 Creating new store');
+      return await this.createStore(storeData);
+    }
   }
 
   static async getStore(shopDomain: string): Promise<StoreDocument | null> {

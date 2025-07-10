@@ -70,8 +70,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         domain: shopData.domain
       });
 
-      // Create store record in database
-      const storeId = await StoreService.createStore({
+      // Create or update store record in database
+      const storeId = await StoreService.createOrUpdateStore({
         shopDomain: shop,
         accessToken: session.accessToken,
         scopes: session.scope?.split(',') || [],
@@ -135,7 +135,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Create default game configuration
     try {
-      await GameConfigService.createConfig({
+      await GameConfigService.createOrUpdateConfig({
         shopDomain: shop,
         isEnabled: true,
         gameSettings: {

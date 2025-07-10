@@ -48,7 +48,15 @@ export default function InstallationComplete() {
   };
 
   const goToDashboard = () => {
-    router.push(`/dashboard?shop=${shop}`);
+    // Use App Bridge navigation for embedded apps
+    if (window.shopifyApp && (window as any).ShopifyAppBridge) {
+      const { Redirect } = (window as any).ShopifyAppBridge;
+      const redirect = Redirect.create(window.shopifyApp);
+      redirect.dispatch(Redirect.Action.APP, `/dashboard?shop=${shop}`);
+    } else {
+      // Fallback to regular navigation
+      router.push(`/dashboard?shop=${shop}`);
+    }
   };
 
   if (loading) {
@@ -162,13 +170,29 @@ export default function InstallationComplete() {
                 </Button>
                 
                 <Button
-                  onClick={() => router.push(`/dashboard/settings?shop=${shop}`)}
+                  onClick={() => {
+                    if (window.shopifyApp && (window as any).ShopifyAppBridge) {
+                      const { Redirect } = (window as any).ShopifyAppBridge;
+                      const redirect = Redirect.create(window.shopifyApp);
+                      redirect.dispatch(Redirect.Action.APP, `/dashboard?shop=${shop}&tab=settings`);
+                    } else {
+                      router.push(`/dashboard?shop=${shop}&tab=settings`);
+                    }
+                  }}
                 >
                   Configure Settings
                 </Button>
-                
+
                 <Button
-                  onClick={() => router.push(`/dashboard/analytics?shop=${shop}`)}
+                  onClick={() => {
+                    if (window.shopifyApp && (window as any).ShopifyAppBridge) {
+                      const { Redirect } = (window as any).ShopifyAppBridge;
+                      const redirect = Redirect.create(window.shopifyApp);
+                      redirect.dispatch(Redirect.Action.APP, `/dashboard?shop=${shop}&tab=analytics`);
+                    } else {
+                      router.push(`/dashboard?shop=${shop}&tab=analytics`);
+                    }
+                  }}
                 >
                   View Analytics
                 </Button>
