@@ -337,6 +337,8 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
   const handleGameEnd = async (score: number, gameData: any) => {
     try {
       console.log('🎮 Finishing game session:', { sessionId, score, gameData });
+      console.log('🎮 Current sessionId value:', sessionId);
+      console.log('🎮 SessionId type:', typeof sessionId);
 
       // Increment attempts used
       setAttemptsUsed(prev => prev + 1);
@@ -358,18 +360,31 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
         distanceTraveled: gameData?.distanceTraveled || 0
       };
 
+      // Check if sessionId exists
+      if (!sessionId) {
+        console.error('❌ No sessionId available for finish-session API call');
+        console.log('🎮 Creating fallback sessionId for API call');
+        // Create a fallback sessionId
+        const fallbackSessionId = `fallback-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        console.log('🎮 Using fallback sessionId:', fallbackSessionId);
+      }
+
+      const requestBody = {
+        sessionId: sessionId || `fallback-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        finalScore: score,
+        gameData: formattedGameData,
+        playerEmail: undefined // Optional
+      };
+
+      console.log('🎮 Sending finish-session request:', JSON.stringify(requestBody, null, 2));
+
       // Finish game session
       const response = await fetch('/api/game/finish-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          sessionId,
-          finalScore: score,
-          gameData: formattedGameData,
-          playerEmail: undefined // Optional
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       let discountCode: string | undefined;
