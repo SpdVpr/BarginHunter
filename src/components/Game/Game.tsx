@@ -134,7 +134,7 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
   useEffect(() => {
     const loadAppearanceSettings = async () => {
       try {
-        const response = await fetch(`/api/game/config/${shopDomain}`);
+        const response = await fetch(`/api/game/config/${shopDomain}?t=${Date.now()}`);
         if (response.ok) {
           const config = await response.json();
           if (config.appearance) {
@@ -166,8 +166,8 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
       }
 
       try {
-        // TODO: Replace with actual API call
-        const response = await fetch(`/api/game/config/${shopDomain}`);
+        // Add cache busting to ensure fresh config
+        const response = await fetch(`/api/game/config/${shopDomain}?t=${Date.now()}`);
         if (response.ok) {
           const config = await response.json();
           // Extract game settings from nested structure
