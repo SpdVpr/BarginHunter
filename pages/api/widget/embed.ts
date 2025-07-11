@@ -437,38 +437,64 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   function createPopupWidget(container) {
+    console.log('🎮 Bargain Hunter: Creating popup widget with trigger:', widgetConfig.triggerEvent);
+
     // Create trigger based on configuration
     switch (widgetConfig.triggerEvent) {
       case 'immediate':
-        setTimeout(openGameModal, 1000);
+        console.log('🎮 Bargain Hunter: Setting immediate trigger with 1 second delay');
+        setTimeout(function() {
+          console.log('🎮 Bargain Hunter: Immediate trigger fired, opening modal');
+          openGameModal();
+        }, 1000);
         break;
       case 'time_delay':
-        setTimeout(openGameModal, (widgetConfig.triggerDelay || 5) * 1000);
+        var delay = (widgetConfig.triggerDelay || 5) * 1000;
+        console.log('🎮 Bargain Hunter: Setting time delay trigger:', delay + 'ms');
+        setTimeout(function() {
+          console.log('🎮 Bargain Hunter: Time delay trigger fired, opening modal');
+          openGameModal();
+        }, delay);
         break;
       case 'exit_intent':
+        console.log('🎮 Bargain Hunter: Setting exit intent trigger');
         document.addEventListener('mouseleave', function(e) {
           if (e.clientY <= 0) {
+            console.log('🎮 Bargain Hunter: Exit intent triggered, opening modal');
             openGameModal();
           }
         });
         break;
       case 'scroll':
+        console.log('🎮 Bargain Hunter: Setting scroll trigger');
         window.addEventListener('scroll', function() {
           var scrollPercent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
           if (scrollPercent > 50) {
+            console.log('🎮 Bargain Hunter: Scroll trigger fired, opening modal');
             openGameModal();
             window.removeEventListener('scroll', arguments.callee);
           }
         });
         break;
+      default:
+        console.log('🎮 Bargain Hunter: Unknown trigger event, using immediate');
+        setTimeout(function() {
+          console.log('🎮 Bargain Hunter: Default trigger fired, opening modal');
+          openGameModal();
+        }, 1000);
     }
   }
 
   function openGameModal() {
+    console.log('🎮 Bargain Hunter: openGameModal called');
+
     // Prevent multiple modals
     if (document.getElementById('bargain-hunter-modal')) {
+      console.log('🎮 Bargain Hunter: Modal already exists, skipping');
       return;
     }
+
+    console.log('🎮 Bargain Hunter: Creating modal elements');
 
     // Create modal overlay
     var overlay = document.createElement('div');
