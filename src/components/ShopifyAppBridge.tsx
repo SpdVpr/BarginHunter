@@ -17,8 +17,12 @@ export function ShopifyAppBridge({ children }: ShopifyAppBridgeProps) {
   const { shop, host } = router.query;
 
   useEffect(() => {
+    console.log('🔍 ShopifyAppBridge params:', { shop, host, query: router.query });
+
     if (!shop || !host) {
-      console.log('Missing shop or host parameter');
+      console.log('Missing shop or host parameter', { shop, host });
+      // For embedded apps, try to continue without App Bridge
+      setIsReady(true);
       return;
     }
 

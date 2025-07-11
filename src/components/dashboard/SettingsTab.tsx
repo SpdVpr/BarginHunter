@@ -436,14 +436,14 @@ export function SettingsTab({ shop }: SettingsTabProps) {
                 <TextField
                   label="Minimum Score for Discount"
                   type="number"
-                  value={gameSettings.minScoreForDiscount.toString()}
+                  value={gameSettings?.minScoreForDiscount?.toString() || '100'}
                   onChange={(value) => setGameSettings({...gameSettings, minScoreForDiscount: parseInt(value) || 0})}
                 />
 
                 <TextField
                   label="Max Discount Codes per Customer"
                   type="number"
-                  value={gameSettings.maxPlaysPerCustomer.toString()}
+                  value={gameSettings?.maxPlaysPerCustomer?.toString() || '5'}
                   onChange={(value) => setGameSettings({...gameSettings, maxPlaysPerCustomer: parseInt(value) || 0})}
                   helpText="Maximum number of discount codes one customer (IP address) can generate within the reset period"
                 />
@@ -451,7 +451,7 @@ export function SettingsTab({ shop }: SettingsTabProps) {
                 <TextField
                   label="Discount Code Limit Reset Hours"
                   type="number"
-                  value={gameSettings.playLimitResetHours.toString()}
+                  value={gameSettings?.playLimitResetHours?.toString() || '24'}
                   onChange={(value) => setGameSettings({...gameSettings, playLimitResetHours: parseInt(value) || 24})}
                   helpText="Hours after which discount code limit resets (default: 24 hours)"
                 />
@@ -597,7 +597,7 @@ export function SettingsTab({ shop }: SettingsTabProps) {
                 <TextField
                   label="Discount Expiry (hours)"
                   type="number"
-                  value={businessRules.discountExpiryHours.toString()}
+                  value={businessRules?.discountExpiryHours?.toString() || '24'}
                   onChange={(value) => setBusinessRules({...businessRules, discountExpiryHours: parseInt(value) || 24})}
                   helpText="How long discount codes remain valid"
                 />
@@ -605,7 +605,7 @@ export function SettingsTab({ shop }: SettingsTabProps) {
                 <TextField
                   label="Minimum Order Value ($)"
                   type="number"
-                  value={businessRules.minimumOrderValue?.toString() || '0'}
+                  value={businessRules?.minimumOrderValue?.toString() || '0'}
                   onChange={(value) => setBusinessRules({...businessRules, minimumOrderValue: parseInt(value) || 0})}
                   helpText="Minimum cart value required to use discount (0 = no minimum)"
                 />

@@ -39,7 +39,7 @@ interface RecentSession {
 
 export default function Dashboard() {
   const router = useRouter();
-  const { shop, installed } = router.query;
+  const { shop, installed, host, hmac, timestamp } = router.query;
   const [selectedTab, setSelectedTab] = useState(0);
   const [showWelcome, setShowWelcome] = useState(false);
 
@@ -47,7 +47,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (installed === 'true') {
       setShowWelcome(true);
-      // Remove the installed parameter from URL to clean it up
+      // Remove only the installed parameter from URL, keep other Shopify params
       const newUrl = new URL(window.location.href);
       newUrl.searchParams.delete('installed');
       window.history.replaceState({}, '', newUrl.toString());
