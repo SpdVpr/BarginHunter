@@ -186,20 +186,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Create discount code in Shopify if we have one
     if (discountCode && discountEarned > 0) {
       try {
+        console.log('🎫 Creating Shopify discount code:', discountCode, 'for', discountEarned + '%');
+
         // Get store data for Shopify API
         const store = await StoreService.getStore(session.shopDomain);
 
-        if (store && store.accessToken) {
-          // Create Shopify session and discount
-          const shopifySession = ShopifySessionManager.createSession(session.shopDomain, store.accessToken);
+        if (!store || !store.accessToken) {
+          console.error('❌ No store or access token found for:', session.shopDomain);
+          throw new Error('Store not found or no access token');
+        }
 
-          const shopifyDiscount = await createDiscountCode(shopifySession, {
-            code: discountCode,
-            value: discountEarned,
-            type: 'percentage',
-            usage_limit: 1,
-            expires_at: expiresAt,
-          });
+        console.log('🔑 Store found, creating Shopify session...');
+
+        // Create Shopify session and discount
+        const shopifySession = ShopifySessionManager.createSession(session.shopDomain, store.accessToken);
+
+        console.log('🛒 Creating discount in Shopify...');
+        const shopifyDiscount = await createDiscountCode(shopifySession, {
+          code: discountCode,
+          value: discountEarned,
+          type: 'percentage',
+          usage_limit: 1,
+          expires_at: expiresAt,
+        });
+
+        console.log('✅ Shopify discount created successfully:', shopifyDiscount);
 
           // Save discount record to database
           console.log('💾 Saving discount record to database...', {
@@ -228,7 +239,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       } catch (error) {
         console.error('❌ Failed to create discount:', error);
-        // Continue with the response even if discount creation fails
+        console.error('❌ Error details:', error instanceof Error ? error.message : error);
+
+        // For demo purposes, still return the discount code even if Shopify creation fails
+        console.log('⚠️ Continuing with demo discount code despite Shopify error');
+
+        // You could also set discountCode = undefined here if you don't want to show codes that aren't in Shopify
+        // discountCode = undefined;
       }
     }
 

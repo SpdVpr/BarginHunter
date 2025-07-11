@@ -103,21 +103,26 @@ export default function WidgetGame() {
   const checkInstallation = async (shop: string) => {
     try {
       // Check if app is properly installed with correct scopes
-      const response = await fetch(`/api/debug/installation-flow?shop=${shop}`);
+      const response = await fetch(`/api/check-installation?shop=${shop}`);
       const data = await response.json();
 
-      if (!data.success || !data.debug.installationComplete) {
+      console.log('🎮 Widget game installation check:', data);
+
+      if (!data.success || !data.installed) {
         console.log('🚨 App not properly installed, redirecting to install...');
+        console.log('🚨 Reason:', data.reason);
         // Redirect to proper installation
         window.top!.location.href = `/api/auth/install?shop=${shop}`;
         return;
       }
 
+      console.log('✅ App is properly installed, loading game...');
       setIsLoading(false);
     } catch (error) {
       console.error('Installation check failed:', error);
-      // If check fails, try to install anyway
-      window.top!.location.href = `/api/auth/install?shop=${shop}`;
+      // If check fails, assume it's installed and continue
+      console.log('⚠️ Installation check failed, continuing anyway...');
+      setIsLoading(false);
     }
   };
 

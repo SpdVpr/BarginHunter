@@ -160,12 +160,8 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
       // If gameConfig is provided as prop, use it directly (for admin testing)
       if (providedGameConfig) {
         setGameConfig(providedGameConfig);
-        // Show intro only for admin testing, skip for regular users
-        setGameState(adminTest ? 'intro' : 'playing');
-        // Start game session immediately for regular users
-        if (!adminTest) {
-          startGameSession();
-        }
+        // Always show intro screen first
+        setGameState('intro');
         return;
       }
 
@@ -220,12 +216,8 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
           appearance: appearanceSettings
         });
       } finally {
-        // Show intro only for admin testing, skip for regular users
-        setGameState(adminTest ? 'intro' : 'playing');
-        // Start game session immediately for regular users
-        if (!adminTest) {
-          startGameSession();
-        }
+        // Always show intro screen first
+        setGameState('intro');
       }
     };
 
