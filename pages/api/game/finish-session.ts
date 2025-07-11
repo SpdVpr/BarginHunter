@@ -24,29 +24,46 @@ function calculateDiscountEarned(score: number, discountTiers: any[]): number {
   const qualifiedTier = discountTiers
     .slice()
     .reverse()
-    .find(tier => score >= tier.minScore);
+    .find(tier => {
+      // Support both old and new tier formats
+      if (tier.maxScore !== undefined) {
+        // New format with minScore and maxScore
+        return score >= tier.minScore && score <= tier.maxScore;
+      } else {
+        // Old format with just minScore
+        return score >= tier.minScore;
+      }
+    });
 
-  return qualifiedTier?.discount || 0;
+  // Support both discount and discountPercentage properties
+  return qualifiedTier?.discount || qualifiedTier?.discountPercentage || 0;
 }
 
-function getNextTierScore(score: number): number | null {
-  const discountTiers = [
-    { minScore: 150, discount: 5 },
-    { minScore: 300, discount: 10 },
-    { minScore: 500, discount: 15 },
-    { minScore: 750, discount: 20 },
-    { minScore: 1000, discount: 25 }
-  ];
+function getNextTierScore(score: number, discountTiers: any[]): number | null {
+  // Find the next tier the player can reach
+  const nextTier = discountTiers
+    .filter(tier => {
+      // Support both formats
+      if (tier.maxScore !== undefined) {
+        // New format: find next tier where minScore > current score
+        return tier.minScore > score;
+      } else {
+        // Old format: find next tier where minScore > current score
+        return tier.minScore > score;
+      }
+    })
+    .sort((a, b) => a.minScore - b.minScore)[0]; // Get the lowest qualifying tier
 
-  const nextTier = discountTiers.find(tier => score < tier.minScore);
   return nextTier?.minScore || null;
 }
 
-function getScoreMessage(score: number, discountEarned: number): string {
+function getScoreMessage(score: number, discountEarned: number, discountTiers?: any[]): string {
   if (discountEarned === 0) {
-    const nextTier = getNextTierScore(score);
-    if (nextTier) {
-      return `Score ${nextTier} points to earn your first discount!`;
+    if (discountTiers) {
+      const nextTier = getNextTierScore(score, discountTiers);
+      if (nextTier) {
+        return `Score ${nextTier} points to earn your first discount!`;
+      }
     }
     return "Keep hunting for better scores! 🔍";
   }
@@ -154,10 +171,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       { minScore: 1000, discount: 25, message: "LEGENDARY HUNTER! 🏆" }
     ];
 
+    console.log('🎯 Discount tiers loaded:', JSON.stringify(discountTiers, null, 2));
+    console.log('🎯 Final score:', finalScore);
+
     // Calculate discount earned
     let discountEarned = calculateDiscountEarned(finalScore, discountTiers);
-    const nextTierScore = getNextTierScore(finalScore);
-    let message = getScoreMessage(finalScore, discountEarned);
+    const nextTierScore = getNextTierScore(finalScore, discountTiers);
+    let message = getScoreMessage(finalScore, discountEarned, discountTiers);
 
     let discountCode: string | undefined;
     let expiresAt: string | undefined;
