@@ -375,15 +375,20 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
       let discountCode: string | undefined;
 
       const data = await response.json();
-      console.log('🎮 Finish session response:', data);
+      console.log('🎮 Finish session response status:', response.status);
+      console.log('🎮 Finish session response data:', JSON.stringify(data, null, 2));
 
       if (response.ok && data.success) {
         discountCode = data.discountCode;
+        console.log('✅ Discount code received from API:', discountCode);
       } else {
-        console.error('Failed to finish game session:', data.error);
+        console.error('❌ Failed to finish game session - Status:', response.status);
+        console.error('❌ Error data:', JSON.stringify(data, null, 2));
+
         // Generate a mock discount code for demo
         if (discountEarned > 0) {
           discountCode = `HUNTER${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+          console.log('🎯 Generated fallback discount code:', discountCode);
         }
       }
 
@@ -393,6 +398,9 @@ export default function Game({ shopDomain, onGameComplete, onClose, gameConfig: 
         discountCode,
         gameData
       };
+
+      console.log('🎮 Final game result:', JSON.stringify(result, null, 2));
+      console.log('🎮 Setting game state to gameOver with result');
 
       setGameResult(result);
       setGameState('gameOver');
