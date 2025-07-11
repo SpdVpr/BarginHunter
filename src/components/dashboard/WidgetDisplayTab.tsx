@@ -122,36 +122,53 @@ export function WidgetDisplayTab({ shop }: WidgetDisplayTabProps) {
       const configResponse = await fetch(`/api/game/config/${shop}`);
       const currentConfig = configResponse.ok ? await configResponse.json() : {};
 
+      console.log('🔧 WidgetDisplayTab: Current config:', currentConfig);
+
+      // Ensure gameSettings have all required fields with proper types
+      const defaultGameSettings = {
+        isEnabled: true,
+        gameType: 'dino',
+        minScoreForDiscount: 100,
+        maxPlaysPerCustomer: 5,
+        maxPlaysPerDay: 10,
+        gameSpeed: 1,
+        difficulty: 'medium',
+        discountTiers: [
+          { minScore: 100, discount: 5, message: 'Great job! You earned 5% off!' },
+          { minScore: 300, discount: 10, message: 'Amazing! You earned 10% off!' },
+          { minScore: 500, discount: 15, message: 'Incredible! You earned 15% off!' }
+        ]
+      };
+
+      const gameSettings = {
+        ...defaultGameSettings,
+        ...currentConfig.gameSettings,
+        // Ensure required fields are correct types
+        isEnabled: Boolean(currentConfig.gameSettings?.isEnabled ?? true),
+        minScoreForDiscount: Number(currentConfig.gameSettings?.minScoreForDiscount || 100),
+        maxPlaysPerCustomer: Number(currentConfig.gameSettings?.maxPlaysPerCustomer || 5),
+        maxPlaysPerDay: Number(currentConfig.gameSettings?.maxPlaysPerDay || 10),
+        gameSpeed: Number(currentConfig.gameSettings?.gameSpeed || 1),
+        difficulty: currentConfig.gameSettings?.difficulty || 'medium'
+      };
+
+      console.log('🔧 WidgetDisplayTab: Prepared gameSettings:', gameSettings);
+
       // Prepare complete settings data (same format as SettingsTab)
       const settingsData = {
         shop,
-        gameSettings: currentConfig.gameSettings || {
-          isEnabled: true,
-          gameType: 'dino',
-          minScoreForDiscount: 100,
-          maxPlaysPerCustomer: 5,
-          maxPlaysPerDay: 10,
-          gameSpeed: 1,
-          difficulty: 'medium',
-          discountTiers: [
-            { minScore: 100, discount: 5, message: 'Great job! You earned 5% off!' },
-            { minScore: 300, discount: 10, message: 'Amazing! You earned 10% off!' },
-            { minScore: 500, discount: 15, message: 'Incredible! You earned 15% off!' }
-          ]
-        },
+        gameSettings,
         widgetSettings,
         appearance: currentConfig.appearance || {
-          primaryColor: '#ff6b6b',
-          secondaryColor: '#4ecdc4',
-          fontFamily: 'Arial, sans-serif',
-          borderRadius: 8,
+          primaryColor: '#667eea',
+          secondaryColor: '#764ba2',
+          backgroundTheme: 'default',
           customCSS: ''
         },
         businessRules: currentConfig.businessRules || {
-          maxDiscountPerCustomer: 50,
-          discountValidityDays: 30,
-          requireEmailForDiscount: false,
-          allowMultipleDiscounts: false,
+          excludeDiscountedProducts: false,
+          allowStackingDiscounts: false,
+          discountExpiryHours: 24,
           minimumOrderValue: 0
         },
         introSettings: currentConfig.introSettings || {
@@ -162,6 +179,8 @@ export function WidgetDisplayTab({ shop }: WidgetDisplayTabProps) {
           customMessage: ''
         }
       };
+
+      console.log('🔧 WidgetDisplayTab: Sending settings data:', JSON.stringify(settingsData, null, 2));
 
       const response = await fetch('/api/dashboard/settings', {
         method: 'POST',
