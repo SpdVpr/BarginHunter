@@ -236,7 +236,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           });
 
           console.log('✅ Discount record saved with ID:', discountRecordId);
-        }
+
       } catch (error) {
         console.error('❌ Failed to create discount:', error);
         console.error('❌ Error details:', error instanceof Error ? error.message : error);
