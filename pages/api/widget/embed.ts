@@ -61,8 +61,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         widgetConfig.gameSettings = config.gameSettings;
         widgetConfig.appearance = config.appearance;
         widgetConfig.success = config.success;
-        
+
         console.log('🎮 Bargain Hunter: Widget config extracted:', widgetConfig);
+        console.log('🎮 Bargain Hunter: User percentage from config:', widgetConfig.userPercentage);
         return config;
       })
       .catch(function(error) {
@@ -149,7 +150,15 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
   function checkUserPercentage() {
     var userPercentage = widgetConfig.userPercentage || 100;
-    if (userPercentage >= 100) return true;
+    console.log('🎮 Bargain Hunter: checkUserPercentage called with:', {
+      widgetConfig: widgetConfig,
+      userPercentage: userPercentage,
+      originalValue: widgetConfig.userPercentage
+    });
+    if (userPercentage >= 100) {
+      console.log('🎮 Bargain Hunter: User percentage >= 100, showing widget');
+      return true;
+    }
 
     // Get or create a consistent user identifier
     var userId = getUserIdentifier();
