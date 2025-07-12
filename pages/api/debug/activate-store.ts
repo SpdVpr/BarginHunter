@@ -34,19 +34,38 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     if (!gameConfig) {
       console.log('🔧 Creating default game config for:', shop);
+
+      // Create default discount tiers for all games
+      const defaultDiscountTiers = [
+        { minScore: 0, discount: 0, message: "Keep hunting! 🔍" },
+        { minScore: 150, discount: 5, message: "Nice start! 🎯" },
+        { minScore: 300, discount: 10, message: "Getting warmer! 🔥" },
+        { minScore: 500, discount: 15, message: "Bargain expert! 💡" },
+        { minScore: 750, discount: 20, message: "Sale master! 👑" },
+        { minScore: 1000, discount: 25, message: "LEGENDARY HUNTER! 🏆" }
+      ];
+
       await GameConfigService.createOrUpdateConfig({
         shopDomain: shop,
         isEnabled: true,
         gameSettings: {
-          discountTiers: [
-            { minScore: 0, maxScore: 49, discountPercentage: 5 },
-            { minScore: 50, maxScore: 99, discountPercentage: 10 },
-            { minScore: 100, maxScore: 199, discountPercentage: 15 },
-            { minScore: 200, maxScore: 999, discountPercentage: 20 },
-          ],
-          maxPlaysPerDay: 3,
-          gameTimeLimit: 60,
-          selectedGames: ['runner', 'flappy', 'tetris', 'snake', 'space-invaders', 'arkanoid', 'fruit-ninja'],
+          gameType: 'dino',
+          minScoreForDiscount: 150,
+          maxPlaysPerCustomer: 3,
+          maxPlaysPerDay: 10,
+          gameSpeed: 1,
+          difficulty: 'medium',
+          selectedGames: ['dino', 'flappy', 'tetris', 'snake', 'space-invaders', 'arkanoid', 'fruit-ninja'],
+          // Create game-specific settings for all games with default discount tiers
+          gameSpecificSettings: {
+            'dino': { discountTiers: defaultDiscountTiers },
+            'flappy': { discountTiers: defaultDiscountTiers },
+            'tetris': { discountTiers: defaultDiscountTiers },
+            'snake': { discountTiers: defaultDiscountTiers },
+            'space-invaders': { discountTiers: defaultDiscountTiers },
+            'arkanoid': { discountTiers: defaultDiscountTiers },
+            'fruit-ninja': { discountTiers: defaultDiscountTiers }
+          }
         },
         widgetSettings: {
           showOn: 'all_pages',

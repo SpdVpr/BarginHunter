@@ -30,23 +30,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     // Create default game configuration
+    const defaultDiscountTiers = [
+      { minScore: 0, discount: 0, message: "Keep hunting! 🔍" },
+      { minScore: 150, discount: 5, message: "Nice start! 🎯" },
+      { minScore: 300, discount: 10, message: "Getting warmer! 🔥" },
+      { minScore: 500, discount: 15, message: "Bargain expert! 💡" },
+      { minScore: 750, discount: 20, message: "Sale master! 👑" },
+      { minScore: 1000, discount: 25, message: "LEGENDARY HUNTER! 🏆" }
+    ];
+
     await GameConfigService.createOrUpdateConfig({
       shopDomain,
       isEnabled: true,
       gameSettings: {
+        gameType: 'dino',
         minScoreForDiscount: 150,
         maxPlaysPerCustomer: 3,
         maxPlaysPerDay: 10,
-        discountTiers: [
-          { minScore: 0, discount: 0, message: "Keep hunting! 🔍" },
-          { minScore: 150, discount: 5, message: "Nice start! 🎯" },
-          { minScore: 300, discount: 10, message: "Getting warmer! 🔥" },
-          { minScore: 500, discount: 15, message: "Bargain expert! 💡" },
-          { minScore: 750, discount: 20, message: "Sale master! 👑" },
-          { minScore: 1000, discount: 25, message: "LEGENDARY HUNTER! 🏆" }
-        ],
         gameSpeed: 1,
         difficulty: 'medium' as 'easy' | 'medium' | 'hard',
+        // Create game-specific settings for all games with default discount tiers
+        gameSpecificSettings: {
+          'dino': { discountTiers: defaultDiscountTiers },
+          'flappy': { discountTiers: defaultDiscountTiers },
+          'tetris': { discountTiers: defaultDiscountTiers },
+          'snake': { discountTiers: defaultDiscountTiers },
+          'space-invaders': { discountTiers: defaultDiscountTiers },
+          'arkanoid': { discountTiers: defaultDiscountTiers },
+          'fruit-ninja': { discountTiers: defaultDiscountTiers }
+        }
       },
       widgetSettings: {
         displayMode: 'tab' as 'popup' | 'tab' | 'inline',
@@ -61,11 +73,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         deviceTargeting: 'all' as 'all' | 'desktop' | 'mobile' | 'tablet',
         geoTargeting: [],
         timeBasedRules: {
-          enabled: false,
-          startTime: undefined,
-          endTime: undefined,
-          timezone: undefined,
-          daysOfWeek: undefined,
+          enabled: false
         },
       },
       appearance: {
