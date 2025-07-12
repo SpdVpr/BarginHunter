@@ -68,12 +68,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           }
         },
         widgetSettings: {
-          showOn: 'all_pages',
+          displayMode: 'popup',
+          triggerEvent: 'immediate',
           position: 'bottom-right',
-          buttonText: 'Play & Win!',
-          buttonColor: '#007ace',
-          popupTitle: 'Win Discount Codes!',
-          popupDescription: 'Play games and earn discount codes for your purchase!',
+          showOn: 'all_pages',
+          customPages: [],
+          userPercentage: 100,
+          testMode: false,
+          showDelay: 0,
+          pageLoadTrigger: 'immediate',
+          deviceTargeting: 'all',
+          geoTargeting: [],
+          timeBasedRules: {
+            enabled: false
+          }
+        },
+        appearance: {
+          primaryColor: '#ff6b6b',
+          secondaryColor: '#4ecdc4',
+          backgroundTheme: 'default'
+        },
+        businessRules: {
+          excludeDiscountedProducts: false,
+          allowStackingDiscounts: false,
+          discountExpiryHours: 24
         }
       });
       gameConfig = await GameConfigService.getConfig(shop);

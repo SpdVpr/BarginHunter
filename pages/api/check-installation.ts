@@ -108,6 +108,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               'arkanoid': { discountTiers: defaultDiscountTiers },
               'fruit-ninja': { discountTiers: defaultDiscountTiers }
             }
+          },
+          widgetSettings: {
+            displayMode: 'popup',
+            triggerEvent: 'immediate',
+            position: 'bottom-right',
+            showOn: 'all_pages',
+            customPages: [],
+            userPercentage: 100,
+            testMode: false,
+            showDelay: 0,
+            pageLoadTrigger: 'immediate',
+            deviceTargeting: 'all',
+            geoTargeting: [],
+            timeBasedRules: {
+              enabled: false
+            }
+          },
+          appearance: {
+            primaryColor: '#ff6b6b',
+            secondaryColor: '#4ecdc4',
+            backgroundTheme: 'default'
+          },
+          businessRules: {
+            excludeDiscountedProducts: false,
+            allowStackingDiscounts: false,
+            discountExpiryHours: 24
           }
         });
         console.log('🔍 Default game config created with game-specific discount tiers');

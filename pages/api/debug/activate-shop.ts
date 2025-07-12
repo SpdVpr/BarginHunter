@@ -72,11 +72,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           selectedGames: ['runner', 'flappy', 'tetris', 'snake', 'space-invaders', 'arkanoid', 'fruit-ninja'],
         },
         widgetSettings: {
-          displayType: 'popup',
-          triggerType: 'button',
+          displayMode: 'popup',
+          triggerEvent: 'immediate',
           position: 'bottom-right',
-          buttonText: 'Play & Win!',
+          showOn: 'all_pages',
           customPages: [],
+          userPercentage: 100,
+          testMode: false,
+          showDelay: 0,
+          pageLoadTrigger: 'immediate',
+          deviceTargeting: 'all',
+          geoTargeting: [],
+          timeBasedRules: {
+            enabled: false
+          }
         },
         appearance: {
           primaryColor: '#ff6b6b',
