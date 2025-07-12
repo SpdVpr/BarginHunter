@@ -150,9 +150,12 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   function checkUserPercentage() {
     var userPercentage = widgetConfig.userPercentage || 100;
     if (userPercentage >= 100) return true;
-    
-    // Simple hash-based percentage check using shop domain and current date
-    var seed = SHOP_DOMAIN + new Date().toDateString();
+
+    // Get or create a consistent user identifier
+    var userId = getUserIdentifier();
+
+    // Create a consistent hash based on shop domain and user identifier
+    var seed = SHOP_DOMAIN + '_' + userId;
     var hash = 0;
     for (var i = 0; i < seed.length; i++) {
       var char = seed.charCodeAt(i);
@@ -160,7 +163,57 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       hash = hash & hash; // Convert to 32bit integer
     }
     var percentage = Math.abs(hash) % 100;
-    return percentage < userPercentage;
+    var shouldShow = percentage < userPercentage;
+
+    console.log('🎮 Bargain Hunter: User percentage check:', {
+      userPercentage: userPercentage,
+      userId: userId,
+      calculatedPercentage: percentage,
+      shouldShow: shouldShow
+    });
+
+    return shouldShow;
+  }
+
+  function getUserIdentifier() {
+    // Try to get existing identifier from localStorage
+    var storageKey = 'bargain_hunter_user_id_' + SHOP_DOMAIN;
+    try {
+      var existingId = localStorage.getItem(storageKey);
+      if (existingId) {
+        return existingId;
+      }
+    } catch (e) {
+      // localStorage not available, continue with fallback
+    }
+
+    // Create a consistent identifier based on browser fingerprint
+    var fingerprint = [
+      navigator.userAgent || '',
+      navigator.language || '',
+      screen.width + 'x' + screen.height,
+      new Date().getTimezoneOffset().toString(),
+      navigator.platform || ''
+    ].join('|');
+
+    // Create hash of fingerprint
+    var hash = 0;
+    for (var i = 0; i < fingerprint.length; i++) {
+      var char = fingerprint.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+
+    var userId = Math.abs(hash).toString(36);
+
+    // Try to store it for future consistency
+    try {
+      localStorage.setItem(storageKey, userId);
+    } catch (e) {
+      // localStorage not available, that's ok
+    }
+
+    return userId;
   }
 
   function checkDeviceTargeting() {
