@@ -153,26 +153,47 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Get game configuration for discount tiers (with fallback)
+    // Get game configuration for discount tiers - use same logic as game config API
     let gameConfig: any = null;
+    let discountTiers: any[] = [];
+
     try {
       gameConfig = await GameConfigService.getConfig(session.shopDomain);
       console.log('🎮 Game config loaded:', !!gameConfig);
-    } catch (configError: any) {
-      console.error('🎮 Failed to load game config, using defaults:', configError);
-    }
 
-    const discountTiers = gameConfig?.gameSettings.discountTiers || [
-      { minScore: 0, discount: 0, message: "Keep hunting! 🔍" },
-      { minScore: 150, discount: 5, message: "Nice start! 🎯" },
-      { minScore: 300, discount: 10, message: "Getting warmer! 🔥" },
-      { minScore: 500, discount: 15, message: "Bargain expert! 💡" },
-      { minScore: 750, discount: 20, message: "Sale master! 👑" },
-      { minScore: 1000, discount: 25, message: "LEGENDARY HUNTER! 🏆" }
-    ];
+      if (gameConfig) {
+        // Use same logic as /api/game/config/[shop].ts - ONLY game-specific settings
+        const currentGameType = gameConfig.gameSettings?.gameType || 'dino';
+
+        // ONLY use game-specific settings for discount tiers
+        if (gameConfig.gameSettings?.gameSpecificSettings?.[currentGameType]?.discountTiers) {
+          discountTiers = gameConfig.gameSettings.gameSpecificSettings[currentGameType].discountTiers;
+          console.log('🎯 Using game-specific discount tiers for', currentGameType, ':', JSON.stringify(discountTiers, null, 2));
+        } else {
+          console.log('🎯 No game-specific discount tiers found for', currentGameType);
+          discountTiers = [];
+        }
+      }
+    } catch (configError: any) {
+      console.error('🎮 Failed to load game config:', configError);
+      discountTiers = [];
+    }
 
     console.log('🎯 Discount tiers loaded:', JSON.stringify(discountTiers, null, 2));
     console.log('🎯 Final score:', finalScore);
+
+    // If no discount tiers are configured, no discount can be earned
+    if (discountTiers.length === 0) {
+      console.log('🎯 No discount tiers configured - no discount earned');
+      return res.status(200).json({
+        success: true,
+        sessionId,
+        score: finalScore,
+        discountEarned: 0,
+        message: 'Game completed! Configure discount tiers in admin panel to enable discounts.',
+        nextTierScore: null
+      });
+    }
 
     // Calculate discount earned
     let discountEarned = calculateDiscountEarned(finalScore, discountTiers);
