@@ -7,17 +7,8 @@ const defaultConfig = {
   isEnabled: true,
   gameSettings: {
     gameType: 'dino' as 'dino' | 'flappy_bird' | 'tetris' | 'snake' | 'space_invaders' | 'library',
-    minScoreForDiscount: 150,
     maxPlaysPerCustomer: 3,
     maxPlaysPerDay: 10,
-    discountTiers: [
-      { minScore: 0, discount: 0, message: "Keep hunting! 🔍" },
-      { minScore: 150, discount: 5, message: "Nice start! 🎯" },
-      { minScore: 300, discount: 10, message: "Getting warmer! 🔥" },
-      { minScore: 500, discount: 15, message: "Bargain expert! 💡" },
-      { minScore: 750, discount: 20, message: "Sale master! 👑" },
-      { minScore: 1000, discount: 25, message: "LEGENDARY HUNTER! 🏆" }
-    ],
     gameSpeed: 1,
     difficulty: 'medium' as 'easy' | 'medium' | 'hard'
   },
@@ -124,13 +115,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Always return config - let the widget decide based on isEnabled
     // This allows admin panel to always load settings
 
-    // Get game-specific discount tiers if available
+    // Get game-specific discount tiers - this is now the ONLY source of discount configuration
     const currentGameType = shopConfig.gameSettings?.gameType || 'dino';
-    let discountTiers = shopConfig.gameSettings?.discountTiers || defaultConfig.gameSettings.discountTiers;
+    let discountTiers: any[] = [];
 
-    // Check if there are game-specific settings
+    // ONLY use game-specific settings for discount tiers
     if (shopConfig.gameSettings?.gameSpecificSettings?.[currentGameType]?.discountTiers) {
       discountTiers = shopConfig.gameSettings.gameSpecificSettings[currentGameType].discountTiers;
+    } else {
+      // If no game-specific settings exist, return empty array - admin must configure them
+      discountTiers = [];
     }
 
     // Return the configuration

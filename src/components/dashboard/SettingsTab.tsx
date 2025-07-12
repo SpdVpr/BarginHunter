@@ -24,18 +24,12 @@ interface SettingsTabProps {
 interface GameSettings {
   isEnabled: boolean;
   gameType: 'dino' | 'flappy_bird' | 'tetris' | 'snake' | 'space_invaders' | 'arkanoid' | 'fruit_ninja';
-  minScoreForDiscount: number;
   maxPlaysPerCustomer: number;
   maxPlaysPerDay: number;
   playLimitResetHours: number; // New: Hours after which play limit resets
   gameSpeed: number;
   difficulty: 'easy' | 'medium' | 'hard';
   testMode: boolean; // Moved from widget settings
-  discountTiers: Array<{
-    minScore: number;
-    discount: number;
-    message: string;
-  }>;
 }
 
 interface WidgetSettings {
@@ -181,11 +175,6 @@ export function SettingsTab({ shop }: SettingsTabProps) {
           gameType: config.gameSettings?.gameType || 'dino',
           testMode: config.widgetSettings?.testMode ?? false, // Moved from widget settings
           playLimitResetHours: config.gameSettings?.playLimitResetHours ?? 24, // Default 24 hours
-          discountTiers: config.gameSettings?.discountTiers || [
-            { minScore: 100, discount: 5, message: 'Great job! You earned 5% off!' },
-            { minScore: 300, discount: 10, message: 'Amazing! You earned 10% off!' },
-            { minScore: 500, discount: 15, message: 'Incredible! You earned 15% off!' }
-          ]
         };
         setGameSettings(gameSettings);
 
@@ -256,16 +245,10 @@ export function SettingsTab({ shop }: SettingsTabProps) {
         gameSettings: gameSettings || {
           isEnabled: true,
           gameType: 'dino',
-          minScoreForDiscount: 100,
           maxPlaysPerCustomer: 5,
           maxPlaysPerDay: 10,
           gameSpeed: 1,
           difficulty: 'medium',
-          discountTiers: [
-            { minScore: 100, discount: 5, message: 'Great job! You earned 5% off!' },
-            { minScore: 300, discount: 10, message: 'Amazing! You earned 10% off!' },
-            { minScore: 500, discount: 15, message: 'Incredible! You earned 15% off!' }
-          ]
         },
         widgetSettings: widgetSettings || {
           displayMode: 'popup',
@@ -428,17 +411,10 @@ export function SettingsTab({ shop }: SettingsTabProps) {
                 
                 <Banner status="info">
                   <p>
-                    <strong>Game Selection:</strong> Game type is now configured in the
-                    <strong> 🎮 Games</strong> tab. Use that tab to select and test games.
+                    <strong>Game Selection & Discount Configuration:</strong> Game type and discount tiers are now configured in the
+                    <strong> 🎮 Games</strong> tab. Use that tab to select games and configure discount tiers for each game individually.
                   </p>
                 </Banner>
-
-                <TextField
-                  label="Minimum Score for Discount"
-                  type="number"
-                  value={gameSettings?.minScoreForDiscount?.toString() || '100'}
-                  onChange={(value) => setGameSettings({...gameSettings, minScoreForDiscount: parseInt(value) || 0})}
-                />
 
                 <TextField
                   label="Max Discount Codes per Customer"

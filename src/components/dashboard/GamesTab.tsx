@@ -20,19 +20,13 @@ interface GamesTabProps {
 interface GameSettings {
   isEnabled: boolean;
   gameType: 'dino' | 'flappy_bird' | 'tetris' | 'snake' | 'space_invaders' | 'arkanoid' | 'fruit_ninja';
-  minScoreForDiscount: number;
   maxPlaysPerCustomer: number;
   maxPlaysPerDay: number;
   playLimitResetHours: number;
   gameSpeed: number;
   difficulty: 'easy' | 'medium' | 'hard';
   testMode: boolean;
-  discountTiers: Array<{
-    minScore: number;
-    discount: number;
-    message: string;
-  }>;
-  // Game-specific score ranges
+  // Game-specific score ranges - this is now the ONLY place for discount configuration
   gameSpecificSettings?: {
     [gameId: string]: {
       discountTiers: Array<{
@@ -184,18 +178,12 @@ export function GamesTab({ shop }: GamesTabProps) {
         setGameSettings({
           isEnabled: true,
           gameType: 'dino',
-          minScoreForDiscount: 100,
           maxPlaysPerCustomer: 5,
           maxPlaysPerDay: 10,
           playLimitResetHours: 24,
           gameSpeed: 1,
           difficulty: 'medium',
           testMode: false,
-          discountTiers: [
-            { minScore: 100, discount: 5, message: 'Great job! You earned 5% off!' },
-            { minScore: 300, discount: 10, message: 'Amazing! You earned 10% off!' },
-            { minScore: 500, discount: 15, message: 'Excellent! You earned 15% off!' }
-          ],
           gameSpecificSettings: defaultGameSpecificSettings
         });
       }
@@ -212,18 +200,12 @@ export function GamesTab({ shop }: GamesTabProps) {
       setGameSettings({
         isEnabled: true,
         gameType: 'dino',
-        minScoreForDiscount: 100,
         maxPlaysPerCustomer: 5,
         maxPlaysPerDay: 10,
         playLimitResetHours: 24,
         gameSpeed: 1,
         difficulty: 'medium',
         testMode: false,
-        discountTiers: [
-          { minScore: 100, discount: 5, message: 'Great job! You earned 5% off!' },
-          { minScore: 300, discount: 10, message: 'Amazing! You earned 10% off!' },
-          { minScore: 500, discount: 15, message: 'Excellent! You earned 15% off!' }
-        ],
         gameSpecificSettings: defaultGameSpecificSettings
       });
     } finally {

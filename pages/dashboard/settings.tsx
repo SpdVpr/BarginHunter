@@ -102,11 +102,6 @@ export default function Settings() {
         const gameSettings = {
           ...config.gameSettings,
           gameType: config.gameSettings?.gameType || 'dino',
-          discountTiers: config.gameSettings?.discountTiers || [
-            { minScore: 100, discount: 5, message: 'Great job! You earned 5% off!' },
-            { minScore: 300, discount: 10, message: 'Amazing! You earned 10% off!' },
-            { minScore: 500, discount: 15, message: 'Incredible! You earned 15% off!' }
-          ]
         };
         setGameSettings(gameSettings);
 

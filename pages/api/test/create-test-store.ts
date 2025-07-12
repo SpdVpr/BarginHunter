@@ -34,17 +34,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       shopDomain,
       isEnabled: true,
       gameSettings: {
-        minScoreForDiscount: 150,
         maxPlaysPerCustomer: 3,
         maxPlaysPerDay: 10,
-        discountTiers: [
-          { minScore: 0, discount: 0, message: "Keep hunting! 🔍" },
-          { minScore: 150, discount: 5, message: "Nice start! 🎯" },
-          { minScore: 300, discount: 10, message: "Getting warmer! 🔥" },
-          { minScore: 500, discount: 15, message: "Bargain expert! 💡" },
-          { minScore: 750, discount: 20, message: "Sale master! 👑" },
-          { minScore: 1000, discount: 25, message: "LEGENDARY HUNTER! 🏆" }
-        ],
         gameSpeed: 1,
         difficulty: 'medium' as 'easy' | 'medium' | 'hard',
       },
